@@ -50,12 +50,12 @@ services:
       # - GITGATEWAY_GITLAB_ACCESS_TOKEN_TYPE=personal_access
       # - GITGATEWAY_GITLAB_REPO=owner/repo
       # gitgateway_roleからeditor消した
-      - GITGATEWAY_ROLES=admin
+      # - GITGATEWAY_ROLES=
       # github
       # - GITGATEWAY_GITHUB_ACCESS_TOKEN=token-generated-on-the-gitlab-interface
       - GITGATEWAY_GITHUB_ACCESS_TOKEN=${GITGATEWAY_GITHUB_ACCESS_TOKEN}
       # - GITGATEWAY_GITHUB_REPO=owner/repo
-      - GITGATEWAY_GITHUB_REPO=GITGATEWAY_GITHUB_REPO
+      - GITGATEWAY_GITHUB_REPO=${GITGATEWAY_GITHUB_REPO}
     ports:
       - 8081:9999
       
