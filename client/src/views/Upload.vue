@@ -3,7 +3,6 @@
     <div></div>
     <h1 class="uk-text-center@s">過去問アップロードフォーム</h1>
 
-    <!-- ファイルドラック&ドロップの処理は出来てない -->
     <div class="uk-flex uk-flex-center uk-margin">
       <div 
         class="drag-area uk-placeholder uk-text-center uk-form-width-large"
@@ -13,7 +12,6 @@
         <vk-icon icon="cloud-upload"></vk-icon>
         <span class="uk-text-middle">ファイルをドラック&ドロップ</span>
         <div uk-form-custom>
-          <!-- この<input>をどうすればいいかわからん -->
           <input
             type="file"
             accept="image/jpeg, image/png, image/jpg"
@@ -24,15 +22,15 @@
       </div>
     </div>
 
-    <!-- <div v-for="file in file.name" class="uk-text-center@s" v-bind:key="file.id">
+    <div v-for="(file, index) in uploadedFiles" class="uk-text-center@s" v-bind:key="index">
       {{ file.name }}
     </div>
- -->
+
     <div class="uk-flex uk-flex-center uk-margin">
       <vk-button
         type="primary"
         class="uk-margin"
-        v-bind:disabled="files.length<1"
+        v-bind:disabled="uploadedFiles.length<1"
         v-on:click="uploadNewFile()"
       >アップロード</vk-button>
     </div>
@@ -52,7 +50,7 @@
     name: 'upload',
     data () {
       return {
-          files: []
+          uploadedFiles: []
       }
     },
     computed: {
@@ -62,14 +60,12 @@
         this.$router.push('edit')
       },
       uploadNewFile () {
-        this.$store.disapatch('uploadNewFile', this.files)
+        this.$store.disapatch('uploadNewFile', this.uploadedFiles)
       },
-      dropFile (event) {
-        const images = event.target.images || event.dataTransfer.images;
-        this.createImage(images[0]);
-        this.files.push({name: images[0].name});
-        this.$emit("upload", images);
-      } 
+      dropFile () {
+        this.uploadedFiles.push([...event.dataTransfer.files])
+        console.log('dorp on!')
+      }
     }
   }
 </script>

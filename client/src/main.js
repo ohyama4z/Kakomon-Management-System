@@ -8,12 +8,12 @@ import VueSidebarMenu from 'vue-sidebar-menu'
 
 
 import '@vuikit/theme'
-import { IconCloudUpload, IconChevronDown, IconCheveronRight } from '@vuikit/icons'
+import { IconCloudUpload, IconChevronDown, IconChevronRight } from '@vuikit/icons'
 import 'vue-sidebar-menu/dist/vue-sidebar-menu.css'
 
 const VueUploadComponent = require('vue-upload-component')
 
-Vue.component('VKIconCheveronRight', IconCheveronRight)
+Vue.component('VKIconCheveronRight', IconChevronRight)
 Vue.component('VKIconCloudpload', IconCloudUpload)
 Vue.component('VKIconChevronDown', IconChevronDown)
 Vue.component('file-upload', VueUploadComponent)
