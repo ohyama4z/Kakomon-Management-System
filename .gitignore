@@ -1,5 +1,5 @@
-git-gateway/
-gotrue/
+# git-gateway/
+# gotrue/
 mysql-data/
 
 .env

@@ -1,0 +1,6 @@
+[submodule "gotrue"]
+	path = gotrue
+	url = https://github.com/netlify/gotrue
+[submodule "git-gateway"]
+	path = git-gateway
+	url = https://github.com/netlify/git-gateway.git
