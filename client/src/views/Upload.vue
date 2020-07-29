@@ -66,7 +66,7 @@
           uploadedFiles: this.uploadedFiles
         }
         const body = Object.keys(sendObj).map((key)=>key+"="+encodeURIComponent(sendObj[key])).join("&")
-        const body = {
+        const headers = {
           'Accept': 'application/json',
           'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
         }
