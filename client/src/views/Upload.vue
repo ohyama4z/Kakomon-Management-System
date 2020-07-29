@@ -22,8 +22,8 @@
       </div>
     </div>
 
-    <div v-for="(file, index) in uploadedFiles" class="uk-text-center@s" v-bind:key="index">
-      {{ file.name }}
+    <div class="uk-text-center@s" v-for="file in uploadedFiles" v-bind:key="file.fileData.lastModified">
+      {{ file.fileData.name }}
     </div>
 
     <div class="uk-flex uk-flex-center uk-margin">
@@ -50,7 +50,7 @@
     name: 'upload',
     data () {
       return {
-          uploadedFiles: []
+        uploadedFiles: []
       }
     },
     computed: {
@@ -59,12 +59,31 @@
       toEdit () {
         this.$router.push('edit')
       },
-      uploadNewFile () {
-        this.$store.disapatch('uploadNewFile', this.uploadedFiles)
+
+      async uploadNewFile () {
+        const method = 'POST'
+        const sendObj = {
+          uploadedFiles: this.uploadedFiles
+        }
+        const body = Object.keys(sendObj).map((key)=>key+"="+encodeURIComponent(sendObj[key])).join("&")
+        const body = {
+          'Accept': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
+        }
+
+        const res = await fetch('/api/upload', {method, headers, body})
+        const response = await res.json()
+        if (response.status !== 'ok') {
+          throw new Error('there is some problems')
+        }
       },
-      dropFile () {
-        this.uploadedFiles.push([...event.dataTransfer.files])
-        console.log('dorp on!')
+
+      dropFile (event) {
+        const droppedFile = event.target.files || event.dataTransfer.files
+        const type = droppedFile[0].type
+        const blob = new Blob([droppedFile], {type})
+        const url = URL.createObjectURL(blob)
+        this.uploadedFiles.push({fileData: droppedFile[0], url})
       }
     }
   }
