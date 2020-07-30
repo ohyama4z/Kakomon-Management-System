@@ -90,10 +90,10 @@
 </template>
 
 
-
 <script>
   export default {
     name: 'edit',
+
     data () {
       return {
         subject: '',
@@ -102,23 +102,66 @@
         period: '',
         contentType: '',
         author: '',
-        sidebarMenu: []
+        sidebarMenu: [],
+        templateFileData: {
+          'subject': [],
+          'year': [],
+          'toolType': [],
+          'period': [],
+          'contentType': [],
+        }
       }
     },
+
     mounted () {
-      //ファイルツリーを作成するため、ここでstateからthis.sidebarMenuにいい感じに代入
-      // for (file in this.$store.state.files) {
-      // }
+      this.getSidebarMenu()
     },
+
     computed: {
       isSellectedAll () {
         return this.subject && this.year && this.toolType && this.period && this.contentType && this.author
       }
     },
+
     methods: {
       toUpload () {
         this.$router.push('upload')
       },
-    }
+
+      getSidebarMenu () {
+        const header = [{
+          header: true,
+          title: '過去問管理',
+          hiddenOnCollapse: true
+        }]
+        const dataTree = this.createDataTree()
+
+        this.sidebarMenu = header.concat(dataTree)
+
+      },
+      createDataTree () {
+        let dataTree = []
+        this.$store.state.files.forEach(file => {
+          dataTree = this.addFileData(file)
+        })
+        return dataTree
+      },
+      addFileData (file) {
+        const keys = ['period', 'subject', 'toolType', 'year', 'contentType']
+        let dataTree = []
+        keys.forEach(key => {
+          this.checkFolder(file[key], key)
+        })
+        
+        return dataTree
+      },
+      checkFolder (fileData, key) {
+        const index = this.templateFileData[key].findIndex(item => item === fileData)
+        // 配列要素に検索要素がなかった場合array.findIndex() === -1
+        if (index === -1) {
+          this.templateFileData[key].push(fileData)
+        }
+      }
+    },
   }
 </script>

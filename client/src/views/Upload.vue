@@ -60,22 +60,8 @@
         this.$router.push('edit')
       },
 
-      async uploadNewFile () {
-        const method = 'POST'
-        const sendObj = {
-          uploadedFiles: this.uploadedFiles
-        }
-        const body = Object.keys(sendObj).map((key)=>key+"="+encodeURIComponent(sendObj[key])).join("&")
-        const headers = {
-          'Accept': 'application/json',
-          'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
-        }
-
-        const res = await fetch('/api/upload', {method, headers, body})
-        const response = await res.json()
-        if (response.status !== 'ok') {
-          throw new Error('there is some problems')
-        }
+      uploadNewFile () {
+        this.$stopre.dispatch('upload', this.uploadedFile)
       },
 
       dropFile (event) {

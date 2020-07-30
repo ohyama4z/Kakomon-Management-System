@@ -3,7 +3,7 @@ import Router from 'vue-router'
 import App from './App.vue'
 import Upload from './views/Upload'
 import Edit from './views/Edit'
-import aho from './views/aho'
+import test from './views/test'
 
 Vue.use(Router)
 
@@ -31,9 +31,9 @@ export default new Router({
       component: Upload
     },
     {
-      path: '/aho',
-      name: 'aho',
-      component: aho
+      path: '/test',
+      name: 'test',
+      component: test
     },
   ]
 })
