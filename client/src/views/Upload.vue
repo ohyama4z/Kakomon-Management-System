@@ -61,7 +61,7 @@
       },
 
       uploadNewFile () {
-        this.$stopre.dispatch('upload', this.uploadedFile)
+        this.$store.dispatch('upload', this.uploadedFile)
       },
 
       dropFile (event) {
