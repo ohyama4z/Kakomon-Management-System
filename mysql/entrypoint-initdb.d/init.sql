@@ -1,0 +1,4 @@
+CREATE DATABASE gotrue;
+CREATE USER 'gotrue'@'%' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON gotrue.* TO 'gotrue'@'%';
+FLUSH PRIVILEGES;
