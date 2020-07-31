@@ -8,10 +8,17 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@vuikit/icons": "^0.8.1",
+    "@vuikit/theme": "^0.8.1",
     "core-js": "^3.6.5",
+    "list-to-tree": "^2.2.3",
+    "tree-model": "^1.0.7",
     "vue": "^2.6.11",
     "vue-router": "^3.3.4",
-    "vuex": "^3.5.1"
+    "vue-sidebar-menu": "^4.6.2",
+    "vue-upload-component": "^2.8.20",
+    "vuex": "^3.5.1",
+    "vuikit": "^0.8.10"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.4.0",
