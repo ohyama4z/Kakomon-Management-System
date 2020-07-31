@@ -22,8 +22,13 @@ CLIENT_SECRET=[clientsecret]
 2. `$ docker-compose up`
 3. (初回だけ)別にシェルを開き\
 `$ docker-compose exec gotrue sh`\
-`$ gotrue migrate`\
-を実行
+`# gotrue migrate`\
+gotrueコンテナを抜けて\
+`$ docker-compose exec db bash`\
+`# mysql -u gotrue -p`\
+`Enter password: `
+passwordと入力\
+`mysql> USE gotrue;`
 4. 上で起動させたCMS環境の"サーバーのアドレス/admin"にwebでアクセス
 5. cmsのログイン画面が出てくるので(数秒待機して)Login with Netlify Identityを選択
 6. `URL of your Netlify Site`の欄にhttp://localhost:8085をsetする
