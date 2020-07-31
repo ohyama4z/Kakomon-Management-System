@@ -3,7 +3,7 @@ import Router from 'vue-router'
 import App from './App.vue'
 import Upload from './views/Upload'
 import Edit from './views/Edit'
-import test from './views/test'
+// import test from './views/test'
 
 Vue.use(Router)
 
@@ -30,10 +30,10 @@ export default new Router({
       name: 'upload',
       component: Upload
     },
-    {
-      path: '/test',
-      name: 'test',
-      component: test
-    },
+    // {
+    //   path: '/test',
+    //   name: 'test',
+    //   component: test
+    // },
   ]
 })
