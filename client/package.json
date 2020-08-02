@@ -6,6 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
+    
   },
   "dependencies": {
     "@vuikit/icons": "^0.8.1",
@@ -18,7 +19,8 @@
     "vue-sidebar-menu": "^4.6.2",
     "vue-upload-component": "^2.8.20",
     "vuex": "^3.5.1",
-    "vuikit": "^0.8.10"
+    "vuikit": "^0.8.10",
+    "webpack-dev-server": "^3.11.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.4.0",
