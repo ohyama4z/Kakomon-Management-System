@@ -60,8 +60,11 @@
         this.$router.push('edit')
       },
 
-      uploadNewFile () {
-        this.$stopre.dispatch('upload', this.uploadedFile)
+      async uploadNewFile () {
+        await this.$store.dispatch('upload', this.uploadedFiles)
+        this.$store.state.files.forEach(file => {
+          console.log(file)
+        });
       },
 
       dropFile (event) {

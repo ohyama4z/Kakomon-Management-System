@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- サイドバーをカッコよく実装するやべーやつ -->
-    <sidebar-menu :menu="sidebarMenu" />
+    <sidebar-menu :menu="getSidebarMenu" />
 
     <h1 class="uk-text-center@s">過去問編集フォーム</h1>
 
@@ -102,30 +102,12 @@
         period: '',
         contentType: '',
         author: '',
-        sidebarMenu: [],
-        templateFileData: {
-          'subject': [],
-          'year': [],
-          'toolType': [],
-          'period': [],
-          'contentType': [],
-        }
       }
-    },
-
-    mounted () {
-      this.getSidebarMenu()
     },
 
     computed: {
       isSellectedAll () {
         return this.subject && this.year && this.toolType && this.period && this.contentType && this.author
-      }
-    },
-
-    methods: {
-      toUpload () {
-        this.$router.push('upload')
       },
 
       getSidebarMenu () {
@@ -134,34 +116,111 @@
           title: '過去問管理',
           hiddenOnCollapse: true
         }]
-        const dataTree = this.createDataTree()
 
-        this.sidebarMenu = header.concat(dataTree)
+        return header.concat(this.getMenuStructure)
+      },
 
+      intermediateFiles () {
+        return this.$store.state.sampleFiles.reduce((previous, current) => {
+          if (previous == null) {
+            previous = {}
+          }
+
+          if (previous[current.period] == null) {
+            previous[current.period] = {}
+          }
+          if (previous[current.period][current.subject] == null) {
+            previous[current.period][current.subject] = {}
+          }
+
+          if (previous[current.period][current.subject][current.toolType] == null) {
+            previous[current.period][current.subject][current.toolType] = {}
+          }
+
+          if (previous[current.period][current.subject][current.toolType][current.year] == null) {
+            previous[current.period][current.subject][current.toolType][current.year] = {}
+          }
+
+          if (previous[current.period][current.subject][current.toolType][current.year][current.contentType] == null) {
+            previous[current.period][current.subject][current.toolType][current.year][current.contentType] = []
+          }
+
+          previous[current.period][current.subject][current.toolType][current.year][current.contentType].push(current)
+
+          return previous
+        }, {})
       },
-      createDataTree () {
-        let dataTree = []
-        this.$store.state.files.forEach(file => {
-          dataTree = this.addFileData(file)
-        })
-        return dataTree
-      },
-      addFileData (file) {
-        const keys = ['period', 'subject', 'toolType', 'year', 'contentType']
-        let dataTree = []
-        keys.forEach(key => {
-          this.checkFolder(file[key], key)
-        })
-        
-        return dataTree
-      },
-      checkFolder (fileData, key) {
-        const index = this.templateFileData[key].findIndex(item => item === fileData)
-        // 配列要素に検索要素がなかった場合array.findIndex() === -1
-        if (index === -1) {
-          this.templateFileData[key].push(fileData)
+
+      getMenuStructure () {
+        const icon = 'fa fa-folder'
+        return Object.entries(this.intermediateFiles).reduce((previous, [period, value]) => {
+          previous.push({
+            title: period,
+            icon,
+            child: generateChildOfPeriod(value)
+          })
+          return previous
+        }, [])
+
+        function generateChildOfPeriod(yearValue) {
+          return Object.entries(yearValue).reduce((previous, [subject, subjectValue]) => {
+            previous.push({
+              title: subject,
+              icon,
+              child: generateChildOfSubject(subjectValue)
+            })
+            return previous
+          }, [])
+        }
+
+        function generateChildOfSubject(subjectValue) {
+          return Object.entries(subjectValue).reduce((previous, [toolType, toolTypeValue]) => {
+            previous.push({
+              title: toolType,
+              icon,
+              child: generateChildOfToolType(toolTypeValue)
+            })
+            return previous
+          }, [])
+        }
+
+        function generateChildOfToolType(toolTypeValue) {
+          return Object.entries(toolTypeValue).reduce((previous, [year, yearValue]) => {
+            previous.push({
+              title: year,
+              icon,
+              child: generateChildOfYear(yearValue)
+            })
+            return previous
+          }, [])
+        }
+
+        function generateChildOfYear(yearValue) {
+          return Object.entries(yearValue).reduce((previous, [contentType, contentTypeValue]) => {
+            previous.push({
+              title: contentType,
+              icon,
+              child: generateChildOfContentType(contentTypeValue)
+            })
+            return previous
+          }, [])
+        }
+
+        function generateChildOfContentType(contentTypeValue) {
+          return contentTypeValue.map(file => {
+            return {
+              title: file.fileName,
+              icon: 'fa fa-file'
+            }
+          })
         }
       }
+    },
+
+    methods: {
+      toUpload () {
+        this.$router.push('upload')
+      },
     },
   }
 </script>

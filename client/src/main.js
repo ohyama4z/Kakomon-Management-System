@@ -27,8 +27,9 @@ Vue.config.productionTip = false
 
 const store = new Vuex.Store({
   state: {
-//    files: []
-    files: [{
+    files: [],
+    sampleFiles: [{
+      src: '001',
       subject: '数学',
       year: 2019,
       toolType: '勉強用',
@@ -38,6 +39,7 @@ const store = new Vuex.Store({
       fileName: 'file001'
     },
     {
+      src: '002',
       subject: '英語',
       year: 2019,
       toolType: '勉強用',
@@ -47,6 +49,7 @@ const store = new Vuex.Store({
       fileName: 'file002'
     },
     {
+      src: '003',
       subject: '英語',
       year: 2018,
       toolType: '勉強用',
@@ -56,6 +59,7 @@ const store = new Vuex.Store({
       fileName: 'file003'
     },
     {
+      src: '004',
       subject: '英語',
       year: 2018,
       toolType: 'テスト',
@@ -65,6 +69,7 @@ const store = new Vuex.Store({
       fileName: 'file004'
     },
     {
+      src: '005',
       subject: '論理回路',
       year: 2018,
       toolType: '勉強用',
@@ -74,6 +79,7 @@ const store = new Vuex.Store({
       fileName: 'file005'
     },
     {
+      src: '006',
       subject: '数学',
       year: 2018,
       toolType: '勉強用',
@@ -83,6 +89,7 @@ const store = new Vuex.Store({
       fileName: 'file006'
     },
     {
+      src: '007',
       subject: '英語',
       year: 2018,
       toolType: '勉強用',
@@ -92,6 +99,7 @@ const store = new Vuex.Store({
       fileName: 'file007'
     },
     {
+      src: '008',
       subject: '数学',
       year: 2019,
       toolType: 'テスト',
@@ -101,6 +109,7 @@ const store = new Vuex.Store({
       fileName: 'file008'
     },
     {
+      src: '009',
       subject: '数学',
       year: 2019,
       toolType: '勉強用',
@@ -110,6 +119,7 @@ const store = new Vuex.Store({
       fileName: 'file009'
     },
     {
+      src: '010',
       subject: '英語',
       year: 2018,
       toolType: '勉強用',
@@ -126,8 +136,16 @@ const store = new Vuex.Store({
     }
   },
   actions: {
-    upload: ({ commit }, newFile) => {
-      commit('upload', newFile)
+    upload: async ({ commit }, newFile) => {
+      const fetchServer = (func ,delay) => new Promise(resolve => {
+        setTimeout(() => {
+          func()
+          resolve()
+        }, delay)
+      })
+      const uploadCommit = () => commit('upload',newFile)
+      await fetchServer(uploadCommit, 1000)
+      console.log('action: upload')
     }
   }
 })
