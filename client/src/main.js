@@ -137,14 +137,13 @@ const store = new Vuex.Store({
   },
   actions: {
     upload: async ({ commit }, newFile) => {
-      const fetchServer = (func ,delay) => new Promise(resolve => {
+      const STO = (delay) => new Promise(resolve => {
         setTimeout(() => {
-          func()
           resolve()
         }, delay)
       })
-      const uploadCommit = () => commit('upload',newFile)
-      await fetchServer(uploadCommit, 1000)
+      await STO(1000)
+      commit('upload',newFile)
       console.log('action: upload')
     }
   }
