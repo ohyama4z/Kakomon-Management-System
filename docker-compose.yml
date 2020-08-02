@@ -53,3 +53,9 @@ services:
     volumes:
       - ./web/default.conf:/etc/nginx/conf.d/default.conf
       - ./data/html:/var/www/html
+
+  client_dev:
+    build: ./client
+    volumes:
+      - ./client:/app
+      - /app/node_modules
