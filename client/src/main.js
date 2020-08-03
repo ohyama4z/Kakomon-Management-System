@@ -6,18 +6,17 @@ import VuikitIcons from '@vuikit/icons'
 import router from './router.js'
 import VueSidebarMenu from 'vue-sidebar-menu'
 
+
 import '@vuikit/theme'
 import { IconCloudUpload, IconChevronDown, IconChevronRight } from '@vuikit/icons'
 import 'vue-sidebar-menu/dist/vue-sidebar-menu.css'
 
 const VueUploadComponent = require('vue-upload-component')
-const netlifyIdentity = require('netlify-identity-widget')
 
 Vue.component('VKIconCheveronRight', IconChevronRight)
 Vue.component('VKIconCloudpload', IconCloudUpload)
 Vue.component('VKIconChevronDown', IconChevronDown)
 Vue.component('file-upload', VueUploadComponent)
-// Vue.component('netlifyIdentity', netlifyIdentity)
 
 Vue.use(Vuex)
 Vue.use(Vuikit)
@@ -155,5 +154,3 @@ new Vue({
   store,
   router
 }).$mount('#app')
-
-module.exports= {netlifyIdentity}

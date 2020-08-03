@@ -6,13 +6,13 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
+    
   },
   "dependencies": {
     "@vuikit/icons": "^0.8.1",
     "@vuikit/theme": "^0.8.1",
     "core-js": "^3.6.5",
     "list-to-tree": "^2.2.3",
-    "netlify-identity-widget": "^1.9.1",
     "tree-model": "^1.0.7",
     "vue": "^2.6.11",
     "vue-router": "^3.3.4",

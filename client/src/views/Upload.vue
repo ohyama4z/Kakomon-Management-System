@@ -46,7 +46,6 @@
 
 
 <script>
-  const netlifyIdentity = require('../App').netlifyIdentity
   export default {
     name: 'upload',
     data () {
@@ -62,16 +61,10 @@
       },
 
       async uploadNewFile () {
-         this.loginNetlifyIdentity()
         await this.$store.dispatch('upload', this.uploadedFiles)
         this.$store.state.files.forEach(file => {
           console.log(file)
         });
-      },
-
-      loginNetlifyIdentity () {
-        this.netlifyIdentity.open()
-        this.netlifyIdentity.open('login')
       },
 
       dropFile (event) {
