@@ -12,6 +12,7 @@ import { IconCloudUpload, IconChevronDown, IconChevronRight } from '@vuikit/icon
 import 'vue-sidebar-menu/dist/vue-sidebar-menu.css'
 
 const VueUploadComponent = require('vue-upload-component')
+const netlifyIdentity = require('netlify-identity-widget')
 
 Vue.component('VKIconCheveronRight', IconChevronRight)
 Vue.component('VKIconCloudpload', IconCloudUpload)
@@ -24,6 +25,10 @@ Vue.use(VuikitIcons)
 Vue.use(VueSidebarMenu)
 
 Vue.config.productionTip = false
+
+netlifyIdentity.init({
+  APIUrl: 'http://localhost:8085/.netlify/identity'
+})
 
 const store = new Vuex.Store({
   state: {

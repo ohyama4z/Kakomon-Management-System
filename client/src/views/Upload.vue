@@ -46,12 +46,16 @@
 
 
 <script>
+  import netlifyIdentity from 'netlify-identity-widget'
   export default {
     name: 'upload',
     data () {
       return {
         uploadedFiles: []
       }
+    },
+    mounted() {
+      netlifyIdentity.open()
     },
     computed: {
     },
