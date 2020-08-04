@@ -116,8 +116,9 @@
           title: '過去問管理',
           hiddenOnCollapse: true
         }]
-
-        return header.concat(this.getMenuStructure)
+        //this.getMenuStructure の第2引数は period, subject, toolType, year, contentType, fileNameで計6
+        const dataTree = this.getMenuStructure (this.intermediateFiles, 6)
+        return header.concat(dataTree)
       },
 
       intermediateFiles () {
@@ -150,76 +151,30 @@
           return previous
         }, {})
       },
+    },
+    methods: {
+      toUpload () {
+        this.$router.push('upload')
+      },
 
-      getMenuStructure () {
+      getMenuStructure (intermediateFiles, keyNum) {
         const icon = 'fa fa-folder'
-        return Object.entries(this.intermediateFiles).reduce((previous, [period, value]) => {
-          previous.push({
-            title: period,
-            icon,
-            child: generateChildOfPeriod(value)
-          })
-          return previous
-        }, [])
-
-        function generateChildOfPeriod(yearValue) {
-          return Object.entries(yearValue).reduce((previous, [subject, subjectValue]) => {
-            previous.push({
-              title: subject,
-              icon,
-              child: generateChildOfSubject(subjectValue)
-            })
-            return previous
-          }, [])
-        }
-
-        function generateChildOfSubject(subjectValue) {
-          return Object.entries(subjectValue).reduce((previous, [toolType, toolTypeValue]) => {
-            previous.push({
-              title: toolType,
-              icon,
-              child: generateChildOfToolType(toolTypeValue)
-            })
-            return previous
-          }, [])
-        }
-
-        function generateChildOfToolType(toolTypeValue) {
-          return Object.entries(toolTypeValue).reduce((previous, [year, yearValue]) => {
-            previous.push({
-              title: year,
-              icon,
-              child: generateChildOfYear(yearValue)
-            })
-            return previous
-          }, [])
-        }
-
-        function generateChildOfYear(yearValue) {
-          return Object.entries(yearValue).reduce((previous, [contentType, contentTypeValue]) => {
-            previous.push({
-              title: contentType,
-              icon,
-              child: generateChildOfContentType(contentTypeValue)
-            })
-            return previous
-          }, [])
-        }
-
-        function generateChildOfContentType(contentTypeValue) {
-          return contentTypeValue.map(file => {
+        if (keyNum <= 1) {
+          return intermediateFiles.map(file => {
             return {
               title: file.fileName,
               icon: 'fa fa-file'
             }
           })
         }
-      }
-    },
-
-    methods: {
-      toUpload () {
-        this.$router.push('upload')
+        return Object.entries(intermediateFiles).reduce((previous, [key, value]) => {
+          previous.push({
+            title: key,
+            icon,
+            child: this.getMenuStructure(value, keyNum-1)
+          })
+          return previous
+        }, [])
       },
     },
   }
