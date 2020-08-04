@@ -3,6 +3,15 @@
     <div></div>
     <h1 class="uk-text-center@s">過去問アップロードフォーム</h1>
 
+    <div class="uk-margin uk-flex uk-flex-center">
+      <input
+        class="uk-input uk-form-width-medium"
+        type="text"
+        placeholder="ブランチ名を入力"
+        v-model="branchName"
+      >
+    </div>
+
     <div class="uk-flex uk-flex-center uk-margin">
       <div 
         class="drag-area uk-placeholder uk-text-center uk-form-width-large"
@@ -26,11 +35,16 @@
       {{ file.fileData.name }}
     </div>
 
+    <div class="uk-text-center@s uk-margin" v-if="!branchName">
+      <div>ブランチ名を入力してください</div>
+      <div>※ブランチ名及び過去問アップロードフォームの使い方がわからない場合は、README.mdを参照してください</div>
+    </div>
+
     <div class="uk-flex uk-flex-center uk-margin">
       <vk-button
         type="primary"
         class="uk-margin"
-        v-bind:disabled="uploadedFiles.length<1"
+        v-bind:disabled="uploadedFiles.length<1 && !branchName"
         v-on:click="uploadNewFile()"
       >アップロード</vk-button>
     </div>
@@ -46,16 +60,17 @@
 
 
 <script>
-  import netlifyIdentity from 'netlify-identity-widget'
+  // const netlifyIdentity = require('netlify-identity-widget')
   export default {
     name: 'upload',
     data () {
       return {
-        uploadedFiles: []
+        uploadedFiles: [],
+        branchName: null
       }
     },
     mounted() {
-      netlifyIdentity.open()
+      // netlifyIdentity.open()
     },
     computed: {
     },
@@ -68,14 +83,12 @@
         await this.$store.dispatch('upload', this.uploadedFiles)
         this.$store.state.files.forEach(file => {
           console.log(file)
-        });
+        })
       },
 
       dropFile (event) {
         const droppedFile = event.target.files || event.dataTransfer.files
-        const type = droppedFile[0].type
-        const blob = new Blob([droppedFile], {type})
-        const url = URL.createObjectURL(blob)
+        const url = URL.createObjectURL(droppedFile[0])
         this.uploadedFiles.push({fileData: droppedFile[0], url})
       }
     }
