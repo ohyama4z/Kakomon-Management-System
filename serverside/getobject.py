@@ -69,20 +69,22 @@ def ReturnAllBranches():
 # print(allbranches)
 
 # downloadurl
-png_dir_contents = repo.get_dir_contents("/scanned", choosebranch)
-gazoukakutyoushi = ['.jpg', '.jpeg', '.png']
-d = {}
-for i in range(len(png_dir_contents)):
-    # if ".jpg" in png_dir_contents[i].name or :
+def GetPictureInfo ():
+    png_dir_contents = repo.get_dir_contents("/scanned", choosebranch)
+    gazoukakutyoushi = ['.jpg', '.jpeg', '.png']
+    PicturepathAndRawURL = {}
+    for i in range(len(png_dir_contents)):
+        # if ".jpg" in png_dir_contents[i].name or :
 
-    # print(png_dir_contents[i].name[-4:])
-    print(gazoukakutyoushi)
-    if png_dir_contents[i].name[-4:] in gazoukakutyoushi:
-        path = png_dir_contents[i].path
-        download_url = png_dir_contents[i].download_url
-        d.setdefault(path, download_url)
+        if png_dir_contents[i].name[-4:] in gazoukakutyoushi:
+            path = png_dir_contents[i].path
+            download_url = png_dir_contents[i].download_url
+            PicturepathAndRawURL.setdefault(path, download_url)
+    return PicturepathAndRawURL
+    # print(PicturepathAndRawURL)
+
+print(GetPictureInfo())
 # 必要な情報
-# print(d)
 # csvfileとcsvheader:対応する各行の値とdownload:画像urlとbranch一覧
 # csvをdownload
 # srcを見に行ってscanned/xxx.jpg 以降のjpgを
