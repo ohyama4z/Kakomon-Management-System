@@ -11,5 +11,3 @@ PersonalToken = os.environ.get("GITGATEWAY_GITHUB_ACCESS_TOKEN")
 repo = os.environ.get("GITHUB_REPO")
 client_id = os.environ.get("CLIENT_ID")
 client_secret = os.environ.get("CLIENT_SECRET")
-
-password = os.environ.get("password")

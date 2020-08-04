@@ -61,7 +61,8 @@ print(d)
 numberoflines = len(gyou)
 numberofcolumns = len(gyou[0])
 
-dictarray = [[]]
+dictarray = {}
+dictarrays = []
 
 # for i in range(5):
 for i in range(numberoflines):
@@ -74,9 +75,11 @@ for i in range(numberoflines):
         print("j" , j)
         print(keys[j])
         # dictarray.append(dict(zip(keys[j], val[i][j])))
-        dictarray.append({keys[j] : val[i][j]})
+        # dictarray.append({keys[j] : val[i][j]})
+        dictarray.setdefault(keys[j], val[i][j])
         # vals = val[i][j]
         # print(val[0][0])
+    dictarrays.append(dictarray)
     # print("\n")
     # print(dictarray)
 # for i in range(numberofcolumns):
@@ -90,7 +93,10 @@ for i in range(numberoflines):
 #         dictarray.append(dict(zip(keys[i], val[i][j])))
 #         # print(val[0][0])
 
-print(dictarray)
+print(dictarrays[1])
+
+sampledict = [{'a' : 1, 'b' : 4}, {'a': 8, 'c':10}]
+print(sampledict[0])
 
 # print(vals)
 # def (self, src, subj, tool_type, period, year, content_type, author, image_index, included_pages_num, fix_text):
