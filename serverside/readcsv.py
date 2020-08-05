@@ -62,7 +62,7 @@ numberoflines = len(gyou)
 numberofcolumns = len(gyou[0])
 
 dictarray = {}
-dictarrays = []
+dictarrays = {}
 
 # for i in range(5):
 for i in range(numberoflines):
@@ -79,7 +79,7 @@ for i in range(numberoflines):
         dictarray.setdefault(keys[j], val[i][j])
         # vals = val[i][j]
         # print(val[0][0])
-    dictarrays.append(dictarray)
+    dictarrays.setdefault(val[i][0], dictarray)
     # print("\n")
     # print(dictarray)
 # for i in range(numberofcolumns):
@@ -93,7 +93,8 @@ for i in range(numberoflines):
 #         dictarray.append(dict(zip(keys[i], val[i][j])))
 #         # print(val[0][0])
 
-print(dictarrays[1])
+print(dictarrays)
+# print(dictarrays[1])
 
 sampledict = [{'a' : 1, 'b' : 4}, {'a': 8, 'c':10}]
 print(sampledict[0])
