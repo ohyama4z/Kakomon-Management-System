@@ -37,7 +37,7 @@
 
     <div class="uk-text-center@s uk-margin" v-if="!branchName">
       <div>ブランチ名を入力してください</div>
-      <div>※ブランチ名及び過去問アップロードフォームの使い方がわからない場合は、README.mdを参照してください</div>
+      <div>※過去問アップロードフォームの使い方がわからない場合は、README.mdを参照してください</div>
     </div>
 
     <div class="uk-flex uk-flex-center uk-margin">
