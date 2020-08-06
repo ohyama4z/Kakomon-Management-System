@@ -160,12 +160,10 @@
       getMenuStructure (intermediateFiles, keyNum) {
         const icon = 'fa fa-folder'
         if (keyNum <= 1) {
-          return intermediateFiles.map(file => {
-            return {
-              title: file.fileName,
-              icon: 'fa fa-file'
-            }
-          })
+          return intermediateFiles.map(file => ({
+            title: file.fileName,
+            icon: 'fa fa-file'
+          }))
         }
         return Object.entries(intermediateFiles).reduce((previous, [key, value]) => {
           previous.push({
