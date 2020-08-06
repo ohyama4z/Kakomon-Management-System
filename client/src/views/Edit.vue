@@ -1,5 +1,6 @@
 <template>
   <div>
+    {{branches}}
 
     <h1 class="uk-text-center@s">過去問編集フォーム</h1>
 
@@ -82,7 +83,7 @@
       </div>
     </div>
 
-    <div v-else>
+    <!-- <div v-else>
       <div class="uk-margin uk-flex uk-flex-center">
         <select class="uk-select uk-form-width-medium" v-model="selectedBranch">
           <option disabled value="">ブランチを選択</option>
@@ -92,7 +93,7 @@
           <option>後期定期</option>
         </select>
       </div>
-    </div>
+    </div> -->
   
     <div class="uk-position-medium uk-position-top-right uk-overlay uk-overlay-default">
       <button class="uk-button uk-button-link" v-on:click="toUpload">アップロード画面へ
@@ -116,8 +117,15 @@
         period: '',
         contentType: '',
         author: '',
-        isSelectedInfo: false
+        isSelectedInfo: false,
+        branches: [],
       }
+    },
+
+    mounted () {
+        this.$store.dispatch('getBranch')
+        this.branches = this.$store.state.metadata.branches;
+        console.log(this.branches)
     },
 
     computed: {

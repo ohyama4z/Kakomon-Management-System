@@ -12,7 +12,7 @@ import { IconCloudUpload, IconChevronDown, IconChevronRight } from '@vuikit/icon
 import 'vue-sidebar-menu/dist/vue-sidebar-menu.css'
 
 const VueUploadComponent = require('vue-upload-component')
-const netlifyIdentity = require('netlify-identity-widget')
+// const netlifyIdentity = require('netlify-identity-widget')
 
 Vue.component('VKIconCheveronRight', IconChevronRight)
 Vue.component('VKIconCloudpload', IconCloudUpload)
@@ -26,12 +26,22 @@ Vue.use(VueSidebarMenu)
 
 Vue.config.productionTip = false
 
-netlifyIdentity.init({
-  APIUrl: 'http://localhost:8085/.netlify/identity'
-})
+// netlifyIdentity.init({
+//   APIUrl: 'http://localhost:8085/.netlify/identity'
+// })
+
+const url= 'http://localhost:5000/'
 
 const store = new Vuex.Store({
   state: {
+    serverSideLanguage: {
+      status: 'unrequested', // unreqested | loaded | loading
+      name: '',
+    },
+    metadata: {
+      status: 'unrequested',
+      branches: [],
+    },
     files: [],
     sampleFiles: [{
       src: '001',
@@ -136,8 +146,23 @@ const store = new Vuex.Store({
   ]
   },
   mutations: {
+    setStatusLoading: (state, req) => {
+      req.status = 'loading'
+    },
     upload: (state, newFile) => {
       state.files.push(newFile)
+    },
+    setServerSideLanguage: (state, languageName) => {
+      state.serverSideLanguage = {
+        status: 'loaded',
+        name: languageName,
+      }
+    },
+    setBranches: (state, data) => {
+      state.metadata = {
+        status: 'loaded',
+        branches : data,
+      }
     }
   },
   actions: {
@@ -150,6 +175,24 @@ const store = new Vuex.Store({
       await STO(1000)
       commit('upload',newFile)
       console.log('action: upload')
+    },
+    
+    updateState: async ({ commit ,state }) => {
+      commit('setStatusLoading', state.serverSideLanguage)
+      const method = 'GET'
+      const res = await fetch('http://localhost:5000/csv', {method})
+      const response = await res.json()
+      console.log(res, response)
+      const languageName = response.languages
+      commit('setServerSideLanguage', languageName)
+    },
+    getBranch: async ({ commit ,state }) => {
+      commit('setStatusLoading', state.metadata)
+      const method = 'GET'
+      const httpresponse = await fetch(url + 'metadata', {method})
+      const jsonresponse = await httpresponse.json()
+      console.log(jsonresponse)
+      commit('setBranches', jsonresponse)
     }
   }
 })
