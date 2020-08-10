@@ -98,7 +98,7 @@
         <div class="uk-margin uk-flex uk-flex-center">
           <select class="uk-select uk-form-width-medium" v-model="selectedBranch">
             <option disabled value="">ブランチを選択</option>
-            <option v-for="branch in branches" v-bind:key="branch.index">{{ branch.name }}</option>
+            <option v-for="branch in branches" v-bind:key="branch.commit">{{ branch.name }}</option>
           </select>
         </div>
       </div>
@@ -132,6 +132,8 @@
 
 
 <script>
+  const netlifyIdentity = require('netlify-identity-widget')
+
   export default {
     name: 'edit',
 
@@ -147,6 +149,11 @@
         selectedBranch: '',
         editType: ''
       }
+    },
+
+    async mounted () {
+      netlifyIdentity.open()
+      await this.$store.dispatch('getMetadatas')
     },
 
     computed: {

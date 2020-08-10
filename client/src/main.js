@@ -35,16 +35,7 @@ const store = new Vuex.Store({
     currentUser: netlifyIdentity.currentUser(),
     metadatas: {
       status: 'loaded',
-      data: [
-        {
-          index: 789,
-          name: 'aho'
-        },
-        {
-          index: 7902,
-          name: 'ahi'
-        }
-      ]
+      data: []
     },
     files: [
       {
@@ -149,29 +140,56 @@ const store = new Vuex.Store({
       }
     ],
   },
+
   mutations: {
     upload: (state, newFile) => {
       state.files.push(newFile)
     },
+
     getCurrentUser: (state) => {
       const user = netlifyIdentity.currentUser();
       state.currentUser = user
+    },
+
+    getBranches: (state, res) => {
+      const branches = JSON.parse(JSON.stringify(res))
+      state.metadatas = {
+        status: 'loaded',
+        data: branches
+      }
+      console.log(state.metadatas)
     }
   },
+
   actions: {
     upload: async ({ commit }, newFile) => {
       commit('upload',newFile)
       console.log('action: upload')
     },
-    get: async ({state}) => {
+
+    get: async ({commit, state}) => {
+      const token = state.currentUser.token.access_token
+      const method = 'GET'
+      const headers = {
+        Authorization: `Bearer ${token}`
+      }
+      const httpRes = await fetch('http://localhost:8085/.netlify/git/github/branches', {method, headers})
+      const res = await httpRes.json()
+      console.log('ahoahoa', httpRes, res)
+
+      commit('getBranches', res)
+    },
+
+    getMetadatas: async ({commit, state}) => {
       const token = state.currentUser.token.access_token
       const method = 'GET'
       const headers = {
         Authorization: `Bearer ${token}`
       }
       const httpRes = await fetch('http://localhost:8085/.netlify/git/github/branches/master', {method, headers})
-      const res = httpRes.json()
-      console.log('ahoahoa', httpRes, res)
+      const res = await httpRes.json()
+
+      commit('getBranches', res)
     }
   }
 })
