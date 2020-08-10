@@ -16,7 +16,7 @@
       </div>
 
       <div class="uk-margin uk-flex uk-flex-center">
-        <input 
+        <input
           class="uk-input uk-form-width-medium"
           type="number"
           placeholder="年度を入力(西暦)"
