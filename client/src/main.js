@@ -12,7 +12,7 @@ import { IconCloudUpload, IconChevronDown, IconChevronRight } from '@vuikit/icon
 import 'vue-sidebar-menu/dist/vue-sidebar-menu.css'
 
 const VueUploadComponent = require('vue-upload-component')
-// const netlifyIdentity = require('netlify-identity-widget')
+const netlifyIdentity = require('netlify-identity-widget')
 
 Vue.component('VKIconCheveronRight', IconChevronRight)
 Vue.component('VKIconCloudpload', IconCloudUpload)
@@ -26,12 +26,13 @@ Vue.use(VueSidebarMenu)
 
 Vue.config.productionTip = false
 
-// netlifyIdentity.init({
-//   APIUrl: 'http://localhost:8085/.netlify/identity'
-// })
+netlifyIdentity.init({
+  APIUrl: 'http://localhost:8085/.netlify/identity'
+})
 
 const store = new Vuex.Store({
   state: {
+    currentUser: netlifyIdentity.currentUser(),
     metadatas: {
       status: 'loaded',
       data: [
@@ -151,18 +152,26 @@ const store = new Vuex.Store({
   mutations: {
     upload: (state, newFile) => {
       state.files.push(newFile)
+    },
+    getCurrentUser: (state) => {
+      const user = netlifyIdentity.currentUser();
+      state.currentUser = user
     }
   },
   actions: {
     upload: async ({ commit }, newFile) => {
-      const STO = (delay) => new Promise(resolve => {
-        setTimeout(() => {
-          resolve()
-        }, delay)
-      })
-      await STO(1000)
       commit('upload',newFile)
       console.log('action: upload')
+    },
+    get: async ({state}) => {
+      const token = state.currentUser.token.access_token
+      const method = 'GET'
+      const headers = {
+        Authorization: `Bearer ${token}`
+      }
+      const httpRes = await fetch('http://localhost:8085/.netlify/git/github/branches/master', {method, headers})
+      const res = httpRes.json()
+      console.log('ahoahoa', httpRes, res)
     }
   }
 })
