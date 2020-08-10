@@ -152,12 +152,12 @@ const store = new Vuex.Store({
     },
 
     getBranches: (state, res) => {
+      console.log(res)
       const branches = JSON.parse(JSON.stringify(res))
       state.metadatas = {
         status: 'loaded',
         data: branches
       }
-      console.log(state.metadatas)
     }
   },
 
@@ -186,7 +186,7 @@ const store = new Vuex.Store({
       const headers = {
         Authorization: `Bearer ${token}`
       }
-      const httpRes = await fetch('http://localhost:8085/.netlify/git/github/branches/master', {method, headers})
+      const httpRes = await fetch('http://localhost:8085/.netlify/git/github/branches', {method, headers})
       const res = await httpRes.json()
 
       commit('getBranches', res)

@@ -3,86 +3,84 @@
     <div></div>
     <h1 class="uk-text-center@s">過去問編集フォーム</h1>
 
-    <div v-if="isSelectedInfo">
-      <sidebar-menu :menu="sidebarMenu" />
+    <sidebar-menu :menu="sidebarMenu" />
 
-      <div class="uk-margin uk-flex uk-flex-center">
-        <input
-          class="uk-input uk-form-width-medium"
-          type="text"
-          placeholder="教科名を入力"
-          v-model="subject"
-        >
-      </div>
-
-      <div class="uk-margin uk-flex uk-flex-center">
-        <input
-          class="uk-input uk-form-width-medium"
-          type="number"
-          placeholder="年度を入力(西暦)"
-          v-model="year"
-        >
-      </div>
-
-      <div class="uk-margin uk-flex uk-flex-center">
-        <select class="uk-select uk-form-width-medium" v-model="toolType">
-          <option disabled value="">用途を選択</option>
-          <option>勉強用</option>
-          <option>テスト</option>
-        </select>
-      </div>
-
-      <div class="uk-margin uk-flex uk-flex-center">
-        <select class="uk-select uk-form-width-medium" v-model="period">
-          <option disabled value="">テストの時期を選択</option>
-          <option>前期中間</option>
-          <option>前期定期</option>
-          <option>後期中間</option>
-          <option>後期定期</option>
-        </select>
-      </div>
-
-      <div class="uk-margin uk-flex uk-flex-center" v-if="toolType==='テスト'">
-        <select class="uk-select uk-form-width-medium" v-model="contentType">
-          <option disabled value="">用紙の種類を選択</option>
-          <option>問題</option>
-          <option>解答なし答案用紙</option>
-          <option>学生解答</option>
-          <option>模範解答</option>
-        </select>
-      </div>
-
-      <div class="uk-margin uk-flex uk-flex-center" v-if="toolType==='勉強用'">
-        <select class="uk-select uk-form-width-medium" v-model="contentType">
-          <option disabled value="">用紙の種類を選択</option>
-          <option>ノート</option>
-          <option>まとめ</option>
-          <option>対策プリント</option>
-        </select>
-      </div>
-
-      <div class="uk-margin uk-flex uk-flex-center">
-        <input
-          class="uk-input uk-form-width-medium"
-          type="text"
-          placeholder="用紙作成者,担当教員"
-          v-model="author"
-        >
-      </div>
-
-      <div class="uk-text-center@s uk-margin" v-if="!isSellectedAll">すべての項目を選択してください</div>
-
-      <div class="uk-flex uk-flex-center uk-margin">
-        <vk-button
-          type="primary"
-          class="uk-margin"
-          v-bind:disabled="!isSellectedAll"
-          v-on:click="upload()"
-        >編集をコミット</vk-button>
-      </div>
+    <div class="uk-margin uk-flex uk-flex-center">
+      <input
+        class="uk-input uk-form-width-medium"
+        type="text"
+        placeholder="教科名を入力"
+        v-model="subject"
+      >
     </div>
 
-    <div v-else>
+    <div class="uk-margin uk-flex uk-flex-center">
+      <input
+        class="uk-input uk-form-width-medium"
+        type="number"
+        placeholder="年度を入力(西暦)"
+        v-model="year"
+      >
+    </div>
+
+    <div class="uk-margin uk-flex uk-flex-center">
+      <select class="uk-select uk-form-width-medium" v-model="toolType">
+        <option disabled value="">用途を選択</option>
+        <option>勉強用</option>
+        <option>テスト</option>
+      </select>
+    </div>
+
+    <div class="uk-margin uk-flex uk-flex-center">
+      <select class="uk-select uk-form-width-medium" v-model="period">
+        <option disabled value="">テストの時期を選択</option>
+        <option>前期中間</option>
+        <option>前期定期</option>
+        <option>後期中間</option>
+        <option>後期定期</option>
+      </select>
+    </div>
+
+    <div class="uk-margin uk-flex uk-flex-center" v-if="toolType==='テスト'">
+      <select class="uk-select uk-form-width-medium" v-model="contentType">
+        <option disabled value="">用紙の種類を選択</option>
+        <option>問題</option>
+        <option>解答なし答案用紙</option>
+        <option>学生解答</option>
+        <option>模範解答</option>
+      </select>
+    </div>
+
+    <div class="uk-margin uk-flex uk-flex-center" v-if="toolType==='勉強用'">
+      <select class="uk-select uk-form-width-medium" v-model="contentType">
+        <option disabled value="">用紙の種類を選択</option>
+        <option>ノート</option>
+        <option>まとめ</option>
+        <option>対策プリント</option>
+      </select>
+    </div>
+
+    <div class="uk-margin uk-flex uk-flex-center">
+      <input
+        class="uk-input uk-form-width-medium"
+        type="text"
+        placeholder="用紙作成者,担当教員"
+        v-model="author"
+      >
+    </div>
+
+    <div class="uk-text-center@s uk-margin" v-if="!isSellectedAll">すべての項目を選択してください</div>
+
+    <div class="uk-flex uk-flex-center uk-margin">
+      <vk-button
+        type="primary"
+        class="uk-margin"
+        v-bind:disabled="!isSellectedAll"
+        v-on:click="upload()"
+      >編集をコミット</vk-button>
+    </div>
+
+    <!-- <div v-else>
       <div class="uk-text-center@s uk-margin">編集の形式を選択してください。</div>
       <div class="uk-margin uk-flex uk-flex-center">
         <select class="uk-select uk-form-width-medium" v-model="editType">
@@ -98,7 +96,7 @@
         <div class="uk-margin uk-flex uk-flex-center">
           <select class="uk-select uk-form-width-medium" v-model="selectedBranch">
             <option disabled value="">ブランチを選択</option>
-            <option v-for="branch in branches" v-bind:key="branch.commit">{{ branch.name }}</option>
+            <option v-for="branch in branches" v-bind:key="branch.commit.sha">{{ branch.name }}</option>
           </select>
         </div>
       </div>
@@ -111,7 +109,7 @@
           v-on:click="requestBranchData()"
         >決定</vk-button>
       </div>
-    </div>
+    </div> -->
 
     <div class="uk-position-bottom uk-overlay uk-overlay-default uk-text-center">
       ※過去問編集フォームの使い方がわからない場合は、
@@ -132,8 +130,6 @@
 
 
 <script>
-  const netlifyIdentity = require('netlify-identity-widget')
-
   export default {
     name: 'edit',
 
@@ -152,7 +148,6 @@
     },
 
     async mounted () {
-      netlifyIdentity.open()
       await this.$store.dispatch('getMetadatas')
     },
 
@@ -183,9 +178,40 @@
           title: '過去問管理',
           hiddenOnCollapse: true
         }]
+
+        const branches = this.getBrancheStructure()
+
         //this.getMenuStructure の第2引数は period, subject, toolType, year, contentType, fileNameで計6
-        const dataTree = this.getMenuStructure (this.intermediateFiles, 6)
-        return header.concat(dataTree)
+        const dataTree = this.getMenuStructure(this.intermediateFiles(), 6)
+        return header.concat(branches, dataTree)
+      },
+
+      branches () {
+        return this.$store.state.metadatas.data
+      }
+    },
+
+    methods: {
+      toUpload () {
+        this.$router.push('upload')
+      },
+
+      getBrancheStructure () {
+        const branchesData = this.branches.reduce((pre, cur) => {
+          pre.push({
+            title: cur.name,
+          })
+
+          return pre
+        }, [])
+
+        const brancheStructure = {
+          title: 'ブランチを選択',
+          icon: 'fa fa-code-branch',
+          child: branchesData
+        }
+
+        return brancheStructure
       },
 
       intermediateFiles () {
@@ -217,16 +243,6 @@
 
           return previous
         }, {})
-      },
-
-      branches () {
-        return this.$store.state.metadatas.data
-      }
-    },
-
-    methods: {
-      toUpload () {
-        this.$router.push('upload')
       },
 
       getMenuStructure (intermediateFiles, keyNum) {
