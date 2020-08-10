@@ -1,10 +1,10 @@
 <template>
   <div>
-
+    <div></div>
     <h1 class="uk-text-center@s">過去問編集フォーム</h1>
 
     <div v-if="isSelectedInfo">
-      <sidebar-menu :menu="getSidebarMenu" />
+      <sidebar-menu :menu="sidebarMenu" />
 
       <div class="uk-margin uk-flex uk-flex-center">
         <input
@@ -16,7 +16,7 @@
       </div>
 
       <div class="uk-margin uk-flex uk-flex-center">
-        <input 
+        <input
           class="uk-input uk-form-width-medium"
           type="number"
           placeholder="年度を入力(西暦)"
@@ -78,22 +78,49 @@
           class="uk-margin"
           v-bind:disabled="!isSellectedAll"
           v-on:click="upload()"
-        >アップロード</vk-button>
+        >編集をコミット</vk-button>
       </div>
     </div>
 
     <div v-else>
+      <div class="uk-text-center@s uk-margin">編集の形式を選択してください。</div>
       <div class="uk-margin uk-flex uk-flex-center">
-        <select class="uk-select uk-form-width-medium" v-model="selectedBranch">
-          <option disabled value="">ブランチを選択</option>
-          <option v-for="branches" ></option>
-          <option>前期定期</option>
-          <option>後期中間</option>
-          <option>後期定期</option>
+        <select class="uk-select uk-form-width-medium" v-model="editType">
+          <option disabled value="">編集の形式を選択</option>
+          <option value="editUnnamed">未編集のファイルの情報を入力する</option>
+          <option value="editNamed">編集済みのファイルの情報を更新する</option>
         </select>
       </div>
+      <div class="uk-text-center@s uk-margin">> {{ displayEditType }}</div>
+
+      <div class="uk-margin-large">
+        <div class="uk-text-center@s uk-margin">編集するブランチを選択してください。</div>
+        <div class="uk-margin uk-flex uk-flex-center">
+          <select class="uk-select uk-form-width-medium" v-model="selectedBranch">
+            <option disabled value="">ブランチを選択</option>
+            <option v-for="branch in branches" v-bind:key="branch.index">{{ branch.name }}</option>
+          </select>
+        </div>
+      </div>
+
+
+      <div class="uk-margin uk-flex uk-flex-center">
+        <vk-button
+          type="primary"
+          v-bind:disabled="!readyForRequest"
+          v-on:click="requestBranchData()"
+        >決定</vk-button>
+      </div>
     </div>
-  
+
+    <div class="uk-position-bottom uk-overlay uk-overlay-default uk-text-center">
+      ※過去問編集フォームの使い方がわからない場合は、
+      <a class="uk-link-toggle" href="https://github.com/asann3/Kakomon-Management-System/blob/master/client/manuals/README.md" target="_blank">
+        README.md
+      </a>
+      を参照してください。
+    </div>
+
     <div class="uk-position-medium uk-position-top-right uk-overlay uk-overlay-default">
       <button class="uk-button uk-button-link" v-on:click="toUpload">アップロード画面へ
         <vk-icon icon="chevron-right"></vk-icon>
@@ -116,7 +143,9 @@
         period: '',
         contentType: '',
         author: '',
-        isSelectedInfo: false
+        isSelectedInfo: false,
+        selectedBranch: '',
+        editType: ''
       }
     },
 
@@ -125,7 +154,23 @@
         return this.subject && this.year && this.toolType && this.period && this.contentType && this.author
       },
 
-      getSidebarMenu () {
+      readyForRequest () {
+        return this.selectedBranch && this.editType
+      },
+
+      displayEditType () {
+        if (this.editType === 'editUnnamed') {
+          return '未編集のファイルの情報を入力する'
+        } 
+        
+        if (this.editType === 'editNamed') {
+          return '編集済みのファイルの情報を更新する'
+        }
+
+         return '編集の形式を入力してください'
+      },
+
+      sidebarMenu () {
         const header = [{
           header: true,
           title: '過去問管理',
@@ -137,7 +182,7 @@
       },
 
       intermediateFiles () {
-        return this.$store.state.sampleFiles.reduce((previous, current) => {
+        return this.$store.state.files.reduce((previous, current) => {
           if (previous == null) {
             previous = {}
           }
@@ -166,7 +211,12 @@
           return previous
         }, {})
       },
+
+      branches () {
+        return this.$store.state.metadatas.data
+      }
     },
+
     methods: {
       toUpload () {
         this.$router.push('upload')
@@ -189,6 +239,10 @@
           return previous
         }, [])
       },
+
+      requestBranchData () {
+        this.isSelectedInfo = true
+      }
     },
   }
 </script>

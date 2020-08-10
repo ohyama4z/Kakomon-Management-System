@@ -37,7 +37,6 @@
 
     <div class="uk-text-center@s uk-margin" v-if="!branchName">
       <div>ブランチ名を入力してください</div>
-      <div>※過去問アップロードフォームの使い方がわからない場合は、README.mdを参照してください</div>
     </div>
 
     <div class="uk-flex uk-flex-center uk-margin">
@@ -47,6 +46,14 @@
         v-bind:disabled="uploadedFiles.length<1 && !branchName"
         v-on:click="uploadNewFile()"
       >アップロード</vk-button>
+    </div>
+
+    <div class="uk-position-bottom uk-overlay uk-overlay-default uk-text-center">
+      ※過去問アップロードフォームの使い方がわからない場合は、
+      <a class="uk-link-toggle" href="https://github.com/asann3/Kakomon-Management-System/blob/master/client/manuals/README.md" target="_blank">
+        README.md
+      </a>
+      を参照してください。
     </div>
 
     <div class="uk-position-medium uk-position-top-right uk-overlay uk-overlay-default">

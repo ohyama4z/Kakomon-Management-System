@@ -4,7 +4,7 @@ import App from './App.vue'
 import Upload from './views/Upload'
 import Edit from './views/Edit'
 import test from './views/test'
-import SelectInfo from './views/SelectInfo'
+import Login from './views/Login'
 
 Vue.use(Router)
 
@@ -37,9 +37,9 @@ export default new Router({
       component: test
     },
     {
-      path: '/selctInfo',
-      name: 'selectInfo',
-      componet: SelectInfo
+      path: '/login',
+      name: 'login',
+      component: Login
     }
   ]
 })
