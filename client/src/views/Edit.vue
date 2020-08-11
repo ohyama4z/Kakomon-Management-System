@@ -5,6 +5,22 @@
 
     <sidebar-menu :menu="sidebarMenu" />
 
+    <div class="uk-position-medium uk-position-top-right uk-overlay uk-overlay-default">
+      <div class="uk-text-center@s uk-margin">編集するブランチを選択してください。</div>
+
+      <div class="uk-margin uk-flex uk-flex-center">
+        <select class="uk-select uk-form-width-medium" v-model="selectedBranch" @change="getBranchData()">
+          <option disabled value="">ブランチを選択</option>
+          <option>master</option>
+          <option 
+            v-for="branch in branches"
+            v-bind:key="branch.commit.sha"
+            v-show="branch.name !== 'master'"
+          >{{ branch.name }}</option>
+        </select>
+      </div>
+    </div>
+
     <div class="uk-margin uk-flex uk-flex-center">
       <input
         class="uk-input uk-form-width-medium"
@@ -80,37 +96,6 @@
       >編集をコミット</vk-button>
     </div>
 
-    <!-- <div v-else>
-      <div class="uk-text-center@s uk-margin">編集の形式を選択してください。</div>
-      <div class="uk-margin uk-flex uk-flex-center">
-        <select class="uk-select uk-form-width-medium" v-model="editType">
-          <option disabled value="">編集の形式を選択</option>
-          <option value="editUnnamed">未編集のファイルの情報を入力する</option>
-          <option value="editNamed">編集済みのファイルの情報を更新する</option>
-        </select>
-      </div>
-      <div class="uk-text-center@s uk-margin">> {{ displayEditType }}</div>
-
-      <div class="uk-margin-large">
-        <div class="uk-text-center@s uk-margin">編集するブランチを選択してください。</div>
-        <div class="uk-margin uk-flex uk-flex-center">
-          <select class="uk-select uk-form-width-medium" v-model="selectedBranch">
-            <option disabled value="">ブランチを選択</option>
-            <option v-for="branch in branches" v-bind:key="branch.commit.sha">{{ branch.name }}</option>
-          </select>
-        </div>
-      </div>
-
-
-      <div class="uk-margin uk-flex uk-flex-center">
-        <vk-button
-          type="primary"
-          v-bind:disabled="!readyForRequest"
-          v-on:click="requestBranchData()"
-        >決定</vk-button>
-      </div>
-    </div> -->
-
     <div class="uk-position-bottom uk-overlay uk-overlay-default uk-text-center">
       ※過去問編集フォームの使い方がわからない場合は、
       <a class="uk-link-toggle" href="https://github.com/asann3/Kakomon-Management-System/blob/master/client/manuals/README.md" target="_blank">
@@ -119,12 +104,11 @@
       を参照してください。
     </div>
 
-    <div class="uk-position-medium uk-position-top-right uk-overlay uk-overlay-default">
+    <div class="uk-position-medium uk-position-bottom-right uk-overlay uk-overlay-default">
       <button class="uk-button uk-button-link" v-on:click="toUpload">アップロード画面へ
         <vk-icon icon="chevron-right"></vk-icon>
       </button>
     </div>
-
   </div>
 </template>
 
@@ -142,13 +126,12 @@
         period: '',
         contentType: '',
         author: '',
-        isSelectedInfo: false,
-        selectedBranch: '',
+        selectedBranch: 'master',
         editType: ''
       }
     },
 
-    async mounted () {
+    mounted () {
       netlifyIdentity.on('logout', () => {
         localStorage.setItem('lastPage', 'edit')
         this.$store.commit('updateLastPage')
@@ -161,7 +144,8 @@
         this.$router.push('/login')
       }
 
-      await this.$store.dispatch('getMetadatas')
+      this.$store.dispatch('getMetadatas')
+      this.getBranchData()
     },
 
     computed: {
@@ -173,30 +157,16 @@
         return this.selectedBranch && this.editType
       },
 
-      displayEditType () {
-        if (this.editType === 'editUnnamed') {
-          return '未編集のファイルの情報を入力する'
-        } 
-        
-        if (this.editType === 'editNamed') {
-          return '編集済みのファイルの情報を更新する'
-        }
-
-         return '編集の形式を入力してください'
-      },
-
       sidebarMenu () {
         const header = [{
           header: true,
-          title: '過去問管理',
+          title: `Branch : ${this.selectedBranch}`,
           hiddenOnCollapse: true
         }]
 
-        const branches = this.getBrancheStructure()
-
         //this.getMenuStructure の第2引数は period, subject, toolType, year, contentType, fileNameで計6
         const dataTree = this.getMenuStructure(this.intermediateFiles(), 6)
-        return header.concat(branches, dataTree)
+        return header.concat(dataTree)
       },
 
       branches () {
@@ -207,24 +177,6 @@
     methods: {
       toUpload () {
         this.$router.push('upload')
-      },
-
-      getBrancheStructure () {
-        const branchesData = this.branches.reduce((pre, cur) => {
-          pre.push({
-            title: cur.name,
-          })
-
-          return pre
-        }, [])
-
-        const brancheStructure = {
-          title: 'ブランチを選択',
-          icon: 'fa fa-code-branch',
-          child: branchesData
-        }
-
-        return brancheStructure
       },
 
       intermediateFiles () {
@@ -276,8 +228,8 @@
         }, [])
       },
 
-      requestBranchData () {
-        this.isSelectedInfo = true
+      getBranchData () {
+        this.$store.dispatch('getBranchData', this.selectedBranch)
       }
     },
   }

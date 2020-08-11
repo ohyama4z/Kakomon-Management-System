@@ -148,12 +148,14 @@ const store = new Vuex.Store({
     },
 
     getCurrentUser: (state) => {
-      const user = netlifyIdentity.currentUser();
+      const user = netlifyIdentity.currentUser()
       state.currentUser = user
     },
 
     updateLastPage: (state) => {
-      state.lastPage = localStorage.getItem('lastPage')
+      const lastPageInStrage = localStorage.getItem('lastPage')
+      const lastPage = lastPageInStrage == null ? 'upload' : lastPageInStrage
+      state.lastPage = lastPage
       console.log('うあ', state.lastPage)
     },
 
@@ -195,6 +197,18 @@ const store = new Vuex.Store({
       const res = await httpRes.json()
 
       commit('getBranches', res)
+    },
+
+    getBranchData: async ({state}, branchName) => {
+      const token = state.currentUser.token.access_token
+      const method = 'GET'
+      const headers = {
+        Authorization: `Bearer ${token}`
+      }
+      console.log(branchName)
+      const httpRes = await fetch(`http://localhost:8085/.netlify/git/github/ref/master/tags/READMD.md`, {method, headers})
+      const res = await httpRes.json()
+      console.log('^_^',res)
     }
   }
 })
