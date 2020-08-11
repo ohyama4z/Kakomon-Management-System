@@ -1,5 +1,9 @@
 <template>
-  <div></div>
+  <div>
+    <div class="uk-position-top uk-overlay uk-overlay-default uk-text-center">
+      誤ってログイン画面を閉じてしまった場合は、ブラウザを再読み込みしてください。(CTRL+R or F5)
+    </div>
+  </div>
 </template>
 
 <script>
@@ -11,16 +15,19 @@
         }
       },
 
-    mounted () {
-      console.log('あほ')
-      netlifyIdentity.open()
+    async mounted () {
+      await netlifyIdentity.open()
+      this.$store.commit('getCurrentUser')
+      
       netlifyIdentity.on('login', () => {
-        console.log('あふいえふぁえ')
-        this.$store.commit('getCurrentUser')
-        this.$store.dispatch('get')
-        // console.log('login', user)
-        // console.log('state', this.$store.state.currentUser)
-      });
+        this.$store.commit('updateLastPage')
+        this.$router.push(`/${this.$store.state.lastPage}`)
+      })
+
+      if (this.$store.state.currentUser != null) {
+        this.$store.commit('updateLastPage')
+        this.$router.push(`/${this.$store.state.lastPage}`)
+      }
     }
 }
 </script>
