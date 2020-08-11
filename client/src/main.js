@@ -33,6 +33,7 @@ netlifyIdentity.init({
 const store = new Vuex.Store({
   state: {
     currentUser: netlifyIdentity.currentUser(),
+    lastPage: 'upload',
     metadatas: {
       status: 'loaded',
       data: []
@@ -151,6 +152,11 @@ const store = new Vuex.Store({
       state.currentUser = user
     },
 
+    updateLastPage: (state) => {
+      state.lastPage = localStorage.getItem('lastPage')
+      console.log('うあ', state.lastPage)
+    },
+
     getBranches: (state, res) => {
       console.log(res)
       const branches = JSON.parse(JSON.stringify(res))
@@ -164,7 +170,6 @@ const store = new Vuex.Store({
   actions: {
     upload: async ({ commit }, newFile) => {
       commit('upload',newFile)
-      console.log('action: upload')
     },
 
     get: async ({commit, state}) => {

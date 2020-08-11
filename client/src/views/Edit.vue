@@ -130,6 +130,7 @@
 
 
 <script>
+  const netlifyIdentity = require('netlify-identity-widget')
   export default {
     name: 'edit',
 
@@ -148,6 +149,18 @@
     },
 
     async mounted () {
+      netlifyIdentity.on('logout', () => {
+        localStorage.setItem('lastPage', 'edit')
+        this.$store.commit('updateLastPage')
+        this.$router.push('/login')
+      })
+
+      if (this.$store.state.currentUser == null) {
+        localStorage.setItem('lastPage', 'edit')
+        this.$store.commit('updateLastPage')
+        this.$router.push('/login')
+      }
+
       await this.$store.dispatch('getMetadatas')
     },
 

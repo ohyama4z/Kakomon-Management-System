@@ -67,7 +67,7 @@
 
 
 <script>
-  // const netlifyIdentity = require('netlify-identity-widget')
+  const netlifyIdentity = require('netlify-identity-widget')
   export default {
     name: 'upload',
     data () {
@@ -77,7 +77,17 @@
       }
     },
     mounted() {
-      // netlifyIdentity.open()
+      netlifyIdentity.on('logout', () => {
+        localStorage.setItem('lastPage', 'upload')
+        this.$store.commit('updateLastPage')
+        this.$router.push('/login')
+      })
+
+      if (this.$store.state.currentUser == null) {
+        localStorage.setItem('lastPage', 'upload')
+        this.$store.commit('updateLastPage')
+        this.$router.push('/login')
+      }
     },
     computed: {
     },
