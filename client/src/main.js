@@ -5,6 +5,7 @@ import Vuikit from 'vuikit'
 import VuikitIcons from '@vuikit/icons'
 import router from './router.js'
 import VueSidebarMenu from 'vue-sidebar-menu'
+import PromisePool from 'native-promise-pool'
 
 
 import '@vuikit/theme'
@@ -38,6 +39,11 @@ const store = new Vuex.Store({
       status: 'loaded',
       data: []
     },
+
+    setCsvObj: {
+      status: 'unrequested',
+    },
+
     files: [
       {
         src: '001',
@@ -166,6 +172,11 @@ const store = new Vuex.Store({
         status: 'loaded',
         data: branches
       }
+    },
+
+    setCsvObj: (state, csvObj) => {
+      state.setCsvObj.status = 'loaded'
+      state.files = csvObj
     }
   },
 
@@ -199,34 +210,66 @@ const store = new Vuex.Store({
       commit('getBranches', res)
     },
 
-    getBranchData: async ({state}, branchName) => {
+    getBranchData: async ({ commit, state }, branchName) => {
+
+
       const token = state.currentUser.token.access_token
       const method = 'GET'
       const headers = {
         Authorization: `Bearer ${token}`
       }
       console.log(branchName)
-      const httpRes = await fetch(`http://localhost:8085/.netlify/git/github/contents/metadatas/unassorted.csv?ref=${branchName}`, {method, headers})
-      const res = await httpRes.json()
-      console.log('^_^',res)
-      const buffer = new Buffer(res.content, 'base64')
-      const csvData = buffer.toString('utf8')
-      // console.log(csvData)
-      const resultArray=convertCsvToArray(csvData);
-      console.log(resultArray)
-      console.log("hoge",resultArray)
+      const httpRes = await fetch(`http://localhost:8085/.netlify/git/github/contents/metadatas?ref=${branchName}`, {method, headers})
+      // const httpRes = await fetch(`http://localhost:8085/.netlify/git/github/contents/metadatas/unassorted.csv?ref=${branchName}`, {method, headers})
+      const resArr = await httpRes.json()
+      console.log('^_^',resArr)
 
+      let csvObj = {}
+      const pool = new PromisePool(50) // 50 tasks at once
+
+      resArr.forEach(res => {
+        pool.open(async () => {
+          const previousResStr = localStorage.getItem(`${branchName}_${res.name}`)
+          const previousRes = JSON.parse(previousResStr)
+          
+          if (previousRes == null || res.sha !== previousRes.sha) {
+            console.log('manukemanuke')
+            const httpResponse = await fetch(`http://localhost:8085/.netlify/git/github/git/blobs/${res.sha}?ref=${branchName}`, {method, headers})
+            const response = await httpResponse.json()
+            const strRes = JSON.stringify(response)
+            localStorage.setItem(`${branchName}_${res.name}`,strRes)
+          }
+
+          const curResStr = localStorage.getItem(`${branchName}_${res.name}`)
+          const curRes = JSON.parse(curResStr)
+          console.log('^^;', curRes)
+          const buffer = new Buffer(curRes.content, 'base64')
+          const csvData = buffer.toString('utf8')
+          // console.log(csvData)
+          const resultObj = convertCsvToObjArray(csvData);
+          // console.log(resultObj)
+          // console.log("hoge",resultObj)
+
+          csvObj = Object.assign(csvObj, resultObj)
+        })
+      })
+
+      
+      
+      console.log(':(', csvObj)
+
+      commit('setCsvObj', csvObj)
     }
   }
 })
 
-const convertCsvToArray = (csv) => {
+const convertCsvToObjArray = (csv) => {
   //header:CSV1行目の項目 :csvRows:項目に対する値
-  const [header, ...csvRows] = csv.split('\n').filter(function (row) {
+  const [header, ...csvRows] = csv.split('\n').filter((row) => {
     if (row !== '') {
       return row;
     }
-  }).map(function (row) {
+  }).map((row) => {
     return row.split(',');
   });
 
@@ -247,15 +290,12 @@ const convertCsvToArray = (csv) => {
     return arrayInKeyAndValue;
   });
 
-  console.log('tmp', tmpResultArray)
-
   resultArray = tmpResultArray.reduce((previous, current) => {
     previous[current.src] = current;
     return previous;
   }, {});
   return resultArray;
 }
-
 
 new Vue({
   render: h => h(App),
