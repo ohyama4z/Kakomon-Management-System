@@ -206,7 +206,7 @@ const store = new Vuex.Store({
         Authorization: `Bearer ${token}`
       }
       console.log(branchName)
-      const httpRes = await fetch(`http://localhost:8085/.netlify/git/github/ref/master/tags/READMD.md`, {method, headers})
+      const httpRes = await fetch(`http://localhost:8085/.netlify/git/github/contents/metadatas?ref=${branchName}`, {method, headers})
       const res = await httpRes.json()
       console.log('^_^',res)
     }

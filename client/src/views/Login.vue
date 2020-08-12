@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="uk-position-top uk-overlay uk-overlay-default uk-text-center">
+    <div class="uk-position-top uk-text-center">
       誤ってログイン画面を閉じてしまった場合は、ブラウザを再読み込みしてください。(CTRL+R or F5)
     </div>
   </div>
