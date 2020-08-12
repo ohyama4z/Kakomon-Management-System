@@ -37,7 +37,6 @@
 
     <div class="uk-text-center@s uk-margin" v-if="!branchName">
       <div>ブランチ名を入力してください</div>
-      <div>※過去問アップロードフォームの使い方がわからない場合は、README.mdを参照してください</div>
     </div>
 
     <div class="uk-flex uk-flex-center uk-margin">
@@ -49,7 +48,15 @@
       >アップロード</vk-button>
     </div>
 
-    <div class="uk-position-medium uk-position-top-right uk-overlay uk-overlay-default">
+    <div class="uk-position-bottom uk-overlay uk-overlay-default uk-text-center">
+      ※過去問アップロードフォームの使い方がわからない場合は、
+      <a class="uk-link-toggle" href="https://github.com/asann3/Kakomon-Management-System/blob/master/client/manuals/README.md" target="_blank">
+        README.md
+      </a>
+      を参照してください。
+    </div>
+
+    <div class="uk-position-medium uk-position-bottom-right uk-overlay uk-overlay-default">
       <button class="uk-button uk-button-link" v-on:click="toEdit">編集画面へ
         <vk-icon icon="chevron-right"></vk-icon>
       </button>
@@ -60,7 +67,7 @@
 
 
 <script>
-  // const netlifyIdentity = require('netlify-identity-widget')
+  const netlifyIdentity = require('netlify-identity-widget')
   export default {
     name: 'upload',
     data () {
@@ -70,7 +77,17 @@
       }
     },
     mounted() {
-      // netlifyIdentity.open()
+      netlifyIdentity.on('logout', () => {
+        localStorage.setItem('lastPage', 'upload')
+        this.$store.commit('updateLastPage')
+        this.$router.push('/login')
+      })
+
+      if (this.$store.state.currentUser == null) {
+        localStorage.setItem('lastPage', 'upload')
+        this.$store.commit('updateLastPage')
+        this.$router.push('/login')
+      }
     },
     computed: {
     },

@@ -26,7 +26,7 @@ KMS(過去問マネージメントシステム)は、現在 [Googleドライブ]
 
     さたけ ([@satakenkoki](https://twitter.com/satakenkoki))
 
-    e-mail : `email`
+    email : `email`
 
 - KMSを作った人
 
