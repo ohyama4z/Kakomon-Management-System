@@ -146,6 +146,16 @@ const store = new Vuex.Store({
         fileName: 'file010'
       }
     ],
+    img: [
+      {
+        src: '001',
+        img: 'blob:http://localhost:8082/9a582659-277b-4242-8e12-264754e0ae6c'
+      },
+      {
+        src: '002',
+        img: 'blob:http://localhost:8082/b230aec2-fe23-461f-84ad-5a21945f8ea1'
+      }
+    ]
   },
 
   mutations: {

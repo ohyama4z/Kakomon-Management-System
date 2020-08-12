@@ -3,13 +3,13 @@
     <div></div>
     <h1 class="uk-text-center@s">過去問編集フォーム</h1>
 
-    <sidebar-menu :menu="sidebarMenu" />
+    <sidebar-menu :menu="sidebarMenu" @item-click="onItemClick" />
 
     <div class="uk-position-medium uk-position-top-right uk-overlay uk-overlay-default">
       <div class="uk-text-center@s uk-margin">編集するブランチを選択してください。</div>
 
       <div class="uk-margin uk-flex uk-flex-center">
-        <select class="uk-select uk-form-width-medium" v-model="selectedBranch" @change="getBranchData()">
+        <select class="uk-select uk-form-width-medium" v-model="selectedBranch" @change="getBranchData">
           <option disabled value="">ブランチを選択</option>
           <option>master</option>
           <option 
@@ -96,6 +96,11 @@
       >編集をコミット</vk-button>
     </div>
 
+    <div class="uk-text-center@s uk-margin" v-for="file in selectedFiles" v-bind:key="file.title">
+      {{ file.title }} 
+      <button @click="trashFile(file)">削除</button>
+    </div>
+
     <div class="uk-position-bottom uk-overlay uk-overlay-default uk-text-center">
       ※過去問編集フォームの使い方がわからない場合は、
       <a class="uk-link-toggle" href="https://github.com/asann3/Kakomon-Management-System/blob/master/client/manuals/README.md" target="_blank">
@@ -127,7 +132,8 @@
         contentType: '',
         author: '',
         selectedBranch: 'master',
-        editType: ''
+        editType: '',
+        selectedFiles: []
       }
     },
 
@@ -215,7 +221,8 @@
         if (keyNum <= 1) {
           return intermediateFiles.map(file => ({
             title: file.fileName,
-            icon: 'fa fa-file'
+            icon: 'fa fa-file',
+            data: file
           }))
         }
         return Object.entries(intermediateFiles).reduce((previous, [key, value]) => {
@@ -230,6 +237,22 @@
 
       getBranchData () {
         this.$store.dispatch('getBranchData', this.selectedBranch)
+      },
+
+      onItemClick (e, item) {
+        // データツリーの末端要素をクリックしたときに処理を行う
+        if (item.child == null) {
+          console.log(item.data)
+          const sameItem = this.selectedFiles.find(file => file.title === item.title)
+          if (sameItem == null) {
+            this.selectedFiles.push(item)
+          }
+        }
+      },
+
+      trashFile (file) {
+        const index = this.selectedFiles.findIndex(item => item.title === file.title)
+        this.selectedFiles.splice(index, 1)
       }
     },
   }
