@@ -206,12 +206,56 @@ const store = new Vuex.Store({
         Authorization: `Bearer ${token}`
       }
       console.log(branchName)
-      const httpRes = await fetch(`http://localhost:8085/.netlify/git/github/contents/metadatas?ref=${branchName}`, {method, headers})
+      const httpRes = await fetch(`http://localhost:8085/.netlify/git/github/contents/metadatas/unassorted.csv?ref=${branchName}`, {method, headers})
       const res = await httpRes.json()
       console.log('^_^',res)
+      const buffer = new Buffer(res.content, 'base64')
+      const csvData = buffer.toString('utf8')
+      // console.log(csvData)
+      const resultArray=convertCsvToArray(csvData);
+      console.log(resultArray)
+      console.log("hoge",resultArray)
+
     }
   }
 })
+
+const convertCsvToArray = (csv) => {
+  //header:CSV1行目の項目 :csvRows:項目に対する値
+  const [header, ...csvRows] = csv.split('\n').filter(function (row) {
+    if (row !== '') {
+      return row;
+    }
+  }).map(function (row) {
+    return row.split(',');
+  });
+
+  let arrayInKeyAndValue;
+  let resultArray;
+  let tmpResultArray;
+
+  tmpResultArray = csvRows.map((r) => {
+    arrayInKeyAndValue = header.map((_, index) => {
+      //ヘッダーの空白文字を削除。keyとvalueに値をセット
+      return ({ key: header[index].replace(/\s+/g, ''), value: r[index] });
+    });
+    arrayInKeyAndValue = arrayInKeyAndValue.reduce((previous, current) => {
+      //{key: "物", value: "MacBook", メーカー: "apple", 値段: "3000"}を作成
+      previous[current.key] = current.value;
+      return previous;
+    }, {});
+    return arrayInKeyAndValue;
+  });
+
+  console.log('tmp', tmpResultArray)
+
+  resultArray = tmpResultArray.reduce((previous, current) => {
+    previous[current.src] = current;
+    return previous;
+  }, {});
+  return resultArray;
+}
+
 
 new Vue({
   render: h => h(App),
