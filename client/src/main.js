@@ -159,8 +159,24 @@ const store = new Vuex.Store({
   },
 
   mutations: {
+    setStatusLoading: (state, req) => {
+      req.status = 'loading'
+    },
     upload: (state, newFile) => {
       state.files.push(newFile)
+    },
+    setServerSideLanguage: (state, languageName) => {
+      state.serverSideLanguage = {
+        status: 'loaded',
+        name: languageName,
+      }
+    },
+
+    setBranches: (state, data) => {
+      state.metadata = {
+        status: 'loaded',
+        branches : data,
+      }
     },
 
     getCurrentUser: (state) => {
@@ -193,6 +209,8 @@ const store = new Vuex.Store({
   actions: {
     upload: async ({ commit }, newFile) => {
       commit('upload',newFile)
+
+      console.log('action: upload')
     },
 
     get: async ({commit, state}) => {
@@ -221,7 +239,7 @@ const store = new Vuex.Store({
     },
 
     getBranchData: async ({ commit, state }, branchName) => {
-
+      commit('setStatusLoading', state.setCsvObj)
 
       const token = state.currentUser.token.access_token
       const method = 'GET'
