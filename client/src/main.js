@@ -184,7 +184,7 @@ const store = new Vuex.Store({
       const lastPageInStrage = localStorage.getItem('lastPage')
       const lastPage = lastPageInStrage == null ? 'upload' : lastPageInStrage
       state.lastPage = lastPage
-      console.log('next page after loging in', state.lastPage)
+      console.log('the next page after loging in =>',state.lastPage)
     },
 
     getBranches: (state, res) => {

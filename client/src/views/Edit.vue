@@ -114,9 +114,16 @@
     </div>
 
     <div class="uk-position-medium uk-position-bottom-right uk-overlay uk-overlay-default" v-if="!isLoading">
-      <button class="uk-button uk-button-link" v-on:click="toUpload">アップロード画面へ
+      <div>
+        <button class="uk-button uk-button-link" v-on:click="toUpload">アップロード画面へ
+          <vk-icon icon="chevron-right"></vk-icon>
+        </button>
+      </div>
+      <div>
+        <button class="uk-button uk-button-link" v-on:click="toLogin">ログイン画面へ
         <vk-icon icon="chevron-right"></vk-icon>
-      </button>
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -193,6 +200,13 @@
       toUpload () {
         this.$router.push('upload')
       },
+
+      toLogin () {
+        localStorage.setItem('lastPage', 'edit')
+        this.$store.commit('updateLastPage')
+        this.$router.push('/login')
+      },
+
 
       intermediateFiles () {
         return this.$store.state.sampleFiles.reduce((previous, current) => {

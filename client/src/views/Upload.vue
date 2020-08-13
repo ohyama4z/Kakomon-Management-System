@@ -57,9 +57,16 @@
     </div>
 
     <div class="uk-position-medium uk-position-bottom-right uk-overlay uk-overlay-default">
-      <button class="uk-button uk-button-link" v-on:click="toEdit">編集画面へ
+      <div>
+        <button class="uk-button uk-button-link" v-on:click="toEdit">編集画面へ
+          <vk-icon icon="chevron-right"></vk-icon>
+        </button>
+      </div>
+      <div>
+        <button class="uk-button uk-button-link" v-on:click="toLogin">ログイン画面へ
         <vk-icon icon="chevron-right"></vk-icon>
-      </button>
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -94,6 +101,12 @@
     methods: {
       toEdit () {
         this.$router.push('edit')
+      },
+
+      toLogin () {
+        localStorage.setItem('lastPage', 'upload')
+        this.$store.commit('updateLastPage')
+        this.$router.push('/login')
       },
 
       async uploadNewFile () {
