@@ -1,6 +1,5 @@
 mysql-data/
 .env
 node_modules
-test.js
 __pycache__
 

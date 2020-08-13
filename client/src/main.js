@@ -36,15 +36,15 @@ const store = new Vuex.Store({
     currentUser: netlifyIdentity.currentUser(),
     lastPage: 'upload',
     metadatas: {
-      status: 'loaded',
+      status: 'unrequested',
       data: []
     },
 
     setCsvObj: {
       status: 'unrequested',
     },
-
-    files: [
+    files: [],
+    sampleFiles: [
       {
         src: '001',
         subject: '数学',
@@ -162,14 +162,9 @@ const store = new Vuex.Store({
     setStatusLoading: (state, req) => {
       req.status = 'loading'
     },
+
     upload: (state, newFile) => {
       state.files.push(newFile)
-    },
-    setServerSideLanguage: (state, languageName) => {
-      state.serverSideLanguage = {
-        status: 'loaded',
-        name: languageName,
-      }
     },
 
     setBranches: (state, data) => {
@@ -188,7 +183,7 @@ const store = new Vuex.Store({
       const lastPageInStrage = localStorage.getItem('lastPage')
       const lastPage = lastPageInStrage == null ? 'upload' : lastPageInStrage
       state.lastPage = lastPage
-      console.log('うあ', state.lastPage)
+      console.log('next page after loging in', state.lastPage)
     },
 
     getBranches: (state, res) => {
@@ -198,6 +193,10 @@ const store = new Vuex.Store({
         status: 'loaded',
         data: branches
       }
+    },
+
+    branchDataOnGithub: (state, data) =>{
+      state[data.branchName][data.fileName] = data.branchData
     },
 
     setCsvObj: (state, csvObj) => {
@@ -248,42 +247,44 @@ const store = new Vuex.Store({
       }
       console.log(branchName)
       const httpRes = await fetch(`http://localhost:8085/.netlify/git/github/contents/metadatas?ref=${branchName}`, {method, headers})
-      // const httpRes = await fetch(`http://localhost:8085/.netlify/git/github/contents/metadatas/unassorted.csv?ref=${branchName}`, {method, headers})
       const resArr = await httpRes.json()
-      console.log('^_^',resArr)
+      // console.log('^_^',resArr)
 
       let csvObj = {}
       const pool = new PromisePool(50) // 50 tasks at once
+      localStorage.removeItem(`${branchName}_lastItem`)
 
       resArr.forEach(res => {
         pool.open(async () => {
-          const previousResStr = localStorage.getItem(`${branchName}_${res.name}`)
-          const previousRes = JSON.parse(previousResStr)
+          // const previousResStr = localStorage.getItem(`${branchName}_${res.name}`)
+          // const previousRes = JSON.parse(previousResStr)
+          const previousRes = state[`${branchName}`][`${res.name}`]
           
           if (previousRes == null || res.sha !== previousRes.sha) {
-            console.log('manukemanuke')
             const httpResponse = await fetch(`http://localhost:8085/.netlify/git/github/git/blobs/${res.sha}?ref=${branchName}`, {method, headers})
             const response = await httpResponse.json()
-            const strRes = JSON.stringify(response)
-            localStorage.setItem(`${branchName}_${res.name}`,strRes)
+            // const strRes = JSON.stringify(response)
+            // localStorage.setItem(`${branchName}_${res.name}`,strRes)
+            commit('branchDataOnGithub' ,{
+              branchData: response,
+              branchName,
+              fileName: res.name
+            })
           }
 
-          const curResStr = localStorage.getItem(`${branchName}_${res.name}`)
-          const curRes = JSON.parse(curResStr)
-          console.log('^^;', curRes)
+          // const curResStr = localStorage.getItem(`${branchName}_${res.name}`)
+          // const curRes = JSON.parse(curResStr)
+          const curRes = state[`${branchName}`][`${res.name}`]
+
           const buffer = new Buffer(curRes.content, 'base64')
           const csvData = buffer.toString('utf8')
-          // console.log(csvData)
-          const resultObj = convertCsvToObjArray(csvData);
-          // console.log(resultObj)
-          // console.log("hoge",resultObj)
+          const resultObj = convertCsvToObjArray(csvData)
 
           csvObj = Object.assign(csvObj, resultObj)
         })
       })
+      // localStorage.setItem(`${branchName}_lastItem`, 'set')
 
-      
-      
       console.log(':(', csvObj)
 
       commit('setCsvObj', csvObj)
@@ -324,6 +325,17 @@ const convertCsvToObjArray = (csv) => {
   }, {});
   return resultArray;
 }
+
+// const asyncLocalStorage = {
+//   setItem: async function (key, value) {
+//       await null;
+//       return localStorage.setItem(key, value);
+//   },
+//   getItem: async function (key) {
+//       await null;
+//       return localStorage.getItem(key);
+//   }
+// };
 
 new Vue({
   render: h => h(App),
