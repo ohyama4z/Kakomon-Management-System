@@ -42,6 +42,7 @@ const store = new Vuex.Store({
 
     setCsvObj: {
       status: 'unrequested',
+      unparsedData: {}
     },
     files: [],
     sampleFiles: [
@@ -196,7 +197,10 @@ const store = new Vuex.Store({
     },
 
     branchDataOnGithub: (state, data) =>{
-      state[data.branchName][data.fileName] = data.branchData
+      if (state.setCsvObj.unparsedData[data.branchName] == null){
+        state.setCsvObj.unparsedData[data.branchName] = {}
+      }
+      state.setCsvObj.unparsedData[data.branchName][data.fileName] = data.branchData
     },
 
     setCsvObj: (state, csvObj) => {
@@ -212,18 +216,18 @@ const store = new Vuex.Store({
       console.log('action: upload')
     },
 
-    get: async ({commit, state}) => {
-      const token = state.currentUser.token.access_token
-      const method = 'GET'
-      const headers = {
-        Authorization: `Bearer ${token}`
-      }
-      const httpRes = await fetch('http://localhost:8085/.netlify/git/github/branches', {method, headers})
-      const res = await httpRes.json()
-      console.log('ahoahoa', httpRes, res)
+    // get: async ({commit, state}) => {
+    //   const token = state.currentUser.token.access_token
+    //   const method = 'GET'
+    //   const headers = {
+    //     Authorization: `Bearer ${token}`
+    //   }
+    //   const httpRes = await fetch('http://localhost:8085/.netlify/git/github/branches', {method, headers})
+    //   const res = await httpRes.json()
+    //   console.log('ahoahoa', httpRes, res)
 
-      commit('getBranches', res)
-    },
+    //   commit('getBranches', res)
+    // },
 
     getMetadatas: async ({commit, state}) => {
       const token = state.currentUser.token.access_token
@@ -252,38 +256,39 @@ const store = new Vuex.Store({
 
       let csvObj = {}
       const pool = new PromisePool(50) // 50 tasks at once
-      localStorage.removeItem(`${branchName}_lastItem`)
 
-      resArr.forEach(res => {
-        pool.open(async () => {
-          // const previousResStr = localStorage.getItem(`${branchName}_${res.name}`)
-          // const previousRes = JSON.parse(previousResStr)
-          const previousRes = state[`${branchName}`][`${res.name}`]
-          
-          if (previousRes == null || res.sha !== previousRes.sha) {
-            const httpResponse = await fetch(`http://localhost:8085/.netlify/git/github/git/blobs/${res.sha}?ref=${branchName}`, {method, headers})
-            const response = await httpResponse.json()
-            // const strRes = JSON.stringify(response)
-            // localStorage.setItem(`${branchName}_${res.name}`,strRes)
-            commit('branchDataOnGithub' ,{
-              branchData: response,
-              branchName,
-              fileName: res.name
-            })
-          }
+      await Promise.all([
+        resArr.forEach(res => {
+          pool.open(async () => {
+            // const previousResStr = localStorage.getItem(`${branchName}_${res.name}`)
+            // const previousRes = JSON.parse(previousResStr)
+            const previousRes = state.setCsvObj.unparsedData[`${branchName}`]?.[`${res.name}`]
+            // state.setCsvObj.unparsedData[`${branchName}`]?.[`${res.name}`]の ?. の部分がわからないときはOptional Chaningでググれ
+            
+            if (previousRes == null || res.sha !== previousRes.sha) {
+              const httpResponse = await fetch(`http://localhost:8085/.netlify/git/github/git/blobs/${res.sha}?ref=${branchName}`, {method, headers})
+              const response = await httpResponse.json()
+              // const strRes = JSON.stringify(response)
+              // localStorage.setItem(`${branchName}_${res.name}`,strRes)
+              commit('branchDataOnGithub' ,{
+                branchData: response,
+                branchName,
+                fileName: res.name
+              })
+            }
 
-          // const curResStr = localStorage.getItem(`${branchName}_${res.name}`)
-          // const curRes = JSON.parse(curResStr)
-          const curRes = state[`${branchName}`][`${res.name}`]
+            // const curResStr = localStorage.getItem(`${branchName}_${res.name}`)
+            // const curRes = JSON.parse(curResStr)
+            const curRes = state.setCsvObj.unparsedData[`${branchName}`][`${res.name}`]
 
-          const buffer = new Buffer(curRes.content, 'base64')
-          const csvData = buffer.toString('utf8')
-          const resultObj = convertCsvToObjArray(csvData)
+            const buffer = new Buffer(curRes.content, 'base64')
+            const csvData = buffer.toString('utf8')
+            const resultObj = convertCsvToObjArray(csvData)
 
-          csvObj = Object.assign(csvObj, resultObj)
+            csvObj = Object.assign(csvObj, resultObj)
+          })
         })
-      })
-      // localStorage.setItem(`${branchName}_lastItem`, 'set')
+      ])
 
       console.log(':(', csvObj)
 
@@ -325,17 +330,6 @@ const convertCsvToObjArray = (csv) => {
   }, {});
   return resultArray;
 }
-
-// const asyncLocalStorage = {
-//   setItem: async function (key, value) {
-//       await null;
-//       return localStorage.setItem(key, value);
-//   },
-//   getItem: async function (key) {
-//       await null;
-//       return localStorage.getItem(key);
-//   }
-// };
 
 new Vue({
   render: h => h(App),

@@ -164,16 +164,12 @@
       },
 
       isLoading () {
-        // console.log('status',this.$store.state.setCsvObj.status)
-        // console.log('unassorted',localStorage.getItem('master_unassorted.csv'))
         const checkLoading = (status) => {
           return status == 'loading'
         }
 
-        const setCsvObjLoaded = checkLoading(this.$store.state.setCsvObj.status) && localStorage.getItem(`${this.selectedBranch}_lastItem`) == 'set'
-
-        // console.log(localStorage.getItem(`${this.selectedBranch}_lastItem`))
-        return checkLoading(this.$store.state.metadatas.status) || !setCsvObjLoaded
+        return checkLoading(this.$store.state.metadatas.status) || checkLoading(this.$store.state.setCsvObj.status)
+        // return false
       },
 
       sidebarMenu () {
