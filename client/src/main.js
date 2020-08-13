@@ -96,66 +96,6 @@ const store = new Vuex.Store({
         author: 'oy',
         fileName: 'file005'
       },
-      {
-        src: '006',
-        subject: '数学',
-        year: 2018,
-        toolType: '勉強用',
-        period: '後期中間',
-        contentType: 'ノート',
-        author: 'oy',
-        fileName: 'file006'
-      },
-      {
-        src: '007',
-        subject: '英語',
-        year: 2018,
-        toolType: '勉強用',
-        period: '後期中間',
-        contentType: 'ノート',
-        author: 'sk',
-        fileName: 'file007'
-      },
-      {
-        src: '008',
-        subject: '数学',
-        year: 2019,
-        toolType: 'テスト',
-        period: '前期中間',
-        contentType: '問題',
-        author: '藤島',
-        fileName: 'file008'
-      },
-      {
-        src: '009',
-        subject: '数学',
-        year: 2019,
-        toolType: '勉強用',
-        period: '前期定期',
-        contentType: '対策プリント',
-        author: '藤島',
-        fileName: 'file009'
-      },
-      {
-        src: '010',
-        subject: '英語',
-        year: 2018,
-        toolType: '勉強用',
-        period: '後期中間',
-        contentType: '対策プリント',
-        author: 'oy',
-        fileName: 'file010'
-      }
-    ],
-    img: [
-      {
-        src: '001',
-        img: 'blob:http://localhost:8082/9a582659-277b-4242-8e12-264754e0ae6c'
-      },
-      {
-        src: '002',
-        img: 'blob:http://localhost:8082/b230aec2-fe23-461f-84ad-5a21945f8ea1'
-      }
     ]
   },
 
@@ -216,19 +156,6 @@ const store = new Vuex.Store({
       console.log('action: upload')
     },
 
-    // get: async ({commit, state}) => {
-    //   const token = state.currentUser.token.access_token
-    //   const method = 'GET'
-    //   const headers = {
-    //     Authorization: `Bearer ${token}`
-    //   }
-    //   const httpRes = await fetch('http://localhost:8085/.netlify/git/github/branches', {method, headers})
-    //   const res = await httpRes.json()
-    //   console.log('ahoahoa', httpRes, res)
-
-    //   commit('getBranches', res)
-    // },
-
     getMetadatas: async ({commit, state}) => {
       const token = state.currentUser.token.access_token
       const method = 'GET'
@@ -260,16 +187,13 @@ const store = new Vuex.Store({
       await Promise.all([
         resArr.forEach(res => {
           pool.open(async () => {
-            // const previousResStr = localStorage.getItem(`${branchName}_${res.name}`)
-            // const previousRes = JSON.parse(previousResStr)
             const previousRes = state.setCsvObj.unparsedData[`${branchName}`]?.[`${res.name}`]
-            // state.setCsvObj.unparsedData[`${branchName}`]?.[`${res.name}`]の ?. の部分がわからないときはOptional Chaningでググれ
+            // state.setCsvObj.unparsedData[`${branchName}`]?.[`${res.name}`]の
+            // '?.'の部分がわからないときはOptional Chaningでググれ
             
             if (previousRes == null || res.sha !== previousRes.sha) {
               const httpResponse = await fetch(`http://localhost:8085/.netlify/git/github/git/blobs/${res.sha}?ref=${branchName}`, {method, headers})
               const response = await httpResponse.json()
-              // const strRes = JSON.stringify(response)
-              // localStorage.setItem(`${branchName}_${res.name}`,strRes)
               commit('branchDataOnGithub' ,{
                 branchData: response,
                 branchName,
@@ -277,8 +201,6 @@ const store = new Vuex.Store({
               })
             }
 
-            // const curResStr = localStorage.getItem(`${branchName}_${res.name}`)
-            // const curRes = JSON.parse(curResStr)
             const curRes = state.setCsvObj.unparsedData[`${branchName}`][`${res.name}`]
 
             const buffer = new Buffer(curRes.content, 'base64')

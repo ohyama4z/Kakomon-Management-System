@@ -113,8 +113,8 @@
       を参照してください。
     </div>
 
-    <div class="uk-position-medium uk-position-bottom-right uk-overlay uk-overlay-default" v-if="!isLoading">
-      <div>
+    <div class="uk-position-medium uk-position-bottom-right uk-overlay uk-overlay-default">
+      <div v-if="!isLoading">
         <button class="uk-button uk-button-link" v-on:click="toUpload">アップロード画面へ
           <vk-icon icon="chevron-right"></vk-icon>
         </button>
@@ -187,6 +187,7 @@
         }]
 
         //this.getMenuStructure の第2引数は period, subject, toolType, year, contentType, fileNameで計6
+        console.log('ｈ',this.intermediateFiles())
         const dataTree = this.getMenuStructure(this.intermediateFiles(), 6)
         return header.concat(dataTree)
       },
@@ -209,41 +210,51 @@
 
 
       intermediateFiles () {
-        return this.$store.state.sampleFiles.reduce((previous, current) => {
+        const files = this.$store.state.files 
+        return Object.keys(files).reduce((previous, key) => {
           if (previous == null) {
             previous = {}
           }
 
-          if (previous[current.period] == null) {
-            previous[current.period] = {}
+          if (previous[files[key].period] == null) {
+            previous[files[key].period] = {}
           }
-          if (previous[current.period][current.subject] == null) {
-            previous[current.period][current.subject] = {}
-          }
-
-          if (previous[current.period][current.subject][current.toolType] == null) {
-            previous[current.period][current.subject][current.toolType] = {}
+          if (previous[files[key].period][files[key].subj] == null) {
+            previous[files[key].period][files[key].subj] = {}
           }
 
-          if (previous[current.period][current.subject][current.toolType][current.year] == null) {
-            previous[current.period][current.subject][current.toolType][current.year] = {}
+          if (previous[files[key].period][files[key].subj][files[key].tool_type] == null) {
+            previous[files[key].period][files[key].subj][files[key].tool_type] = {}
           }
 
-          if (previous[current.period][current.subject][current.toolType][current.year][current.contentType] == null) {
-            previous[current.period][current.subject][current.toolType][current.year][current.contentType] = []
+          if (previous[files[key].period][files[key].subj][files[key].tool_type][files[key].year] == null) {
+            previous[files[key].period][files[key].subj][files[key].tool_type][files[key].year] = {}
           }
 
-          previous[current.period][current.subject][current.toolType][current.year][current.contentType].push(current)
+          if (previous[files[key].period][files[key].subj][files[key].tool_type][files[key].year][files[key].content_type] == null) {
+            previous[files[key].period][files[key].subj][files[key].tool_type][files[key].year][files[key].content_type] = []
+          }
+
+          previous[files[key].period][files[key].subj][files[key].tool_type][files[key].year][files[key].content_type].push(files[key])
 
           return previous
         }, {})
       },
 
       getMenuStructure (intermediateFiles, keyNum) {
+        if (intermediateFiles == null) {
+          console.log('ぬす')
+          return {
+            title: 'あほあほまぬけ',
+            icon: 'fa fa-user',
+          }
+        }
+
+
         const icon = 'fa fa-folder'
         if (keyNum <= 1) {
           return intermediateFiles.map(file => ({
-            title: file.fileName,
+            title: file.src,
             icon: 'fas fa-file',
             data: file
           }))
@@ -260,6 +271,8 @@
 
       getBranchData () {
         this.$store.dispatch('getBranchData', this.selectedBranch)
+        console.log('aa',this.intermediateFiles())
+        console.log('uu',this.getMenuStructure())
       },
 
       onItemClick (e, item) {
