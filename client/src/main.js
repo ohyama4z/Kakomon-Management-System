@@ -237,7 +237,7 @@ const store = new Vuex.Store({
       commit('getBranches', res)
     },
 
-    getBranchData: async ({ commit, state }, branchName) => {
+    getBranchData: async ({ commit, state }, branchName, sendObj) => {
       commit('setStatusLoading', state.setCsvObj)
 
       const token = state.currentUser.token.access_token
@@ -256,9 +256,9 @@ const store = new Vuex.Store({
 
       resArr.forEach(res => {
         pool.open(async () => {
-          // const previousResStr = localStorage.getItem(`${branchName}_${res.name}`)
-          // const previousRes = JSON.parse(previousResStr)
-          const previousRes = state[`${branchName}`][`${res.name}`]
+          const previousResStr = localStorage.getItem(`${branchName}_${res.name}`)
+          const previousRes = JSON.parse(previousResStr)
+          // const previousRes = state[`${branchName}`][`${res.name}`]
           
           if (previousRes == null || res.sha !== previousRes.sha) {
             const httpResponse = await fetch(`http://localhost:8085/.netlify/git/github/git/blobs/${res.sha}?ref=${branchName}`, {method, headers})
@@ -272,9 +272,9 @@ const store = new Vuex.Store({
             })
           }
 
-          // const curResStr = localStorage.getItem(`${branchName}_${res.name}`)
-          // const curRes = JSON.parse(curResStr)
-          const curRes = state[`${branchName}`][`${res.name}`]
+          const curResStr = localStorage.getItem(`${branchName}_${res.name}`)
+          const curRes = JSON.parse(curResStr)
+          // const curRes = state[`${branchName}`][`${res.name}`]
 
           const buffer = new Buffer(curRes.content, 'base64')
           const csvData = buffer.toString('utf8')
@@ -285,12 +285,64 @@ const store = new Vuex.Store({
       })
       // localStorage.setItem(`${branchName}_lastItem`, 'set')
 
+      
+
+
+    // commitCSV: async ({ state }, sendObj) => {
+      // const token = state.currentUser.token.access_token
+      const postmethod = 'GET'
+      // const patchmethod = 'POST'
+      // const headers = {
+      //   Authorization: `Bearer ${token}`
+      // }
+      const postcontents = {
+          content: 'dGVzdCBjb21taXQ=',
+          encoding: 'base64'
+        };
+      const bodys = JSON.stringify(postcontents)
+      console.log("type", typeof(bodys), postcontents, bodys, typeof(postcontents))
+      console.log('refarr', resArr[0].sha) //filehash
+      const branchref = await fetch(`http://localhost:8085/.netlify/git/github/git/refs/heads/${branchName}`, {postmethod, headers})
+      const parseref = await branchref.json()
+      console.log('branch毎のハッシュ',`${branchName}` , parseref.object.sha)
+      const commithttpRes = await fetch(`http://localhost:8085/.netlify/git/github/commits/${parseref.object.sha}`, {postmethod, headers})
+      const commitres = await commithttpRes.json()
+      console.log(':p~', commitres, sendObj)
+      console.log('headerrrr', headers)
+      console.log(bodys)
+      const refhttpRes = await fetch('http://localhost:8085/.netlify/git/github/git/blobs', {method: 'POST', headers, body: bodys}); // { headerss: {'Content-Type': 'application/json'}}
+      const refres = await refhttpRes.json()
+      console.log(':q~', refres)
+
+      const treesbody = {
+        base_tree: commitres.tree.sha,
+        tree: [{
+            path: "hoge.txt",
+            mode: "わからないのであとで調べる",
+            type: "blob",
+            sha: refres.sha
+          }
+          // ,
+          // {
+          //   path: ""
+          // }
+        ]
+      }
+      const branchhttpRes = await fetch('http://localhost:8085/.netlify/git/github/git/trees', {method: 'GET', headers, body: treesbody});
+      const branchres = await branchhttpRes.json()
+      console.log("branchesres", branchres)
+
       console.log(':(', csvObj)
 
       commit('setCsvObj', csvObj)
     }
   }
 })
+
+// blobs //github/git/blobs post    content:ファイルの文字列(base64エンコードしたものとか) encoding:base64(utf-8という選択もある) request payload  
+// master //github/branches/master  get
+// trees //github/git/trees post    base_tree(masterから返ってくるcommithash commit.sha) tree(配列) {path: ,mode: , sha: blobs叩いた時に返ってくるsha, type: "blob"}
+// commit //github/git/commits    author:{name: , email: , date: } parents: [master叩いた時に返ってくるcommit.sha] tree: [trees叩いた時に返ってくるsha]
 
 const convertCsvToObjArray = (csv) => {
   //header:CSV1行目の項目 :csvRows:項目に対する値
