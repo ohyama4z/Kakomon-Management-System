@@ -1,6 +1,8 @@
 <template>
   <div class="container">
-    <sidebar-menu :menu="sidebarMenu" />
+    <button v-on:click="updateState()"> updateState </button>
+    <div v-if="status === 'loading'">NOW LOADING</div>
+    <div v-else>{{state}}</div>
   </div>
 </template>
  
