@@ -290,37 +290,49 @@ const store = new Vuex.Store({
 
     // commitCSV: async ({ state }, sendObj) => {
       // const token = state.currentUser.token.access_token
-      const postmethod = 'GET'
+      const getmethod = 'GET'
+      // const postmethod = 'POST'
       // const patchmethod = 'POST'
       // const headers = {
       //   Authorization: `Bearer ${token}`
       // }
-      const postcontents = {
-          content: 'dGVzdCBjb21taXQ=',
-          encoding: 'base64'
-        };
-      const bodys = JSON.stringify(postcontents)
-      console.log("type", typeof(bodys), postcontents, bodys, typeof(postcontents))
+      
       console.log('refarr', resArr[0].sha) //filehash
-      const branchref = await fetch(`http://localhost:8085/.netlify/git/github/git/refs/heads/${branchName}`, {postmethod, headers})
+      
+      // refの取得
+      const branchref = await fetch(`http://localhost:8085/.netlify/git/github/git/refs/heads/${branchName}`, {getmethod, headers})
       const parseref = await branchref.json()
       console.log('branch毎のハッシュ',`${branchName}` , parseref.object.sha)
-      const commithttpRes = await fetch(`http://localhost:8085/.netlify/git/github/commits/${parseref.object.sha}`, {postmethod, headers})
+      
+      // commitの取得
+      const commithttpRes = await fetch(`http://localhost:8085/.netlify/git/github/commits/${parseref.object.sha}`, {getmethod, headers})
       const commitres = await commithttpRes.json()
       console.log(':p~', commitres, sendObj)
-      console.log('headerrrr', headers)
-      console.log(bodys)
-      const refhttpRes = await fetch('http://localhost:8085/.netlify/git/github/git/blobs', {method: 'POST', headers, body: bodys}); // { headerss: {'Content-Type': 'application/json'}}
+
+      const postcontents = {
+        content: 'dGVzdCBjb21taXQ=',
+        encoding: 'base64'
+      };
+      const bodys = JSON.stringify(postcontents)
+      // blobの作成
+      const refhttpRes = await fetch(`http://localhost:8085/.netlify/git/github/git/blobs?ref=${branchName}`, {method: 'POST', headers, body: bodys}); // { headerss: {'Content-Type': 'application/json'}}
       const refres = await refhttpRes.json()
       console.log(':q~', refres)
 
-      const treesbody = {
-        base_tree: commitres.tree.sha,
+      // const masmaster = await fetch('http://localhost:8085/.netlify/git/github/branches/master', {method: 'GET', headers})
+      // const masres = await masmaster.json()
+
+      // console.log(commitres.sha, masres.commit.sha) 同じ値
+      const treesbody = 
+      {
+        // base_tree: commitres.sha,
+        base_tree: commitres.commit.tree.sha,
         tree: [{
-            path: "hoge.txt",
-            mode: "わからないのであとで調べる",
-            type: "blob",
-            sha: refres.sha
+            path: 'README.md',
+            mode: '100644', // 100644  100755 , 040000 160000  シンボリックリンクのパス120000 
+            type: 'blob',
+            sha: refres.sha,
+            // content: "hoge"
           }
           // ,
           // {
@@ -328,10 +340,43 @@ const store = new Vuex.Store({
           // }
         ]
       }
-      const branchhttpRes = await fetch('http://localhost:8085/.netlify/git/github/git/trees', {method: 'GET', headers, body: treesbody});
+      // treeの作成
+      const treesbodys = JSON.stringify(treesbody)
+      const branchhttpRes = await fetch('http://localhost:8085/.netlify/git/github/git/trees', {method: 'POST', headers, body: treesbodys});
       const branchres = await branchhttpRes.json()
       console.log("branchesres", branchres)
+      console.log("check", refres.sha, branchres.sha, parseref.object.sha)
 
+      const commitsbody = 
+      {
+        message: "test commit",
+        author: {
+          name: "test",
+          email: "hoge@gmail.com",
+          date: "2020-08-15T02:27:22.296Z"
+        },
+        parents: [
+          // refres.sha
+          parseref.object.sha
+        ],
+        tree: branchres.sha
+      }
+      const commitsbodys = JSON.stringify(commitsbody)
+      console.log(commitsbodys)
+      // commitの作成
+      const createcommithttpres = await fetch(`http://localhost:8085/.netlify/git/github/git/commits?ref=${branchName}`, {method: 'POST', headers, body: commitsbodys});
+      const createcommitres = await createcommithttpres.json()
+      console.log("commithash", createcommitres.sha)
+
+      // refの更新
+      const updatebody = {
+        sha: createcommitres.sha,
+        force: false // 強制pushするか否
+      }
+      const updatebodys = JSON.stringify(updatebody)
+      const updaterefhttpres = await fetch(`http://localhost:8085/.netlify/git/github/git/refs/heads/${branchName}`, {method: 'PATCH', headers, body: updatebodys})
+      const updaterefres = await updaterefhttpres.json()
+      console.log('asdf', updaterefres)
       console.log(':(', csvObj)
 
       commit('setCsvObj', csvObj)
@@ -343,6 +388,7 @@ const store = new Vuex.Store({
 // master //github/branches/master  get
 // trees //github/git/trees post    base_tree(masterから返ってくるcommithash commit.sha) tree(配列) {path: ,mode: , sha: blobs叩いた時に返ってくるsha, type: "blob"}
 // commit //github/git/commits    author:{name: , email: , date: } parents: [master叩いた時に返ってくるcommit.sha] tree: [trees叩いた時に返ってくるsha]
+// master // github/git/refs/heads/master 
 
 const convertCsvToObjArray = (csv) => {
   //header:CSV1行目の項目 :csvRows:項目に対する値
