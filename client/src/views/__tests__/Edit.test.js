@@ -1,7 +1,13 @@
-import { mount } from '@vue/test-utils'
+import { mount, shallowMount, createLocalVue } from '@vue/test-utils'
 import Edit from '../Edit'
 import Vuex from 'vuex'
-// import Actions from ''
+import Actions from '../../store/actions'
+
+const localVue = createLocalVue()
+
+localVue.use(Vuex)
+
+describe('Actions.vue', () => {})
 
 const wrapper = mount(Edit)
 

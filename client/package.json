@@ -33,15 +33,17 @@
     "@vue/cli-plugin-eslint": "~4.4.0",
     "@vue/cli-service": "~4.4.0",
     "@vue/test-utils": "^1.0.3",
-    "babel-core": "^6.26.3",
+    "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.1.0",
-    "babel-jest": "^26.3.0",
-    "babel-preset-env": "^1.7.0",
+    "babel-jest": "^23.4.2",
+    "babel-loader": "^8.1.0",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
     "jest": "^26.4.0",
+    "regenerator-runtime": "^0.13.7",
     "vue-jest": "^3.0.6",
-    "vue-template-compiler": "^2.6.11"
+    "vue-template-compiler": "^2.6.11",
+    "webpack": "^4.44.1"
   },
   "eslintConfig": {
     "root": true,
@@ -69,7 +71,10 @@
     },
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1"
-    }
+    },
+    "setupFilesAfterEnv": [
+      "./src/setupTests.js"
+    ]
   },
   "browserslist": [
     "> 1%",
