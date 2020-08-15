@@ -14,6 +14,7 @@ import 'vue-sidebar-menu/dist/vue-sidebar-menu.css'
 
 const VueUploadComponent = require('vue-upload-component')
 const netlifyIdentity = require('netlify-identity-widget')
+const moment = require('moment')
 
 Vue.component('VKIconCheveronRight', IconChevronRight)
 Vue.component('VKIconCloudpload', IconCloudUpload)
@@ -380,6 +381,19 @@ const store = new Vuex.Store({
       console.log(':(', csvObj)
 
       commit('setCsvObj', csvObj)
+
+    },
+    editCSV: async ( {state}, branchname, editFile ) => {
+      const token = state.currentUser.token.access_token
+
+      const timestamp = moment().format('YYYY-MM-DD-hh:mm:ss')
+      const base64csv = btoa(editFile)
+      const body = btoa(sendObject)
+      // const body = ~~~~~~~(sendObject)~~~~~s
+      const httpRes = await fetch(`http://localhost:8085/.netlify/git//github/git/trees/${branchname}/:metadatas`, {method, headers, body}) //refs/heads/master
+      const res = httpRes.json()
+      console.log(timestamp, res)
+
     }
   }
 })
@@ -434,6 +448,18 @@ const convertCsvToObjArray = (csv) => {
 //       return localStorage.getItem(key);
 //   }
 // };
+
+// export const mutations = {
+//   editCSV: (state, editFile) => {
+//     state.files.push(editFile)
+//   }
+// }
+
+// export default new Vuex.Store({
+//   // state,
+//   mutations,
+//   // actions
+// })
 
 new Vue({
   render: h => h(App),
