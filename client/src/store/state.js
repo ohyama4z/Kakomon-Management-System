@@ -2,7 +2,7 @@ export default {
   currentUser: netlifyIdentity.currentUser(),
   lastPage: 'upload',
   metadatas: {
-    status: 'loaded',
+    status: 'unrequested',
     data: []
   },
 
