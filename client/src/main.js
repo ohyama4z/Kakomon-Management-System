@@ -159,9 +159,6 @@ const store = new Vuex.Store({
   },
 
   mutations: {
-    setStatusLoading: (state, req) => {
-      req.status = 'loading'
-    },
     upload: (state, newFile) => {
       state.files.push(newFile)
     },
