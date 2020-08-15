@@ -20,7 +20,7 @@ describe('Login.vue', () => {
         }
         const store = new Vuex.Store({
             state: {
-                currentUser: true,
+                currentUser: null,
                 lastPage: 'edit'
             },
             mutations
