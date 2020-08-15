@@ -13,14 +13,15 @@ localVue.use(VueRouter)
 const router = new VueRouter()
 
 describe('Login.vue', () => {
-    it('currentUserがログイン済みのとき最後に開いたパスに飛ばすmutationが呼ばれる', () => {
+    it('currentUserがログイン済みのとき最後に開いたパスに飛ばすmutationが呼ばれ、lastPageに遷移する', () => {
         const mutations = {
             getCurrentUser: jest.fn(),
             updateLastPage: jest.fn()
         }
         const store = new Vuex.Store({
             state: {
-                currentUser: true
+                currentUser: true,
+                lastPage: 'edit'
             },
             mutations
         })
@@ -30,6 +31,7 @@ describe('Login.vue', () => {
             store
         })
         expect(mutations.updateLastPage).toHaveBeenCalled()
+        expect(wrapper.vm.$route.path).toBe(`/${store.state.lastPage}`)
     })
 })
 
