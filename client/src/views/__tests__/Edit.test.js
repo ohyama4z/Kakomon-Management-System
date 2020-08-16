@@ -1,7 +1,6 @@
-import { mount, shallowMount, createLocalVue } from '@vue/test-utils'
+import { shallowMount, createLocalVue } from '@vue/test-utils'
 import Edit from '../Edit'
 import Vuex from 'vuex'
-import actions from '../../store/actions'
 
 const localVue = createLocalVue()
 
@@ -24,7 +23,7 @@ describe('Edit.vue', () => {
       },
       actions
     })
-    const wrapper = shallowMount(Edit, {
+    shallowMount(Edit, {
       localVue,
       store
     })

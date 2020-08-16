@@ -77,8 +77,7 @@ export default {
         const curResStr = localStorage.getItem(`${branchName}_${res.name}`)
         const curRes = JSON.parse(curResStr)
         console.log('^^;', curRes)
-        const buffer = new Buffer(curRes.content, 'base64')
-        const csvData = buffer.toString('utf8')
+        const csvData = Buffer.from(curRes.content, 'base64').toString('utf8')
         // console.log(csvData)
         const resultObj = convertCsvToObjArray(csvData)
         // console.log(resultObj)
@@ -96,7 +95,7 @@ export default {
 
 const convertCsvToObjArray = csv => {
   // header:CSV1行目の項目 :csvRows:項目に対する値
-  const [header, ...csvRows] = csv
+  const [headerNames, ...csvRows] = csv
     .split('\n')
     .filter(row => {
       if (row !== '') {
@@ -107,26 +106,21 @@ const convertCsvToObjArray = csv => {
       return row.split(',')
     })
 
-  let arrayInKeyAndValue
-  let resultArray
-  let tmpResultArray
-
-  tmpResultArray = csvRows.map(r => {
-    arrayInKeyAndValue = header.map((_, index) => {
-      // ヘッダーの空白文字を削除。keyとvalueに値をセット
-      return { key: header[index].replace(/\s+/g, ''), value: r[index] }
+  return csvRows
+    .map(r => {
+      return headerNames
+        .map((headerName, index) => {
+          // ヘッダーの空白文字を削除。keyとvalueに値をセット
+          return { key: headerName.replace(/\s+/g, ''), value: r[index] }
+        })
+        .reduce((previous, current) => {
+          // {key: "物", value: "MacBook", メーカー: "apple", 値段: "3000"}を作成
+          previous[current.key] = current.value
+          return previous
+        }, {})
     })
-    arrayInKeyAndValue = arrayInKeyAndValue.reduce((previous, current) => {
-      // {key: "物", value: "MacBook", メーカー: "apple", 値段: "3000"}を作成
-      previous[current.key] = current.value
+    .reduce((previous, current) => {
+      previous[current.src] = current
       return previous
     }, {})
-    return arrayInKeyAndValue
-  })
-
-  resultArray = tmpResultArray.reduce((previous, current) => {
-    previous[current.src] = current
-    return previous
-  }, {})
-  return resultArray
 }
