@@ -39,4 +39,4 @@ jobs:
           docker-cache-${{ hashFiles('**/package-lock.json') }}
 
     - run: docker-compose build client_dev
-    - run: docker-compose run client_dev npm build
+    - run: docker-compose run client_dev npm run build
