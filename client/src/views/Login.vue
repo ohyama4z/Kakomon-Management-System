@@ -15,8 +15,8 @@
         }
       },
 
-    async mounted () {
-      await netlifyIdentity.open()
+    mounted () {
+      netlifyIdentity.open()
       this.$store.commit('getCurrentUser')
       
       netlifyIdentity.on('login', () => {
