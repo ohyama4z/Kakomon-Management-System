@@ -198,11 +198,8 @@ export default {
   computed: {
     ...mapState({
       intermediateFiles: state => {
-        console.log('state.files', state.filesZ)
         const files = Object.values(state.files)
-        console.log(files)
         const beforeMerge = files.map(file => {
-          console.log('ffile', file)
           const {
             period,
             subj,
@@ -239,18 +236,17 @@ export default {
               }
             }
           }
-          console.log('fileResult', fileResult)
           return fileResult
         })
         const result = merge.all(beforeMerge)
-        console.log(JSON.stringify({ files, beforeMerge, result }))
         return result
-      }
+      },
+
+      branches: state => state.metadatas.data
     }),
 
     menuStructure() {
       const icon = 'fa fa-folder'
-      // console.log({files: this.intermediateFiles})
       const result = generateMenuStructure(this.intermediateFiles, 6)
       return result
 
@@ -262,12 +258,10 @@ export default {
             data: file
           }))
 
-          console.log('intermediate', { intermediate, result })
           return result
         }
         return Object.entries(intermediate).reduce((previous, [key, value]) => {
           if (num === 2) {
-            console.log('123', key, value)
           }
           return [
             ...previous,

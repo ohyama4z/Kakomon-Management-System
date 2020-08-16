@@ -103,9 +103,9 @@ describe('Login.vue', () => {
       router,
       store
     })
-    const beforeRouteLeave = wrapper.vm.$options.beforeRouteLeave[0];
-    const next = jest.fn();
-    beforeRouteLeave.call(wrapper.vm , "toObj", "fromObj", next); 
+    const beforeRouteLeave = wrapper.vm.$options.beforeRouteLeave[0]
+    const next = jest.fn()
+    beforeRouteLeave.call(wrapper.vm, 'toObj', 'fromObj', next)
 
     expect(netlifyIdentity.close).toHaveBeenCalledTimes(1)
     expect(next).toHaveBeenCalledTimes(1)
