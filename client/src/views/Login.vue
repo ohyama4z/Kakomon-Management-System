@@ -16,23 +16,21 @@ export default {
   },
 
   mounted() {
-    netlifyIdentity.open()
     this.$store.dispatch('updateCurrentUser')
+
+    if (this.$store.state.currentUser != null) {
+      this.$store.commit('updateLastPage')
+      this.$router.push(`/${this.$store.state.lastPage}`)
+      return
+    }
 
     netlifyIdentity.on('login', () => {
       this.$store.commit('updateLastPage')
       this.$router.push(`/${this.$store.state.lastPage}`)
     })
 
-    netlifyIdentity.on('close', () => {
-      this.$store.commit('updateLastPage')
-      this.$router.push(`/${this.$store.state.lastPage}`)
-    })
 
-    if (this.$store.state.currentUser != null) {
-      this.$store.commit('updateLastPage')
-      this.$router.push(`/${this.$store.state.lastPage}`)
-    }
+    netlifyIdentity.open()
   },
 
   beforeRouteLeave(to, from, next) {

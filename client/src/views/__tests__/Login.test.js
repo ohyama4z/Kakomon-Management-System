@@ -1,7 +1,7 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils'
-import Login from '../Login'
-import Vuex from 'vuex'
+import { createLocalVue, shallowMount } from '@vue/test-utils'
 import VueRouter from 'vue-router'
+import Vuex from 'vuex'
+import Login from '../Login'
 // import Mctions from '../../store/mutations'
 
 const netlifyIdentity = require('netlify-identity-widget')
@@ -28,12 +28,16 @@ describe('Login.vue', () => {
       getCurrentUser: jest.fn(),
       updateLastPage: jest.fn()
     }
+    const actions = {
+      updateCurrentUser: jest.fn()
+    }
     const store = new Vuex.Store({
       state: {
         currentUser: true,
         lastPage: 'edit'
       },
-      mutations
+      mutations,
+      actions
     })
     const wrapper = shallowMount(Login, {
       localVue,
@@ -41,7 +45,7 @@ describe('Login.vue', () => {
       store
     })
 
-    expect(netlifyIdentity.open).toHaveBeenCalled()
+    expect(actions.updateCurrentUser).toHaveBeenCalled()
     expect(mutations.updateLastPage).toHaveBeenCalled()
     expect(wrapper.vm.$route.path).toBe(`/${store.state.lastPage}`)
   })
@@ -51,12 +55,15 @@ describe('Login.vue', () => {
       getCurrentUser: jest.fn(),
       updateLastPage: jest.fn()
     }
+    const actions = {
+      updateCurrentUser: jest.fn()
+    }
     const store = new Vuex.Store({
       state: {
-        currentUser: true,
         lastPage: 'edit'
       },
-      mutations
+      mutations,
+      actions
     })
 
     const wrapper = shallowMount(Login, {
@@ -65,7 +72,7 @@ describe('Login.vue', () => {
       store
     })
 
-    expect(netlifyIdentity.open).toHaveBeenCalled()
+    expect(actions.updateCurrentUser).toHaveBeenCalled()
     expect(netlifyIdentity.on).toHaveBeenCalled()
     expect(mutations.updateLastPage).toHaveBeenCalled()
     expect(wrapper.vm.$route.path).toBe(`/${store.state.lastPage}`)

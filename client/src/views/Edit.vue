@@ -185,8 +185,14 @@ export default {
     }
   },
 
-  readyForRequest() {
-    return this.selectedBranch && this.editType
+  mounted () {
+      if (this.$store.state.currentUser == null) {
+        localStorage.setItem('lastPage', 'edit')
+        this.$store.commit('updateLastPage')
+        this.$router.push('/login')
+      }
+      this.$store.dispatch('getMetadatas')
+      this.getBranchData()
   },
 
   computed: {
@@ -307,9 +313,7 @@ export default {
         }
       ]
 
-      // this.getMenuStructure の第2引数は period, subject, toolType, year, contentType, fileNameで計6
-      const dataTree = this.getMenuStructure(this.intermediateFiles(), 6)
-      return header.concat(dataTree)
+      return header.concat(this.menuStructure)
     }
   },
   methods: {
@@ -322,9 +326,6 @@ export default {
       this.$store.commit('updateLastPage')
       this.$router.push('/logout')
     },
-
-    //   }, {})
-    // },
 
     getBranchData() {
       this.$store.dispatch('getBranchData', this.selectedBranch)
