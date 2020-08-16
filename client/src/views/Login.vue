@@ -29,7 +29,6 @@ export default {
       this.$router.push(`/${this.$store.state.lastPage}`)
     })
 
-
     netlifyIdentity.open()
   },
 

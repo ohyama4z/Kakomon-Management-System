@@ -185,14 +185,14 @@ export default {
     }
   },
 
-  mounted () {
-      if (this.$store.state.currentUser == null) {
-        localStorage.setItem('lastPage', 'edit')
-        this.$store.commit('updateLastPage')
-        this.$router.push('/login')
-      }
-      this.$store.dispatch('getMetadatas')
-      this.getBranchData()
+  mounted() {
+    if (this.$store.state.currentUser == null) {
+      localStorage.setItem('lastPage', 'edit')
+      this.$store.commit('updateLastPage')
+      this.$router.push('/login')
+    }
+    this.$store.dispatch('getMetadatas')
+    this.getBranchData()
   },
 
   computed: {
