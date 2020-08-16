@@ -172,7 +172,7 @@
 
       isLoading () {
         const checkLoading = (status) => {
-          return status == 'loading'
+          return status === 'loading'
         }
 
         return checkLoading(this.$store.state.metadatas.status) || checkLoading(this.$store.state.setCsvObj.status)
