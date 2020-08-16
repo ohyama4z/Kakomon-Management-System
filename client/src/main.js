@@ -347,6 +347,8 @@ const store = new Vuex.Store({
       const branchres = await branchhttpRes.json()
       console.log("branchesres", branchres)
       console.log("check", refres.sha, branchres.sha, parseref.object.sha)
+      const date = moment().format('YYYY-MM-DDThh:mm:ssZ')
+      console.log("time", date)
 
       const commitsbody = 
       {
@@ -354,7 +356,9 @@ const store = new Vuex.Store({
         author: {
           name: "test",
           email: "hoge@gmail.com",
-          date: "2020-08-15T02:27:22.296Z"
+          // date: "2020-08-15T02:27:22.296Z"
+          // date: `${timestamp}`
+          date
         },
         parents: [
           // refres.sha
@@ -383,18 +387,17 @@ const store = new Vuex.Store({
       commit('setCsvObj', csvObj)
 
     },
-    editCSV: async ( {state}, branchname, editFile ) => {
-      const token = state.currentUser.token.access_token
+    // editCSV: async ( {state}, branchname, editFile ) => {
+    //   const token = state.currentUser.token.access_token
 
-      const timestamp = moment().format('YYYY-MM-DD-hh:mm:ss')
-      const base64csv = btoa(editFile)
-      const body = btoa(sendObject)
-      // const body = ~~~~~~~(sendObject)~~~~~s
-      const httpRes = await fetch(`http://localhost:8085/.netlify/git//github/git/trees/${branchname}/:metadatas`, {method, headers, body}) //refs/heads/master
-      const res = httpRes.json()
-      console.log(timestamp, res)
+    //   const base64csv = btoa(editFile)
+    //   const body = btoa(sendObject)
+    //   // const body = ~~~~~~~(sendObject)~~~~~s
+    //   const httpRes = await fetch(`http://localhost:8085/.netlify/git//github/git/trees/${branchname}/:metadatas`, {method, headers, body}) //refs/heads/master
+    //   const res = httpRes.json()
+    //   console.log(timestamp, res)
 
-    }
+    // }
   }
 })
 
