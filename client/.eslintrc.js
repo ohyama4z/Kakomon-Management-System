@@ -2,12 +2,10 @@ module.exports = {
   env: {
     browser: true,
     es6: true,
-    node: true
+    node: true,
+    'jest/globals': true
   },
-  extends: [
-    'plugin:vue/essential',
-    "prettier-standard"
-  ],
+  extends: ['plugin:vue/essential', 'prettier-standard'],
   globals: {
     Atomics: 'readonly',
     SharedArrayBuffer: 'readonly'
@@ -16,9 +14,6 @@ module.exports = {
     ecmaVersion: 2018,
     sourceType: 'module'
   },
-  plugins: [
-    'vue'
-  ],
-  rules: {
-  }
+  plugins: ['vue', 'jest'],
+  rules: {}
 }
