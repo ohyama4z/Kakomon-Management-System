@@ -11,6 +11,7 @@ describe('Edit.vue', () => {
     it ('ページが読み込まれたときにbranchを取得するactionを走らせる', () => {
         const actions = {
             getMetadatas: jest.fn(),
+            getBranchData: jest.fn()
         }
         const store = new Vuex.Store({
             state: {
