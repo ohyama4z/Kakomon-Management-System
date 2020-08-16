@@ -394,8 +394,6 @@ const store = new Vuex.Store({
     //   const body = btoa(sendObject)
     //   // const body = ~~~~~~~(sendObject)~~~~~s
     //   const httpRes = await fetch(`http://localhost:8085/.netlify/git//github/git/trees/${branchname}/:metadatas`, {method, headers, body}) //refs/heads/master
-    //   const res = httpRes.json()
-    //   console.log(timestamp, res)
 
     // }
   }
