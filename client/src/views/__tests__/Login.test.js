@@ -77,6 +77,39 @@ describe('Login.vue', () => {
     expect(mutations.updateLastPage).toHaveBeenCalled()
     expect(wrapper.vm.$route.path).toBe(`/${store.state.lastPage}`)
   })
+
+  it('遷移する時はログインモーダルが閉じられる', () => {
+    const state = {
+      lastPage: 'edit',
+      files: {}
+    }
+    const mutations = {
+      getCurrentUser: jest.fn(),
+      updateLastPage: jest.fn()
+    }
+    const actions = {
+      updateCurrentUser: jest.fn()
+    }
+    const store = new Vuex.Store({
+      state,
+      mutations,
+      actions
+    })
+
+    netlifyIdentity.close = jest.fn()
+
+    const wrapper = shallowMount(Login, {
+      localVue,
+      router,
+      store
+    })
+    const beforeRouteLeave = wrapper.vm.$options.beforeRouteLeave[0];
+    const next = jest.fn();
+    beforeRouteLeave.call(wrapper.vm , "toObj", "fromObj", next); 
+
+    expect(netlifyIdentity.close).toHaveBeenCalledTimes(1)
+    expect(next).toHaveBeenCalledTimes(1)
+  })
 })
 
 // todo
