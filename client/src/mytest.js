@@ -16,18 +16,21 @@
 // const data = 'k'
 
 // console.log(arr[arr.length-1])
-function getSidebarMenu () {
-  const header = [{
-    header: true,
-    title: '過去問管理',
-    hiddenOnCollapse: true
-  }]
+function getSidebarMenu() {
+  const header = [
+    {
+      header: true,
+      title: '過去問管理',
+      hiddenOnCollapse: true
+    }
+  ]
 
   return header.concat(this.getMenuStructure)
 }
 
-function intermediateFiles () {
-  const sampleFiles = [{
+function intermediateFiles() {
+  const sampleFiles = [
+    {
       src: '001',
       subject: '数学',
       year: 2019,
@@ -126,7 +129,7 @@ function intermediateFiles () {
       contentType: '対策プリント',
       author: 'oy',
       fileName: 'file010'
-    },
+    }
   ]
   return sampleFiles.reduce((previous, current) => {
     if (previous == null) {
@@ -141,78 +144,106 @@ function intermediateFiles () {
       previous[current.period][current.subject] = {}
     }
 
-
     if (previous[current.period][current.subject][current.toolType] == null) {
       previous[current.period][current.subject][current.toolType] = {}
     }
 
-    if (previous[current.period][current.subject][current.toolType][current.year] == null) {
-      previous[current.period][current.subject][current.toolType][current.year] = {}
+    if (
+      previous[current.period][current.subject][current.toolType][
+        current.year
+      ] == null
+    ) {
+      previous[current.period][current.subject][current.toolType][
+        current.year
+      ] = {}
     }
 
-    if (previous[current.period][current.subject][current.toolType][current.year][current.contentType] == null) {
-      previous[current.period][current.subject][current.toolType][current.year][current.contentType] = []
+    if (
+      previous[current.period][current.subject][current.toolType][current.year][
+        current.contentType
+      ] == null
+    ) {
+      previous[current.period][current.subject][current.toolType][current.year][
+        current.contentType
+      ] = []
     }
 
-    previous[current.period][current.subject][current.toolType][current.year][current.contentType].push(current)
+    previous[current.period][current.subject][current.toolType][current.year][
+      current.contentType
+    ].push(current)
 
     return previous
   }, {})
 }
 
-function getMenuStructure () {
+function getMenuStructure() {
   const icon = 'fa fa-folder'
-  return Object.entries(this.intermediateFiles).reduce((previous, [period, value]) => {
-    previous.push({
-      title: period,
-      icon,
-      child: generateChildOfPeriod(value)
-    })
-    return previous
-  }, [])
-
-  function generateChildOfPeriod(yearValue) {
-    return Object.entries(yearValue).reduce((previous, [subject, subjectValue]) => {
+  return Object.entries(this.intermediateFiles).reduce(
+    (previous, [period, value]) => {
       previous.push({
-        title: subject,
+        title: period,
         icon,
-        child: generateChildOfSubject(subjectValue)
+        child: generateChildOfPeriod(value)
       })
       return previous
-    }, [])
+    },
+    []
+  )
+
+  function generateChildOfPeriod(yearValue) {
+    return Object.entries(yearValue).reduce(
+      (previous, [subject, subjectValue]) => {
+        previous.push({
+          title: subject,
+          icon,
+          child: generateChildOfSubject(subjectValue)
+        })
+        return previous
+      },
+      []
+    )
   }
 
   function generateChildOfSubject(subjectValue) {
-    return Object.entries(subjectValue).reduce((previous, [toolType, toolTypeValue]) => {
-      previous.push({
-        title: toolType,
-        icon,
-        child: generateChildOfToolType(toolTypeValue)
-      })
-      return previous
-    }, [])
+    return Object.entries(subjectValue).reduce(
+      (previous, [toolType, toolTypeValue]) => {
+        previous.push({
+          title: toolType,
+          icon,
+          child: generateChildOfToolType(toolTypeValue)
+        })
+        return previous
+      },
+      []
+    )
   }
 
   function generateChildOfToolType(toolTypeValue) {
-    return Object.entries(toolTypeValue).reduce((previous, [year, yearValue]) => {
-      previous.push({
-        title: year,
-        icon,
-        child: generateChildOfYear(yearValue)
-      })
-      return previous
-    }, [])
+    return Object.entries(toolTypeValue).reduce(
+      (previous, [year, yearValue]) => {
+        previous.push({
+          title: year,
+          icon,
+          child: generateChildOfYear(yearValue)
+        })
+        return previous
+      },
+      []
+    )
   }
 
   function generateChildOfYear(yearValue) {
-    return Object.entries(yearValue).reduce((previous, [contentType, contentTypeValue]) => {
-      previous.push({
-        title: contentType,
-        icon,
-        child: generateChildOfContentType(contentTypeValue)
-      })
-      return previous
-    }, [])
+    return Object.entries(yearValue).reduce(
+      (previous, [contentType, contentTypeValue]) => {
+        previous.push({
+          title: contentType,
+          icon,
+          child: generateChildOfContentType(contentTypeValue)
+        })
+        return previous
+      },
+      []
+    )
   }
 
   function generateChildOfContentType(contentTypeValue) {
@@ -225,4 +256,4 @@ function getMenuStructure () {
   }
 }
 
-console.log(getSidebarMenu ())
+console.log(getSidebarMenu())

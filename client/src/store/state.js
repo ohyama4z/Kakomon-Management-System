@@ -9,7 +9,7 @@ export default {
   },
 
   setCsvObj: {
-    status: 'unrequested',
+    status: 'unrequested'
   },
 
   files: [
