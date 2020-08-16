@@ -163,6 +163,9 @@
 
       this.$store.dispatch('getMetadatas')
       this.getBranchData()
+              console.log('aa',this.intermediateFiles())
+        console.log('uu',this.getMenuStructure())
+
     },
 
     computed: {
@@ -189,6 +192,8 @@
         //this.getMenuStructure の第2引数は period, subject, toolType, year, contentType, fileNameで計6
         console.log('ｈ',this.intermediateFiles())
         const dataTree = this.getMenuStructure(this.intermediateFiles(), 6)
+        console.log('getMenuStructure',this.getMenuStructure(this.intermediateFiles(), 6))
+        console.log(dataTree)
         return header.concat(dataTree)
       },
 
@@ -271,8 +276,6 @@
 
       getBranchData () {
         this.$store.dispatch('getBranchData', this.selectedBranch)
-        console.log('aa',this.intermediateFiles())
-        console.log('uu',this.getMenuStructure())
       },
 
       onItemClick (e, item) {

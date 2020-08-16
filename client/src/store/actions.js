@@ -3,21 +3,6 @@ import PromisePool from 'native-promise-pool'
 export default {
   upload: async ({ commit }, newFile) => {
     commit('upload',newFile)
-
-    console.log('action: upload')
-  },
-
-  get: async ({commit, state}) => {
-    const token = state.currentUser.token.access_token
-    const method = 'GET'
-    const headers = {
-      Authorization: `Bearer ${token}`
-    }
-    const httpRes = await fetch('http://localhost:8085/.netlify/git/github/branches', {method, headers})
-    const res = await httpRes.json()
-    console.log('ahoahoa', httpRes, res)
-
-    commit('getBranches', res)
   },
 
   getMetadatas: async ({commit, state}) => {
@@ -40,37 +25,35 @@ export default {
     const headers = {
       Authorization: `Bearer ${token}`
     }
-    console.log(branchName)
+    console.log(`selected branch is branch:${branchName}`)
     const httpRes = await fetch(`http://localhost:8085/.netlify/git/github/contents/metadatas?ref=${branchName}`, {method, headers})
     // const httpRes = await fetch(`http://localhost:8085/.netlify/git/github/contents/metadatas/unassorted.csv?ref=${branchName}`, {method, headers})
     const resArr = await httpRes.json()
-    console.log('^_^',resArr)
+    // console.log('^_^',resArr)
 
     let csvObj = {}
     const pool = new PromisePool(50) // 50 tasks at once
 
     resArr.forEach(res => {
       pool.open(async () => {
-        const previousResStr = localStorage.getItem(`${branchName}_${res.name}`)
-        const previousRes = JSON.parse(previousResStr)
+        const previousRes = state.setCsvObj.unparsedData[`${branchName}`]?.[`${res.name}`]
+        // state.setCsvObj.unparsedData[`${branchName}`]?.[`${res.name}`]の
+        // ?. の部分がわからないときはOptional Chaningでググれ
         
         if (previousRes == null || res.sha !== previousRes.sha) {
-          console.log('manukemanuke')
           const httpResponse = await fetch(`http://localhost:8085/.netlify/git/github/git/blobs/${res.sha}?ref=${branchName}`, {method, headers})
           const response = await httpResponse.json()
-          const strRes = JSON.stringify(response)
-          localStorage.setItem(`${branchName}_${res.name}`,strRes)
+          commit('branchDataOnGithub' ,{
+            branchData: response,
+            branchName,
+            fileName: res.name
+          })
         }
 
-        const curResStr = localStorage.getItem(`${branchName}_${res.name}`)
-        const curRes = JSON.parse(curResStr)
-        console.log('^^;', curRes)
+        const curRes = state.setCsvObj.unparsedData[`${branchName}`][`${res.name}`]
         const buffer = new Buffer(curRes.content, 'base64')
         const csvData = buffer.toString('utf8')
-        // console.log(csvData)
         const resultObj = convertCsvToObjArray(csvData);
-        // console.log(resultObj)
-        // console.log("hoge",resultObj)
 
         csvObj = Object.assign(csvObj, resultObj)
       })
