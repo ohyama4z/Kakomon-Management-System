@@ -17,9 +17,14 @@
 
     mounted () {
       netlifyIdentity.open()
-      this.$store.commit('getCurrentUser')
-      
+      this.$store.dispatch('updateCurrentUser')
+
       netlifyIdentity.on('login', () => {
+        this.$store.commit('updateLastPage')
+        this.$router.push(`/${this.$store.state.lastPage}`)
+      })
+
+      netlifyIdentity.on('close', () => {
         this.$store.commit('updateLastPage')
         this.$router.push(`/${this.$store.state.lastPage}`)
       })
@@ -28,6 +33,11 @@
         this.$store.commit('updateLastPage')
         this.$router.push(`/${this.$store.state.lastPage}`)
       }
+    },
+
+    beforeRouteLeave ( to, from, next ) {
+      netlifyIdentity.close()
+      next()
     }
-}
+  }
 </script>

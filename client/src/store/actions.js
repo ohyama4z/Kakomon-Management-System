@@ -1,4 +1,5 @@
 import PromisePool from 'native-promise-pool'
+import netlifyIdentity from 'netlify-identity-widget'
 
 export default {
   upload: async ({ commit }, newFile) => {
@@ -64,6 +65,14 @@ export default {
     console.log(':(', csvObj)
 
     commit('setCsvObj', csvObj)
+  },
+
+  updateCurrentUser: async ({ commit }) => {
+    const user = netlifyIdentity.currentUser()
+    if(user != null && user.token.access_token == null) {
+      await netlifyIdentity.refresh()
+    }
+    commit('updateCurrentUser', user)
   }
 }
 

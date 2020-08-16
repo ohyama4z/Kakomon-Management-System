@@ -120,7 +120,7 @@
         </button>
       </div>
       <div>
-        <button class="uk-button uk-button-link" v-on:click="toLogin">ログイン画面へ
+        <button class="uk-button uk-button-link" v-on:click="logout">ログアウト
         <vk-icon icon="chevron-right"></vk-icon>
         </button>
       </div>
@@ -207,10 +207,10 @@
         this.$router.push('upload')
       },
 
-      toLogin () {
+      logout () {
         localStorage.setItem('lastPage', 'edit')
         this.$store.commit('updateLastPage')
-        this.$router.push('/login')
+        this.$router.push('/logout')
       },
 
 

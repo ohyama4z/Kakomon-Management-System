@@ -1,5 +1,3 @@
-const netlifyIdentity = require('netlify-identity-widget')
-
 export default {
   setStatusLoading: (state, req) => {
     req.status = 'loading'
@@ -15,8 +13,7 @@ export default {
     }
   },
 
-  getCurrentUser: (state) => {
-    const user = netlifyIdentity.currentUser()
+  updateCurrentUser: (state, user) => {
     state.currentUser = user
   },
 
