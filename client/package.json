@@ -74,7 +74,10 @@
     },
     "setupFilesAfterEnv": [
       "./src/setupTests.js"
-    ]
+    ],
+    "coverageDirectory": "./coverage/",
+    "collectCoverage": true,
+    "collectCoverageFrom": ["**/*.{js,vue}", "!**/node_modules/**"],
   },
   "browserslist": [
     "> 1%",
