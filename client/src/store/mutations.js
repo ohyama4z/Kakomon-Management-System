@@ -10,23 +10,23 @@ export default {
   setServerSideLanguage: (state, languageName) => {
     state.serverSideLanguage = {
       status: 'loaded',
-      name: languageName,
+      name: languageName
     }
   },
 
   setBranches: (state, data) => {
     state.metadata = {
       status: 'loaded',
-      branches : data,
+      branches: data
     }
   },
 
-  getCurrentUser: (state) => {
+  getCurrentUser: state => {
     const user = netlifyIdentity.currentUser()
     state.currentUser = user
   },
 
-  updateLastPage: (state) => {
+  updateLastPage: state => {
     const lastPageInStrage = localStorage.getItem('lastPage')
     const lastPage = lastPageInStrage == null ? 'upload' : lastPageInStrage
     state.lastPage = lastPage

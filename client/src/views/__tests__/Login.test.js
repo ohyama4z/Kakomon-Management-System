@@ -6,7 +6,6 @@ import VueRouter from 'vue-router'
 
 const netlifyIdentity = require('netlify-identity-widget')
 
-
 const localVue = createLocalVue()
 
 localVue.use(Vuex)
@@ -18,63 +17,60 @@ const router = new VueRouter()
 jest.mock('netlify-identity-widget')
 netlifyIdentity.open = jest.fn()
 netlifyIdentity.on = jest.fn().mockImplementation((event, callback) => {
-    if(event === 'login') {
-        callback()
-    }
+  if (event === 'login') {
+    callback()
+  }
 })
 
-
 describe('Login.vue', () => {
-    it('currentUserがログイン済みのとき最後に開いたパスに飛ばすmutationが呼ばれ、lastPageに遷移する', () => {
-        const mutations = {
-            getCurrentUser: jest.fn(),
-            updateLastPage: jest.fn()
-        }
-        const store = new Vuex.Store({
-            state: {
-                currentUser: true,
-                lastPage: 'edit'
-            },
-            mutations
-        })
-        const wrapper = shallowMount(Login, {
-            localVue,
-            router,
-            store
-        })
-
-        expect(netlifyIdentity.open).toHaveBeenCalled()
-        expect(mutations.updateLastPage).toHaveBeenCalled()
-        expect(wrapper.vm.$route.path).toBe(`/${store.state.lastPage}`)
+  it('currentUserがログイン済みのとき最後に開いたパスに飛ばすmutationが呼ばれ、lastPageに遷移する', () => {
+    const mutations = {
+      getCurrentUser: jest.fn(),
+      updateLastPage: jest.fn()
+    }
+    const store = new Vuex.Store({
+      state: {
+        currentUser: true,
+        lastPage: 'edit'
+      },
+      mutations
+    })
+    const wrapper = shallowMount(Login, {
+      localVue,
+      router,
+      store
     })
 
-    it('netlify-identity-widgetでログインしたら最後に開いたパスに飛ばすmutationが呼ばれ、lastPageに遷移する', () => {
-        const mutations = {
-            getCurrentUser: jest.fn(),
-            updateLastPage: jest.fn()
-        }
-        const store = new Vuex.Store({
-            state: {
-                currentUser: true,
-                lastPage: 'edit'
-            },
-            mutations
-        })
+    expect(netlifyIdentity.open).toHaveBeenCalled()
+    expect(mutations.updateLastPage).toHaveBeenCalled()
+    expect(wrapper.vm.$route.path).toBe(`/${store.state.lastPage}`)
+  })
 
-        const wrapper = shallowMount(Login, {
-            localVue,
-            router,
-            store
-        })
-
-        expect(netlifyIdentity.open).toHaveBeenCalled()
-        expect(netlifyIdentity.on).toHaveBeenCalled()
-        expect(mutations.updateLastPage).toHaveBeenCalled()
-        expect(wrapper.vm.$route.path).toBe(`/${store.state.lastPage}`)
-
+  it('netlify-identity-widgetでログインしたら最後に開いたパスに飛ばすmutationが呼ばれ、lastPageに遷移する', () => {
+    const mutations = {
+      getCurrentUser: jest.fn(),
+      updateLastPage: jest.fn()
+    }
+    const store = new Vuex.Store({
+      state: {
+        currentUser: true,
+        lastPage: 'edit'
+      },
+      mutations
     })
+
+    const wrapper = shallowMount(Login, {
+      localVue,
+      router,
+      store
+    })
+
+    expect(netlifyIdentity.open).toHaveBeenCalled()
+    expect(netlifyIdentity.on).toHaveBeenCalled()
+    expect(mutations.updateLastPage).toHaveBeenCalled()
+    expect(wrapper.vm.$route.path).toBe(`/${store.state.lastPage}`)
+  })
 })
 
 // todo
 // ログイン済みじゃないときのも追加しろ
-
