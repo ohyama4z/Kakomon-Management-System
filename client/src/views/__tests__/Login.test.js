@@ -15,23 +15,6 @@ localVue.use(VueRouter)
 const router = new VueRouter()
 
 // netlifyIdentityの関数を使えるようにする
-
-// const netlifyIdentityMock = () => ({
-//     open: jest.fn(),
-//     on: jest.fn((event, callback) => {
-//         if(event === 'login') {
-//             callback()
-//         }
-//     })
-// })
-// const netlifyIdentityMock = jest.createMockFromModule('netlify-identity-widget')
-// netlifyIdentityMock.open = jest.fn()
-// netlifyIdentityMock.on = jest.fn((event, callback) => {
-//     if(event === 'login') {
-//         callback()
-//     }
-// })
-
 jest.mock('netlify-identity-widget')
 netlifyIdentity.open = jest.fn()
 netlifyIdentity.on = jest.fn().mockImplementation((event, callback) => {
