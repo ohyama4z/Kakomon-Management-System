@@ -24,7 +24,7 @@ jobs:
     - run: docker-compose run client_dev npm test
 
     - uses: codecov/codecov-action@v1
-      if: github.event_name == "push"
+      if: github.event_name == 'push'
       with:
         directory: ./client/coverage/
       #   token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
