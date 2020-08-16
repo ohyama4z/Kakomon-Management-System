@@ -93,15 +93,11 @@ export default {
   }
 }
 
-const convertCsvToObjArray = csv => {
+export const convertCsvToObjArray = csv => {
   // header:CSV1行目の項目 :csvRows:項目に対する値
   const [headerNames, ...csvRows] = csv
     .split('\n')
-    .filter(row => {
-      if (row !== '') {
-        return row
-      }
-    })
+    .filter(row => row !== '')
     .map(row => {
       return row.split(',')
     })
