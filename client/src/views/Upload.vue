@@ -67,15 +67,19 @@
       を参照してください。
     </div>
 
-    <div class="uk-position-medium uk-position-bottom-right uk-overlay uk-overlay-default">
+    <div
+      class="uk-position-medium uk-position-bottom-right uk-overlay uk-overlay-default"
+    >
       <div v-if="!isLoading">
-        <button class="uk-button uk-button-link" v-on:click="toEdit">編集画面へ
+        <button class="uk-button uk-button-link" v-on:click="toEdit">
+          編集画面へ
           <vk-icon icon="chevron-right"></vk-icon>
         </button>
       </div>
       <div>
-        <button class="uk-button uk-button-link" v-on:click="logout">ログアウト
-        <vk-icon icon="chevron-right"></vk-icon>
+        <button class="uk-button uk-button-link" v-on:click="logout">
+          ログアウト
+          <vk-icon icon="chevron-right"></vk-icon>
         </button>
       </div>
     </div>
@@ -111,18 +115,18 @@ export default {
       this.$router.push('edit')
     },
 
-      logout () {
-        localStorage.setItem('lastPage', 'upload')
-        this.$store.commit('updateLastPage')
-        this.$router.push('/logout')
-      },
+    logout() {
+      localStorage.setItem('lastPage', 'upload')
+      this.$store.commit('updateLastPage')
+      this.$router.push('/logout')
+    },
 
-      async uploadNewFile () {
-        await this.$store.dispatch('upload', this.uploadedFiles)
-        this.$store.state.files.forEach(file => {
-          console.log(file)
-        })
-      },
+    async uploadNewFile() {
+      await this.$store.dispatch('upload', this.uploadedFiles)
+      this.$store.state.files.forEach(file => {
+        console.log(file)
+      })
+    },
 
     dropFile(event) {
       const droppedFile = event.target.files || event.dataTransfer.files

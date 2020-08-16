@@ -1,11 +1,13 @@
 <template>
-  <div>ログアウトできてるよ！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！</div>
+  <div>
+    ログアウトできてるよ！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
+  </div>
 </template>
 
 <script>
 import netlifyIdentity from 'netlify-identity-widget'
 export default {
-  mounted () {
+  mounted() {
     netlifyIdentity.logout()
     netlifyIdentity.on('logout', () => {
       this.$store.dispatch('updateCurrentUser')

@@ -15,29 +15,29 @@ export default {
     return {}
   },
 
-    mounted () {
-      netlifyIdentity.open()
-      this.$store.dispatch('updateCurrentUser')
+  mounted() {
+    netlifyIdentity.open()
+    this.$store.dispatch('updateCurrentUser')
 
-      netlifyIdentity.on('login', () => {
-        this.$store.commit('updateLastPage')
-        this.$router.push(`/${this.$store.state.lastPage}`)
-      })
+    netlifyIdentity.on('login', () => {
+      this.$store.commit('updateLastPage')
+      this.$router.push(`/${this.$store.state.lastPage}`)
+    })
 
-      netlifyIdentity.on('close', () => {
-        this.$store.commit('updateLastPage')
-        this.$router.push(`/${this.$store.state.lastPage}`)
-      })
+    netlifyIdentity.on('close', () => {
+      this.$store.commit('updateLastPage')
+      this.$router.push(`/${this.$store.state.lastPage}`)
+    })
 
-      if (this.$store.state.currentUser != null) {
-        this.$store.commit('updateLastPage')
-        this.$router.push(`/${this.$store.state.lastPage}`)
-      }
-    },
-
-    beforeRouteLeave ( to, from, next ) {
-      netlifyIdentity.close()
-      next()
+    if (this.$store.state.currentUser != null) {
+      this.$store.commit('updateLastPage')
+      this.$router.push(`/${this.$store.state.lastPage}`)
     }
+  },
+
+  beforeRouteLeave(to, from, next) {
+    netlifyIdentity.close()
+    next()
   }
+}
 </script>

@@ -3,7 +3,7 @@ import netlifyIdentity from 'netlify-identity-widget'
 
 export default {
   upload: async ({ commit }, newFile) => {
-    commit('upload',newFile)
+    commit('upload', newFile)
   },
 
   getMetadatas: async ({ commit, state }) => {
@@ -40,31 +40,38 @@ export default {
 
     const pool = new PromisePool(50) // 50 tasks at once
 
-    const files = (await Promise.all(resArr.map(res =>
-      pool.open(async () => {
-        const previousRes = state.setCsvObj.unparsedData[`${branchName}`]?.[`${res.name}`]
-        // state.setCsvObj.unparsedData[`${branchName}`]?.[`${res.name}`]の
-        // ?. の部分がわからないときはOptional Chaningでググれ
-        
-        if (previousRes == null || res.sha !== previousRes.sha) {
-          const httpResponse = await fetch(`http://localhost:8085/.netlify/git/github/git/blobs/${res.sha}?ref=${branchName}`, {method, headers})
-          const response = await httpResponse.json()
-          commit('branchDataOnGithub' ,{
-            branchData: response,
-            branchName,
-            fileName: res.name
-          })
-        }
+    const files = await Promise.all(
+      resArr.map(res =>
+        pool.open(async () => {
+          const previousRes =
+            state.setCsvObj.unparsedData[`${branchName}`]?.[`${res.name}`]
+          // state.setCsvObj.unparsedData[`${branchName}`]?.[`${res.name}`]の
+          // ?. の部分がわからないときはOptional Chaningでググれ
 
-        const curRes = state.setCsvObj.unparsedData[`${branchName}`][`${res.name}`]
-        const csvData = Buffer.from(curRes.content, 'base64').toString('utf8')
-        // console.log(csvData)
-        const resultObj = convertCsvToObjArray(csvData)
-        // console.log(resultObj)
+          if (previousRes == null || res.sha !== previousRes.sha) {
+            const httpResponse = await fetch(
+              `http://localhost:8085/.netlify/git/github/git/blobs/${res.sha}?ref=${branchName}`,
+              { method, headers }
+            )
+            const response = await httpResponse.json()
+            commit('branchDataOnGithub', {
+              branchData: response,
+              branchName,
+              fileName: res.name
+            })
+          }
 
-        return resultObj
-      })
-    )))
+          const curRes =
+            state.setCsvObj.unparsedData[`${branchName}`][`${res.name}`]
+          const csvData = Buffer.from(curRes.content, 'base64').toString('utf8')
+          // console.log(csvData)
+          const resultObj = convertCsvToObjArray(csvData)
+          // console.log(resultObj)
+
+          return resultObj
+        })
+      )
+    )
 
     const filesBySrc = files.reduce((p, v) => {
       return {
@@ -73,15 +80,15 @@ export default {
       }
     }, {})
 
-    console.log(':(', JSON.stringify({filesBySrc}, null, 2))
-    console.log(':( (2)', JSON.stringify({files}, null, 2))
+    console.log(':(', JSON.stringify({ filesBySrc }, null, 2))
+    console.log(':( (2)', JSON.stringify({ files }, null, 2))
 
     commit('setCsvObj', filesBySrc)
   },
 
   updateCurrentUser: async ({ commit }) => {
     const user = netlifyIdentity.currentUser()
-    if(user != null && user.token.access_token == null) {
+    if (user != null && user.token.access_token == null) {
       await netlifyIdentity.refresh()
     }
     commit('updateCurrentUser', user)

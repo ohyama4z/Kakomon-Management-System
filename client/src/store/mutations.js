@@ -38,10 +38,11 @@ export default {
     state.files = csvObj
   },
 
-  branchDataOnGithub: (state, data) =>{
-    if (state.setCsvObj.unparsedData[data.branchName] == null){
+  branchDataOnGithub: (state, data) => {
+    if (state.setCsvObj.unparsedData[data.branchName] == null) {
       state.setCsvObj.unparsedData[data.branchName] = {}
     }
-    state.setCsvObj.unparsedData[data.branchName][data.fileName] = data.branchData
-  },
+    state.setCsvObj.unparsedData[data.branchName][data.fileName] =
+      data.branchData
+  }
 }

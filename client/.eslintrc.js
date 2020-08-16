@@ -2,7 +2,6 @@ module.exports = {
   env: {
     browser: true,
     es6: true,
-    node: true,
     'jest/globals': true
   },
   extends: ['plugin:vue/essential', 'prettier-standard'],
@@ -11,7 +10,7 @@ module.exports = {
     SharedArrayBuffer: 'readonly'
   },
   parserOptions: {
-    ecmaVersion: 2018,
+    ecmaVersion: 2020,
     sourceType: 'module'
   },
   plugins: ['vue', 'jest'],
