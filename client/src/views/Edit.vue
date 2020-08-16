@@ -105,9 +105,15 @@
       </div>
     </div>
 
-    <div class="uk-position-bottom uk-overlay uk-overlay-default uk-text-center">
+    <div
+      class="uk-position-bottom uk-overlay uk-overlay-default uk-text-center"
+    >
       ※過去問編集フォームの使い方がわからない場合は、
-      <a class="uk-link-toggle" href="https://github.com/asann3/Kakomon-Management-System/blob/master/client/manuals/README.md" target="_blank">
+      <a
+        class="uk-link-toggle"
+        href="https://github.com/asann3/Kakomon-Management-System/blob/master/client/manuals/README.md"
+        target="_blank"
+      >
         README.md
       </a>
       を参照してください。
@@ -127,7 +133,6 @@
     </div>
   </div>
 </template>
-
 
 <script>
   import netlifyIdentity from 'netlify-identity-widget'
@@ -151,21 +156,8 @@
       }
     },
 
-    mounted () {
-      netlifyIdentity.on('logout', () => {
-        localStorage.setItem('lastPage', 'edit')
-        this.$store.commit('updateLastPage')
-        this.$router.push('/login')
-      })
-
-      if (this.$store.state.currentUser == null) {
-        localStorage.setItem('lastPage', 'edit')
-        this.$store.commit('updateLastPage')
-        this.$router.push('/login')
-      }
-
-      this.$store.dispatch('getMetadatas')
-      this.getBranchData()
+    readyForRequest() {
+      return this.selectedBranch && this.editType
     },
 
     computed: {
@@ -257,21 +249,22 @@
           header: true,
           title: `Branch : ${this.selectedBranch}`,
           hiddenOnCollapse: true
-        }]
+        }
+      ]
+
+      // this.getMenuStructure の第2引数は period, subject, toolType, year, contentType, fileNameで計6
+      const dataTree = this.getMenuStructure(this.intermediateFiles(), 6)
+      return header.concat(dataTree)
+    },
 
         //this.getMenuStructure の第2引数は period, subject, toolType, year, contentType, fileNameで計6
         return header.concat(this.menuStructure)
       },
 
-      branches () {
-        return this.$store.state.metadatas.data
-      }
+  methods: {
+    toUpload() {
+      this.$router.push('upload')
     },
-
-    methods: {
-      toUpload () {
-        this.$router.push('upload')
-      },
 
       logout () {
         localStorage.setItem('lastPage', 'edit')
@@ -320,9 +313,17 @@
         this.$store.dispatch('updateEditData', sendObj)
       }
     },
+
+    trashFile(file) {
+      const index = this.selectedFiles.findIndex(
+        item => item.title === file.title
+      )
+      this.selectedFiles.splice(index, 1)
+    }
   }
+}
 </script>
 
 <style>
-  @import url('https://use.fontawesome.com/releases/v5.6.1/css/all.css');
+@import url('https://use.fontawesome.com/releases/v5.6.1/css/all.css');
 </style>

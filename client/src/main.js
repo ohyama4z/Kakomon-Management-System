@@ -2,7 +2,11 @@ import Vue from 'vue'
 import App from './App.vue'
 import Vuex from 'vuex'
 import Vuikit from 'vuikit'
-import VuikitIcons from '@vuikit/icons'
+import VuikitIcons, {
+  IconCloudUpload,
+  IconChevronDown,
+  IconChevronRight
+} from '@vuikit/icons'
 import router from './router.js'
 import VueSidebarMenu from 'vue-sidebar-menu'
 import actions from './store/actions'
@@ -10,7 +14,7 @@ import mutations from './store/mutations'
 import state from './store/state'
 
 import '@vuikit/theme'
-import { IconCloudUpload, IconChevronDown, IconChevronRight } from '@vuikit/icons'
+
 import 'vue-sidebar-menu/dist/vue-sidebar-menu.css'
 
 const VueUploadComponent = require('vue-upload-component')

@@ -6,13 +6,16 @@ export default {
     commit('upload',newFile)
   },
 
-  getMetadatas: async ({commit, state}) => {
+  getMetadatas: async ({ commit, state }) => {
     const token = state.currentUser.token.access_token
     const method = 'GET'
     const headers = {
       Authorization: `Bearer ${token}`
     }
-    const httpRes = await fetch('http://localhost:8085/.netlify/git/github/branches', {method, headers})
+    const httpRes = await fetch(
+      'http://localhost:8085/.netlify/git/github/branches',
+      { method, headers }
+    )
     const res = await httpRes.json()
 
     commit('getBranches', res)
@@ -26,11 +29,14 @@ export default {
     const headers = {
       Authorization: `Bearer ${token}`
     }
-    console.log(`selected branch is branch:${branchName}`)
-    const httpRes = await fetch(`http://localhost:8085/.netlify/git/github/contents/metadatas?ref=${branchName}`, {method, headers})
+    console.log(branchName)
+    const httpRes = await fetch(
+      `http://localhost:8085/.netlify/git/github/contents/metadatas?ref=${branchName}`,
+      { method, headers }
+    )
     // const httpRes = await fetch(`http://localhost:8085/.netlify/git/github/contents/metadatas/unassorted.csv?ref=${branchName}`, {method, headers})
     const resArr = await httpRes.json()
-    // console.log('^_^',resArr)
+    console.log('^_^', resArr)
 
     const pool = new PromisePool(50) // 50 tasks at once
 
@@ -51,9 +57,9 @@ export default {
         }
 
         const curRes = state.setCsvObj.unparsedData[`${branchName}`][`${res.name}`]
-        const buffer = new Buffer(curRes.content, 'base64')
-        const csvData = buffer.toString('utf8')
-        const resultObj = convertCsvToObj(csvData);
+        const csvData = Buffer.from(curRes.content, 'base64').toString('utf8')
+        // console.log(csvData)
+        const resultObj = convertCsvToObjArray(csvData)
         // console.log(resultObj)
 
         return resultObj
@@ -82,36 +88,30 @@ export default {
   }
 }
 
-const convertCsvToObj = (csv) => {
-  //header:CSV1行目の項目 :csvRows:項目に対する値
-  const [header, ...csvRows] = csv.split('\n').filter((row) => {
-    if (row !== '') {
-      return row;
-    }
-  }).map((row) => {
-    return row.split(',');
-  });
+export const convertCsvToObjArray = csv => {
+  // header:CSV1行目の項目 :csvRows:項目に対する値
+  const [headerNames, ...csvRows] = csv
+    .split('\n')
+    .filter(row => row !== '')
+    .map(row => {
+      return row.split(',')
+    })
 
-  let objInKeyAndValue;
-  let resultObj;
-  let tmpResultObj;
-
-  tmpResultObj = csvRows.map((r) => {
-    objInKeyAndValue = header.map((_, index) => {
-      //ヘッダーの空白文字を削除。keyとvalueに値をセット
-      return ({ key: header[index].replace(/\s+/g, ''), value: r[index] });
-    });
-    objInKeyAndValue = objInKeyAndValue.reduce((previous, current) => {
-      //{key: "物", value: "MacBook", メーカー: "apple", 値段: "3000"}を作成
-      previous[current.key] = current.value;
-      return previous;
-    }, {});
-    return objInKeyAndValue;
-  });
-
-  resultObj = tmpResultObj.reduce((previous, current) => {
-    previous[current.src] = current;
-    return previous;
-  }, {});
-  return resultObj;
+  return csvRows
+    .map(r => {
+      return headerNames
+        .map((headerName, index) => {
+          // ヘッダーの空白文字を削除。keyとvalueに値をセット
+          return { key: headerName.replace(/\s+/g, ''), value: r[index] }
+        })
+        .reduce((previous, current) => {
+          // {key: "物", value: "MacBook", メーカー: "apple", 値段: "3000"}を作成
+          previous[current.key] = current.value
+          return previous
+        }, {})
+    })
+    .reduce((previous, current) => {
+      previous[current.src] = current
+      return previous
+    }, {})
 }

@@ -9,7 +9,7 @@ export default {
   setBranches: (state, data) => {
     state.metadata = {
       status: 'loaded',
-      branches : data,
+      branches: data
     }
   },
 
@@ -17,7 +17,7 @@ export default {
     state.currentUser = user
   },
 
-  updateLastPage: (state) => {
+  updateLastPage: state => {
     const lastPageInStrage = localStorage.getItem('lastPage')
     const lastPage = lastPageInStrage == null ? 'upload' : lastPageInStrage
     state.lastPage = lastPage
