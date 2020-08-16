@@ -32,10 +32,9 @@ export default {
     const resArr = await httpRes.json()
     // console.log('^_^',resArr)
 
-    let csvObj = {}
     const pool = new PromisePool(50) // 50 tasks at once
 
-    resArr.forEach(res => {
+    const files = (await Promise.all(resArr.map(res =>
       pool.open(async () => {
         const previousRes = state.setCsvObj.unparsedData[`${branchName}`]?.[`${res.name}`]
         // state.setCsvObj.unparsedData[`${branchName}`]?.[`${res.name}`]の
@@ -54,17 +53,24 @@ export default {
         const curRes = state.setCsvObj.unparsedData[`${branchName}`][`${res.name}`]
         const buffer = new Buffer(curRes.content, 'base64')
         const csvData = buffer.toString('utf8')
-        const resultObj = convertCsvToObjArray(csvData);
+        const resultObj = convertCsvToObj(csvData);
+        // console.log(resultObj)
 
-        csvObj = Object.assign(csvObj, resultObj)
+        return resultObj
       })
-    })
+    )))
 
-    
-    
-    console.log(':(', csvObj)
+    const filesBySrc = files.reduce((p, v) => {
+      return {
+        ...p,
+        ...v
+      }
+    }, {})
 
-    commit('setCsvObj', csvObj)
+    console.log(':(', JSON.stringify({filesBySrc}, null, 2))
+    console.log(':( (2)', JSON.stringify({files}, null, 2))
+
+    commit('setCsvObj', filesBySrc)
   },
 
   updateCurrentUser: async ({ commit }) => {
@@ -76,7 +82,7 @@ export default {
   }
 }
 
-const convertCsvToObjArray = (csv) => {
+const convertCsvToObj = (csv) => {
   //header:CSV1行目の項目 :csvRows:項目に対する値
   const [header, ...csvRows] = csv.split('\n').filter((row) => {
     if (row !== '') {
@@ -86,26 +92,26 @@ const convertCsvToObjArray = (csv) => {
     return row.split(',');
   });
 
-  let arrayInKeyAndValue;
-  let resultArray;
-  let tmpResultArray;
+  let objInKeyAndValue;
+  let resultObj;
+  let tmpResultObj;
 
-  tmpResultArray = csvRows.map((r) => {
-    arrayInKeyAndValue = header.map((_, index) => {
+  tmpResultObj = csvRows.map((r) => {
+    objInKeyAndValue = header.map((_, index) => {
       //ヘッダーの空白文字を削除。keyとvalueに値をセット
       return ({ key: header[index].replace(/\s+/g, ''), value: r[index] });
     });
-    arrayInKeyAndValue = arrayInKeyAndValue.reduce((previous, current) => {
+    objInKeyAndValue = objInKeyAndValue.reduce((previous, current) => {
       //{key: "物", value: "MacBook", メーカー: "apple", 値段: "3000"}を作成
       previous[current.key] = current.value;
       return previous;
     }, {});
-    return arrayInKeyAndValue;
+    return objInKeyAndValue;
   });
 
-  resultArray = tmpResultArray.reduce((previous, current) => {
+  resultObj = tmpResultObj.reduce((previous, current) => {
     previous[current.src] = current;
     return previous;
   }, {});
-  return resultArray;
+  return resultObj;
 }

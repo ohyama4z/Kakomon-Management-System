@@ -130,7 +130,10 @@
 
 
 <script>
-  const netlifyIdentity = require('netlify-identity-widget')
+  import netlifyIdentity from 'netlify-identity-widget'
+  import merge from 'deepmerge'
+  import { mapState } from 'vuex'
+
   export default {
     name: 'edit',
 
@@ -163,12 +166,79 @@
 
       this.$store.dispatch('getMetadatas')
       this.getBranchData()
-              console.log('aa',this.intermediateFiles())
-        console.log('uu',this.getMenuStructure())
-
     },
 
     computed: {
+      ...mapState({
+        intermediateFiles: state => {
+          console.log('state.files', state.filesZ)
+          const files = Object.values(state.files)
+          console.log(files)
+          const beforeMerge = files.map(
+            file => {
+              console.log('ffile', file)
+              const { period, subj, tool_type, year, content_type } = Object.fromEntries(Object.entries(file).map(([key, value]) => 
+                [key, value === '' ? '不明' : value]
+              ))
+              console.log('file', file, JSON.stringify({ period, subj, tool_type, year, content_type }))
+              const fileResult = {
+                [period]: {
+                  [subj] : {
+                    [tool_type]: {
+                      [year]: {
+                        [content_type]: {
+                          [file.src.replace(/^.*\//, '')]: file
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+              console.log('fileResult', fileResult)
+              return fileResult
+            }
+            
+          )
+          const result = merge.all(beforeMerge)
+          console.log(JSON.stringify({files, beforeMerge, result }))
+          return result
+        }
+      }),
+
+      menuStructure () {
+        const icon = 'fa fa-folder'
+        // console.log({files: this.intermediateFiles})
+        const result = generateMenuStructure(this.intermediateFiles, 6)
+        return result
+
+        function generateMenuStructure(intermediate, num) {
+          if (num === 1) {
+            const result = Object.entries(intermediate).map(([key, file]) => ({
+              title: key,
+              icon: 'fas fa-file',
+              data: file
+            }))
+            
+            console.log('intermediate', {intermediate, result})
+            return result
+          }
+          return Object.entries(intermediate).reduce((previous, [key, value]) => {
+            if (num === 2) {
+              console.log('123', key, value)
+            }
+            return [
+              ...previous,
+              {
+                title: key,
+                icon,
+                child: generateMenuStructure(value, num-1)
+              }
+            ]
+          }, [])
+
+        }
+      },
+
       isSellectedAll () {
         return this.subject && this.year && this.toolType && this.period && this.contentType && this.author
       },
@@ -190,11 +260,7 @@
         }]
 
         //this.getMenuStructure の第2引数は period, subject, toolType, year, contentType, fileNameで計6
-        console.log('ｈ',this.intermediateFiles())
-        const dataTree = this.getMenuStructure(this.intermediateFiles(), 6)
-        console.log('getMenuStructure',this.getMenuStructure(this.intermediateFiles(), 6))
-        console.log(dataTree)
-        return header.concat(dataTree)
+        return header.concat(this.menuStructure)
       },
 
       branches () {
@@ -214,65 +280,10 @@
       },
 
 
-      intermediateFiles () {
-        const files = this.$store.state.files 
-        return Object.keys(files).reduce((previous, key) => {
-          if (previous == null) {
-            previous = {}
-          }
+      // intermediateFiles () {
+      //   }, {})
+      // },
 
-          if (previous[files[key].period] == null) {
-            previous[files[key].period] = {}
-          }
-          if (previous[files[key].period][files[key].subj] == null) {
-            previous[files[key].period][files[key].subj] = {}
-          }
-
-          if (previous[files[key].period][files[key].subj][files[key].tool_type] == null) {
-            previous[files[key].period][files[key].subj][files[key].tool_type] = {}
-          }
-
-          if (previous[files[key].period][files[key].subj][files[key].tool_type][files[key].year] == null) {
-            previous[files[key].period][files[key].subj][files[key].tool_type][files[key].year] = {}
-          }
-
-          if (previous[files[key].period][files[key].subj][files[key].tool_type][files[key].year][files[key].content_type] == null) {
-            previous[files[key].period][files[key].subj][files[key].tool_type][files[key].year][files[key].content_type] = []
-          }
-
-          previous[files[key].period][files[key].subj][files[key].tool_type][files[key].year][files[key].content_type].push(files[key])
-
-          return previous
-        }, {})
-      },
-
-      getMenuStructure (intermediateFiles, keyNum) {
-        if (intermediateFiles == null) {
-          console.log('ぬす')
-          return {
-            title: 'あほあほまぬけ',
-            icon: 'fa fa-user',
-          }
-        }
-
-
-        const icon = 'fa fa-folder'
-        if (keyNum <= 1) {
-          return intermediateFiles.map(file => ({
-            title: file.src,
-            icon: 'fas fa-file',
-            data: file
-          }))
-        }
-        return Object.entries(intermediateFiles).reduce((previous, [key, value]) => {
-          previous.push({
-            title: key,
-            icon,
-            child: this.getMenuStructure(value, keyNum-1)
-          })
-          return previous
-        }, [])
-      },
 
       getBranchData () {
         this.$store.dispatch('getBranchData', this.selectedBranch)
