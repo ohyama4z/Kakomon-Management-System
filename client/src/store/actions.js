@@ -1,3 +1,5 @@
+import PromisePool from 'native-promise-pool'
+
 export default {
   upload: async ({ commit }, newFile) => {
     commit('upload',newFile)

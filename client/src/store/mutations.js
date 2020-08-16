@@ -1,3 +1,5 @@
+const netlifyIdentity = require('netlify-identity-widget')
+
 export default {
   setStatusLoading: (state, req) => {
     req.status = 'loading'
