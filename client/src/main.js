@@ -238,7 +238,7 @@ const store = new Vuex.Store({
       commit('getBranches', res)
     },
 
-    getBranchData: async ({ commit, state }, branchName, sendObj) => {
+    getBranchData: async ({ commit, state }, branchName) => { // 引数にsendObj追加 todo
       commit('setStatusLoading', state.setCsvObj)
 
       const token = state.currentUser.token.access_token
@@ -246,7 +246,7 @@ const store = new Vuex.Store({
       const headers = {
         Authorization: `Bearer ${token}`
       }
-      console.log(branchName)
+      console.log("choosebranchname", branchName)
       const httpRes = await fetch(`http://localhost:8085/.netlify/git/github/contents/metadatas?ref=${branchName}`, {method, headers})
       const resArr = await httpRes.json()
       // console.log('^_^',resArr)
@@ -264,8 +264,9 @@ const store = new Vuex.Store({
           if (previousRes == null || res.sha !== previousRes.sha) {
             const httpResponse = await fetch(`http://localhost:8085/.netlify/git/github/git/blobs/${res.sha}?ref=${branchName}`, {method, headers})
             const response = await httpResponse.json()
-            // const strRes = JSON.stringify(response)
-            // localStorage.setItem(`${branchName}_${res.name}`,strRes)
+            const strRes = JSON.stringify(response)
+            localStorage.setItem(`${branchName}_${res.name}`,strRes)
+            // console.log(response)
             commit('branchDataOnGithub' ,{
               branchData: response,
               branchName,
@@ -287,6 +288,44 @@ const store = new Vuex.Store({
       // localStorage.setItem(`${branchName}_lastItem`, 'set')
 
       
+      const editcsvobj = {
+        changedFiles: {
+          "scanned/20180802_2年3紐。5組『倫理社会」前期定期試験1.jpg": {
+            "src":"scanned/20180802_2年3紐。5組『倫理社会」前期定期試験1.jpg",
+            "subj":"倫理社会",
+            "tool_type":"テスト",
+            "period":"前期定期",
+            "year":"2018",
+            "content_type":"",
+            "author":"",
+            "image_index":"",
+            "included_pages_num":"",
+            "fix_text":""
+          },
+          "scanned/20180802_2年3紐。5組『倫理社会」前期定期試験2.jpg": {
+            "src":"scanned/20180802_2年3紐。5組『倫理社会」前期定期試験2.jpg",
+            "subj":"",
+            "tool_type":"",
+            "period":"",
+            "year":"",
+            "content_type":"",
+            "author":"",
+            "image_index":"",
+            "included_pages_num":"",
+            "fix_text":""
+          },
+        }
+      }
+
+      // editedobject→csv
+      console.log(Object.values(editcsvobj.changedFiles))
+      const objarray = Object.values(editcsvobj.changedFiles)
+      // console.log(convertToCSV(objarray))
+      const content = convertToCSV(objarray)
+
+    //   // 追々やる
+    //   // branchName = sendObj.selectedBranch 同じ名前のselectedbranchが大量にある可能性
+    //   // selectedfilesが共通のもののそれぞれをつなぎ合わせてcontentsにしてbase64encodeするor utf-8のまま
 
 
     // commitCSV: async ({ state }, sendObj) => {
@@ -308,11 +347,14 @@ const store = new Vuex.Store({
       // commitの取得
       const commithttpRes = await fetch(`http://localhost:8085/.netlify/git/github/commits/${parseref.object.sha}`, {getmethod, headers})
       const commitres = await commithttpRes.json()
-      console.log(':p~', commitres, sendObj)
+      console.log(':p~', commitres)
+      // console.log(':p~', commitres, sendObj)
 
       const postcontents = {
-        content: 'dGVzdCBjb21taXQ=',
-        encoding: 'base64'
+        // content: 'dGVzdCBjb21taXQ=',
+        // encoding: 'base64'
+        content,
+        encoding: 'utf-8'
       };
       const bodys = JSON.stringify(postcontents)
       // blobの作成
@@ -329,11 +371,10 @@ const store = new Vuex.Store({
         // base_tree: commitres.sha,
         base_tree: commitres.commit.tree.sha,
         tree: [{
-            path: 'README.md',
+            path: 'test.csv',
             mode: '100644', // 100644  100755 , 040000 160000  シンボリックリンクのパス120000 
             type: 'blob',
             sha: refres.sha,
-            // content: "hoge"
           }
           // ,
           // {
@@ -347,19 +388,18 @@ const store = new Vuex.Store({
       const branchres = await branchhttpRes.json()
       console.log("branchesres", branchres)
       console.log("check", refres.sha, branchres.sha, parseref.object.sha)
-      const date = moment().format('YYYY-MM-DDThh:mm:ssZ')
+      let date = moment().format('YYYY-MM-DDTHH:mm:ssZ')
       console.log("time", date)
 
       const commitsbody = 
       {
-        message: "test commit",
+        message: date,
         author: {
           name: "test",
           email: "hoge@gmail.com",
           // date: "2020-08-15T02:27:22.296Z"
-          // date: `${timestamp}`
           date
-        },
+      },
         parents: [
           // refres.sha
           parseref.object.sha
@@ -389,12 +429,7 @@ const store = new Vuex.Store({
     },
     // editCSV: async ( {state}, branchname, editFile ) => {
     //   const token = state.currentUser.token.access_token
-
-    //   const base64csv = btoa(editFile)
-    //   const body = btoa(sendObject)
-    //   // const body = ~~~~~~~(sendObject)~~~~~s
     //   const httpRes = await fetch(`http://localhost:8085/.netlify/git//github/git/trees/${branchname}/:metadatas`, {method, headers, body}) //refs/heads/master
-
     // }
   }
 })
@@ -404,6 +439,14 @@ const store = new Vuex.Store({
 // trees //github/git/trees post    base_tree(masterから返ってくるcommithash commit.sha) tree(配列) {path: ,mode: , sha: blobs叩いた時に返ってくるsha, type: "blob"}
 // commit //github/git/commits    author:{name: , email: , date: } parents: [master叩いた時に返ってくるcommit.sha] tree: [trees叩いた時に返ってくるsha]
 // master // github/git/refs/heads/master 
+
+const convertToCSV = (arr) => {
+  const array = [Object.keys(arr[0])].concat(arr)
+
+  return array.map(it => {
+    return Object.values(it).toString()
+  }).join('\n')
+}
 
 const convertCsvToObjArray = (csv) => {
   //header:CSV1行目の項目 :csvRows:項目に対する値
