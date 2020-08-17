@@ -52,13 +52,14 @@ export default {
           if (previousRes == null || res.sha !== previousRes.sha) {
             const unparsed = localStorage.getItem(`${res.sha}`)
             const branchDataInStorage = JSON.parse(unparsed)
+
             if (branchDataInStorage == null) {
               const httpResponse = await fetch(
                 `http://localhost:8085/.netlify/git/github/git/blobs/${res.sha}?ref=${branchName}`,
                 { method, headers }
               )
               const response = await httpResponse.json()
-              commit('branchDataOnGithub', {
+              commit('saveBase64EncodedCsv', {
                 branchData: response,
                 branchName,
                 fileName: res.name
@@ -66,7 +67,7 @@ export default {
               localStorage.setItem(`${res.sha}`, JSON.stringify(response))
             } else if (res.sha === branchDataInStorage.sha) {
               console.log('using localStorage cache')
-              commit('branchDataOnGithub', {
+              commit('saveBase64EncodedCsv', {
                 branchData: branchDataInStorage,
                 branchName,
                 fileName: res.name

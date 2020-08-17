@@ -45,7 +45,8 @@ export default {
     state.files = csvObj
   },
 
-  branchDataOnGithub: (state, data) => {
+  saveBase64EncodedCsv: (state, data) => {
+    console.log('pass mutation')
     if (state.setCsvObj.unparsedData[data.branchName] == null) {
       state.setCsvObj.unparsedData[data.branchName] = {}
     }
