@@ -38,10 +38,27 @@
     "babel-eslint": "^10.1.0",
     "babel-jest": "^23.4.2",
     "babel-loader": "^8.1.0",
-    "eslint": "^6.7.2",
+    "eslint": "^7.7.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-config-prettier-standard": "^3.0.1",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-jest": "^23.20.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
     "eslint-plugin-vue": "^6.2.2",
+    "fetch-mock": "^9.10.7",
     "jest": "^26.4.0",
+    "jest-fetch-mock": "^3.0.3",
+    "jest-localstorage-mock": "^2.4.3",
+    "node-fetch": "^2.6.0",
+    "prettier": "2.0.5",
+    "prettier-config-standard": "^1.0.1",
+    "prettier-eslint": "^11.0.0",
     "regenerator-runtime": "^0.13.7",
+    "vue-eslint-parser": "^7.1.0",
     "vue-jest": "^3.0.6",
     "vue-template-compiler": "^2.6.11",
     "webpack": "^4.44.1"
@@ -78,7 +95,14 @@
     ],
     "coverageDirectory": "./coverage/",
     "collectCoverage": true,
-    "collectCoverageFrom": ["**/*.{js,vue}", "!**/node_modules/**"]
+    "collectCoverageFrom": [
+      "**/*.{js,vue}",
+      "!**/node_modules/**"
+    ],
+    "setupFiles": [
+      "jest-localstorage-mock",
+      "./src/setupTests.js"
+    ]
   },
   "browserslist": [
     "> 1%",

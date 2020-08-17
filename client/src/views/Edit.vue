@@ -3,23 +3,36 @@
     <div></div>
     <h1 class="uk-text-center@s">過去問編集フォーム</h1>
 
-    <vk-spinner class="uk-position-medium uk-position-center" ratio="5" v-if="isLoading"></vk-spinner>
+    <vk-spinner
+      class="uk-position-medium uk-position-center"
+      ratio="5"
+      v-if="isLoading"
+    ></vk-spinner>
 
     <div v-if="!isLoading">
       <sidebar-menu :menu="sidebarMenu" @item-click="onItemClick" />
 
-      <div class="uk-position-medium uk-position-top-right uk-overlay uk-overlay-default">
-        <div class="uk-text-center@s uk-margin">編集するブランチを選択してください。</div>
+      <div
+        class="uk-position-medium uk-position-top-right uk-overlay uk-overlay-default"
+      >
+        <div class="uk-text-center@s uk-margin">
+          編集するブランチを選択してください。
+        </div>
 
         <div class="uk-margin uk-flex uk-flex-center">
-          <select class="uk-select uk-form-width-medium" v-model="selectedBranch" @change="getBranchData">
+          <select
+            class="uk-select uk-form-width-medium"
+            v-model="selectedBranch"
+            @change="getBranchData"
+          >
             <option disabled value="">ブランチを選択</option>
             <option>master</option>
-            <option 
+            <option
               v-for="branch in branches"
               v-bind:key="branch.commit.sha"
               v-show="branch.name !== 'master'"
-            >{{ branch.name }}</option>
+              >{{ branch.name }}</option
+            >
           </select>
         </div>
       </div>
@@ -30,7 +43,7 @@
           type="text"
           placeholder="教科名を入力"
           v-model="subject"
-        >
+        />
       </div>
 
       <div class="uk-margin uk-flex uk-flex-center">
@@ -39,7 +52,7 @@
           type="number"
           placeholder="年度を入力(西暦)"
           v-model="year"
-        >
+        />
       </div>
 
       <div class="uk-margin uk-flex uk-flex-center">
@@ -60,7 +73,10 @@
         </select>
       </div>
 
-      <div class="uk-margin uk-flex uk-flex-center" v-if="toolType==='テスト'">
+      <div
+        class="uk-margin uk-flex uk-flex-center"
+        v-if="toolType === 'テスト'"
+      >
         <select class="uk-select uk-form-width-medium" v-model="contentType">
           <option disabled value="">用紙の種類を選択</option>
           <option>問題</option>
@@ -70,7 +86,10 @@
         </select>
       </div>
 
-      <div class="uk-margin uk-flex uk-flex-center" v-if="toolType==='勉強用'">
+      <div
+        class="uk-margin uk-flex uk-flex-center"
+        v-if="toolType === '勉強用'"
+      >
         <select class="uk-select uk-form-width-medium" v-model="contentType">
           <option disabled value="">用紙の種類を選択</option>
           <option>ノート</option>
@@ -85,10 +104,12 @@
           type="text"
           placeholder="用紙作成者,担当教員"
           v-model="author"
-        >
+        />
       </div>
 
-      <div class="uk-text-center@s uk-margin" v-if="!isSellectedAll">すべての項目を選択してください</div>
+      <div class="uk-text-center@s uk-margin" v-if="!isSellectedAll">
+        すべての項目を選択してください
+      </div>
 
       <div class="uk-flex uk-flex-center uk-margin">
         <vk-button
@@ -96,198 +117,266 @@
           class="uk-margin"
           v-bind:disabled="!isSellectedAll"
           v-on:click="updateEditData"
-        >編集をコミット</vk-button>
+          >編集をコミット</vk-button
+        >
       </div>
 
-      <div class="uk-text-center@s uk-margin" v-for="file in selectedFiles" v-bind:key="file.title">
-        {{ file.title }} 
+      <div
+        class="uk-text-center@s uk-margin"
+        v-for="file in selectedFiles"
+        v-bind:key="file.title"
+      >
+        {{ file.title }}
         <button @click="trashFile(file)">削除</button>
       </div>
     </div>
 
-    <div class="uk-position-bottom uk-overlay uk-overlay-default uk-text-center">
+    <div
+      class="uk-position-bottom uk-overlay uk-overlay-default uk-text-center"
+    >
       ※過去問編集フォームの使い方がわからない場合は、
-      <a class="uk-link-toggle" href="https://github.com/asann3/Kakomon-Management-System/blob/master/client/manuals/README.md" target="_blank">
+      <a
+        class="uk-link-toggle"
+        href="https://github.com/asann3/Kakomon-Management-System/blob/master/client/manuals/README.md"
+        target="_blank"
+      >
         README.md
       </a>
       を参照してください。
     </div>
 
-    <div class="uk-position-medium uk-position-bottom-right uk-overlay uk-overlay-default" v-if="!isLoading">
-      <button class="uk-button uk-button-link" v-on:click="toUpload">アップロード画面へ
-        <vk-icon icon="chevron-right"></vk-icon>
-      </button>
+    <div
+      class="uk-position-medium uk-position-bottom-right uk-overlay uk-overlay-default"
+    >
+      <div v-if="!isLoading">
+        <button class="uk-button uk-button-link" v-on:click="toUpload">
+          アップロード画面へ
+          <vk-icon icon="chevron-right"></vk-icon>
+        </button>
+      </div>
+      <div>
+        <button class="uk-button uk-button-link" v-on:click="logout">
+          ログアウト
+          <vk-icon icon="chevron-right"></vk-icon>
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
-
 <script>
-  const netlifyIdentity = require('netlify-identity-widget')
-  export default {
-    name: 'edit',
+import merge from 'deepmerge'
+import { mapState } from 'vuex'
 
-    data () {
-      return {
-        subject: '',
-        year: null,
-        toolType: '',
-        period: '',
-        contentType: '',
-        author: '',
-        selectedBranch: 'master',
-        editType: '',
-        selectedFiles: []
-      }
-    },
+export default {
+  name: 'edit',
 
-    mounted () {
-      netlifyIdentity.on('logout', () => {
-        localStorage.setItem('lastPage', 'edit')
-        this.$store.commit('updateLastPage')
-        this.$router.push('/login')
-      })
+  data() {
+    return {
+      subject: '',
+      year: null,
+      toolType: '',
+      period: '',
+      contentType: '',
+      author: '',
+      selectedBranch: 'master',
+      editType: '',
+      selectedFiles: []
+    }
+  },
 
-      if (this.$store.state.currentUser == null) {
-        localStorage.setItem('lastPage', 'edit')
-        this.$store.commit('updateLastPage')
-        this.$router.push('/login')
-      }
+  mounted() {
+    if (this.$store.state.currentUser == null) {
+      localStorage.setItem('lastPage', 'edit')
+      this.$store.commit('updateLastPage')
+      this.$router.push('/login')
+    }
+    this.$store.dispatch('getMetadatas')
+    this.getBranchData()
+  },
 
-      this.$store.dispatch('getMetadatas')
-      this.getBranchData()
-    },
-
-    computed: {
-      isSellectedAll () {
-        return this.subject && this.year && this.toolType && this.period && this.contentType && this.author
+  computed: {
+    ...mapState({
+      intermediateFiles: state => {
+        const files = Object.values(state.files)
+        const beforeMerge = files.map(file => {
+          const {
+            period,
+            subj,
+            // eslint-disable-next-line camelcase
+            tool_type,
+            year,
+            // eslint-disable-next-line camelcase
+            content_type
+          } = Object.fromEntries(
+            Object.entries(file).map(([key, value]) => [
+              key,
+              value === '' ? '不明' : value
+            ])
+          )
+          const fileResult = {
+            [period]: {
+              [subj]: {
+                // eslint-disable-next-line camelcase
+                [tool_type]: {
+                  [year]: {
+                    // eslint-disable-next-line camelcase
+                    [content_type]: {
+                      [file.src.replace(/^.*\//, '')]: file
+                    }
+                  }
+                }
+              }
+            }
+          }
+          return fileResult
+        })
+        const result = merge.all(beforeMerge)
+        return result
       },
 
-      isLoading () {
-        // console.log('status',this.$store.state.setCsvObj.status)
-        // console.log('unassorted',localStorage.getItem('master_unassorted.csv'))
-        // const checkLoading = (status) => {
-        //   return status == 'loading'
-        // }
+      branches: state => state.metadatas.data
+    }),
 
-        // const setCsvObjLoaded = checkLoading(this.$store.state.setCsvObj.status) && localStorage.getItem(`${this.selectedBranch}_lastItem`) == 'set'
+    menuStructure() {
+      const icon = 'fa fa-folder'
+      const result = generateMenuStructure(this.intermediateFiles, 6)
+      return result
 
-        // // console.log(localStorage.getItem(`${this.selectedBranch}_lastItem`))
-        // return checkLoading(this.$store.state.metadatas.status) || !setCsvObjLoaded
-        return false
-      },
-
-      sidebarMenu () {
-        const header = [{
-          header: true,
-          title: `Branch : ${this.selectedBranch}`,
-          hiddenOnCollapse: true
-        }]
-
-        //this.getMenuStructure の第2引数は period, subject, toolType, year, contentType, fileNameで計6
-        const dataTree = this.getMenuStructure(this.intermediateFiles(), 6)
-        return header.concat(dataTree)
-      },
-
-      branches () {
-        return this.$store.state.metadatas.data
-      }
-    },
-
-    methods: {
-      toUpload () {
-        this.$router.push('upload')
-      },
-
-      intermediateFiles () {
-        return this.$store.state.sampleFiles.reduce((previous, current) => {
-          if (previous == null) {
-            previous = {}
-          }
-
-          if (previous[current.period] == null) {
-            previous[current.period] = {}
-          }
-          if (previous[current.period][current.subject] == null) {
-            previous[current.period][current.subject] = {}
-          }
-
-          if (previous[current.period][current.subject][current.toolType] == null) {
-            previous[current.period][current.subject][current.toolType] = {}
-          }
-
-          if (previous[current.period][current.subject][current.toolType][current.year] == null) {
-            previous[current.period][current.subject][current.toolType][current.year] = {}
-          }
-
-          if (previous[current.period][current.subject][current.toolType][current.year][current.contentType] == null) {
-            previous[current.period][current.subject][current.toolType][current.year][current.contentType] = []
-          }
-
-          previous[current.period][current.subject][current.toolType][current.year][current.contentType].push(current)
-
-          return previous
-        }, {})
-      },
-
-      getMenuStructure (intermediateFiles, keyNum) {
-        const icon = 'fa fa-folder'
-        if (keyNum <= 1) {
-          return intermediateFiles.map(file => ({
-            title: file.fileName,
+      function generateMenuStructure(intermediate, num) {
+        if (num === 1) {
+          const result = Object.entries(intermediate).map(([key, file]) => ({
+            title: key,
             icon: 'fas fa-file',
             data: file
           }))
+
+          // isLoading () {
+          //   // console.log('status',this.$store.state.setCsvObj.status)
+          //   // console.log('unassorted',localStorage.getItem('master_unassorted.csv'))
+          //   // const checkLoading = (status) => {
+          //   //   return status == 'loading'
+          //   // }
+
+          //   // const setCsvObjLoaded = checkLoading(this.$store.state.setCsvObj.status) && localStorage.getItem(`${this.selectedBranch}_lastItem`) == 'set'
+
+          //   // // console.log(localStorage.getItem(`${this.selectedBranch}_lastItem`))
+          //   // return checkLoading(this.$store.state.metadatas.status) || !setCsvObjLoaded
+          //   return false
+          // },
+
+          return result
         }
-        return Object.entries(intermediateFiles).reduce((previous, [key, value]) => {
-          previous.push({
-            title: key,
-            icon,
-            child: this.getMenuStructure(value, keyNum-1)
-          })
-          return previous
-        }, [])
-      },
-
-      getBranchData () {
-        this.$store.dispatch('getBranchData', this.selectedBranch)
-      },
-
-      onItemClick (e, item) {
-        // データツリーの末端要素をクリックしたときに処理を行う
-        if (item.child == null) {
-          console.log(item.data)
-          const sameItem = this.selectedFiles.find(file => file.title === item.title)
-          if (sameItem == null) {
-            this.selectedFiles.push(item)
+        return Object.entries(intermediate).reduce((previous, [key, value]) => {
+          if (num === 2) {
           }
-        }
-      },
-
-      trashFile (file) {
-        const index = this.selectedFiles.findIndex(item => item.title === file.title)
-        this.selectedFiles.splice(index, 1)
-      },
-
-      updateEditData () {
-        // sendObjは1つのcsvfile
-        const sendObj = {
-          selectedBranch: this.selectedBranch,
-          selectedFiles: this.selectedFiles,
-          subject: this.subject,
-          year: this.year,
-          toolType: this.toolType,
-          period: this.period,
-          contentType: this.contentType,
-          author: this.author,
-        }
-
-        this.$store.dispatch('updateEditData', sendObj)
+          return [
+            ...previous,
+            {
+              title: key,
+              icon,
+              child: generateMenuStructure(value, num - 1)
+            }
+          ]
+        }, [])
       }
     },
+
+    isSellectedAll() {
+      return (
+        this.subject &&
+        this.year &&
+        this.toolType &&
+        this.period &&
+        this.contentType &&
+        this.author
+      )
+    },
+
+    isLoading() {
+      const checkLoading = status => {
+        return status === 'loading'
+      }
+
+      return (
+        checkLoading(this.$store.state.metadatas.status) ||
+        checkLoading(this.$store.state.setCsvObj.status)
+      )
+      // return false
+    },
+
+    sidebarMenu() {
+      const header = [
+        {
+          header: true,
+          title: `Branch : ${this.selectedBranch}`,
+          hiddenOnCollapse: true
+        }
+      ]
+
+      return header.concat(this.menuStructure)
+    }
+  },
+  methods: {
+    toUpload() {
+      this.$router.push('upload')
+    },
+
+    logout() {
+      localStorage.setItem('lastPage', 'edit')
+      this.$store.commit('updateLastPage')
+      this.$router.push('/logout')
+    },
+
+    getBranchData() {
+      this.$store.dispatch('getBranchData', this.selectedBranch)
+    },
+
+    onItemClick(e, item) {
+      // データツリーの末端要素をクリックしたときに処理を行う
+      if (item.child == null) {
+        console.log(item.data)
+        const sameItem = this.selectedFiles.find(
+          file => file.title === item.title
+        )
+        if (sameItem == null) {
+          this.selectedFiles.push(item)
+        }
+      }
+    },
+
+    trashFile(file) {
+      const index = this.selectedFiles.findIndex(
+        item => item.title === file.title
+      )
+      this.selectedFiles.splice(index, 1)
+    },
+
+    updateEditData() {
+      // sendObjは1つのcsvfile
+      const sendObj = {
+        selectedBranch: this.selectedBranch,
+        selectedFiles: this.selectedFiles,
+        subject: this.subject,
+        year: this.year,
+        toolType: this.toolType,
+        period: this.period,
+        contentType: this.contentType,
+        author: this.author
+      }
+      this.$store.dispatch('updateEditData', sendObj)
+    }
+  },
+
+  trashFile(file) {
+    const index = this.selectedFiles.findIndex(
+      item => item.title === file.title
+    )
+    this.selectedFiles.splice(index, 1)
   }
+}
 </script>
 
 <style>
-  @import url('https://use.fontawesome.com/releases/v5.6.1/css/all.css');
+@import url('https://use.fontawesome.com/releases/v5.6.1/css/all.css');
 </style>

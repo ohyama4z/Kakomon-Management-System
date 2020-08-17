@@ -1,17 +1,19 @@
+import VuikitIcons, {
+  IconChevronDown,
+  IconChevronRight,
+  IconCloudUpload
+} from '@vuikit/icons'
+import '@vuikit/theme'
 import Vue from 'vue'
-import App from './App.vue'
+import VueSidebarMenu from 'vue-sidebar-menu'
+import 'vue-sidebar-menu/dist/vue-sidebar-menu.css'
 import Vuex from 'vuex'
 import Vuikit from 'vuikit'
-import VuikitIcons from '@vuikit/icons'
+import App from './App.vue'
 import router from './router.js'
-import VueSidebarMenu from 'vue-sidebar-menu'
 import actions from './store/actions'
 import mutations from './store/mutations'
 import state from './store/state'
-
-import '@vuikit/theme'
-import { IconCloudUpload, IconChevronDown, IconChevronRight } from '@vuikit/icons'
-import 'vue-sidebar-menu/dist/vue-sidebar-menu.css'
 
 const VueUploadComponent = require('vue-upload-component')
 const netlifyIdentity = require('netlify-identity-widget')

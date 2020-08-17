@@ -5,6 +5,7 @@ import Upload from './views/Upload'
 import Edit from './views/Edit'
 import mytest from './views/mytest'
 import Login from './views/Login'
+import Logout from './views/Logout'
 
 Vue.use(Router)
 
@@ -13,8 +14,8 @@ export default new Router({
   base: process.env.BASE_URL,
   routes: [
     {
-    path: '/',
-    redirect: { name: 'upload' }
+      path: '/',
+      redirect: { name: 'upload' }
     },
     {
       path: '/app',
@@ -22,9 +23,9 @@ export default new Router({
       component: App
     },
     {
-    path: '/edit',
-    name: 'edit',
-    component: Edit
+      path: '/edit',
+      name: 'edit',
+      component: Edit
     },
     {
       path: '/upload',
@@ -45,6 +46,11 @@ export default new Router({
       path: '/edit/:branchName/:fileType',
       name: 'EditFileType',
       component: Edit
+    },
+    {
+      path: '/logout',
+      name: 'logout',
+      component: Logout
     }
   ]
 })

@@ -1,36 +1,35 @@
-const netlifyIdentity = require('netlify-identity-widget')
-
+// const netlifyIdentity = require('netlify-identity-widget')
 export default {
-  setStatusLoading: (state, req) => {
-    req.status = 'loading'
+  // setStatusLoading: (state, req) => {
+  //   req.status = 'loading'
+  // },
+
+  setStatus: (state, path, status) => {
+    state[path] = status
   },
+
   upload: (state, newFile) => {
     state.files.push(newFile)
-  },
-  setServerSideLanguage: (state, languageName) => {
-    state.serverSideLanguage = {
-      status: 'loaded',
-      name: languageName,
-    }
   },
 
   setBranches: (state, data) => {
     state.metadata = {
       status: 'loaded',
-      branches : data,
+      branches: data
     }
   },
 
-  getCurrentUser: (state) => {
-    const user = netlifyIdentity.currentUser()
+  updateCurrentUser: (state, user) => {
     state.currentUser = user
   },
 
-  updateLastPage: (state) => {
+  updateLastPage: state => {
     const lastPageInStrage = localStorage.getItem('lastPage')
     const lastPage = lastPageInStrage == null ? 'upload' : lastPageInStrage
-    state.lastPage = lastPage
-    console.log('うあ', state.lastPage)
+    if (state.lastPage === '') {
+      state.lastPage = lastPage
+    }
+    console.log(`next page after loging in is ${state.lastPage}`)
   },
 
   getBranches: (state, res) => {
@@ -47,7 +46,12 @@ export default {
     state.files = csvObj
   },
 
-  branchDataOnGithub: (state, data) =>{
-    state[data.branchName][data.fileName] = data.branchData
-  },
+  saveBase64EncodedCsv: (state, data) => {
+    console.log('pass mutation')
+    if (state.setCsvObj.unparsedData[data.branchName] == null) {
+      state.setCsvObj.unparsedData[data.branchName] = {}
+    }
+    state.setCsvObj.unparsedData[data.branchName][data.fileName] =
+      data.branchData
+  }
 }
