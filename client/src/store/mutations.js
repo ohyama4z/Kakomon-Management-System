@@ -1,7 +1,12 @@
 export default {
-  setStatusLoading: (state, req) => {
-    req.status = 'loading'
+  // setStatusLoading: (state, req) => {
+  //   req.status = 'loading'
+  // },
+
+  setStatus: (state, path, status) => {
+    state[path] = status
   },
+
   upload: (state, newFile) => {
     state.files.push(newFile)
   },
@@ -20,7 +25,9 @@ export default {
   updateLastPage: state => {
     const lastPageInStrage = localStorage.getItem('lastPage')
     const lastPage = lastPageInStrage == null ? 'upload' : lastPageInStrage
-    state.lastPage = lastPage
+    if (state.lastPage === '') {
+      state.lastPage = lastPage
+    }
     console.log(`next page after loging in is ${state.lastPage}`)
   },
 
@@ -38,7 +45,8 @@ export default {
     state.files = csvObj
   },
 
-  branchDataOnGithub: (state, data) => {
+  saveBase64EncodedCsv: (state, data) => {
+    console.log('pass mutation')
     if (state.setCsvObj.unparsedData[data.branchName] == null) {
       state.setCsvObj.unparsedData[data.branchName] = {}
     }

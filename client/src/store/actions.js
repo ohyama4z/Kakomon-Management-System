@@ -22,7 +22,8 @@ export default {
   },
 
   getBranchData: async ({ commit, state }, branchName) => {
-    commit('setStatusLoading', state.setCsvObj)
+    // commit('setStatusLoading', state.setCsvObj)
+    commit('setStatus', 'csvObj', 'loading')
 
     const token = state.currentUser.token.access_token
     const method = 'GET'
@@ -49,16 +50,31 @@ export default {
           // ?. の部分がわからないときはOptional Chaningでググれ
 
           if (previousRes == null || res.sha !== previousRes.sha) {
-            const httpResponse = await fetch(
-              `http://localhost:8085/.netlify/git/github/git/blobs/${res.sha}?ref=${branchName}`,
-              { method, headers }
-            )
-            const response = await httpResponse.json()
-            commit('branchDataOnGithub', {
-              branchData: response,
-              branchName,
-              fileName: res.name
-            })
+            const unparsed = localStorage.getItem(`${res.sha}`)
+            const branchDataInStorage = JSON.parse(unparsed)
+
+            if (branchDataInStorage == null) {
+              const httpResponse = await fetch(
+                `http://localhost:8085/.netlify/git/github/git/blobs/${res.sha}?ref=${branchName}`,
+                { method, headers }
+              )
+              const response = await httpResponse.json()
+              commit('saveBase64EncodedCsv', {
+                branchData: response,
+                branchName,
+                fileName: res.name
+              })
+              localStorage.setItem(`${res.sha}`, JSON.stringify(response))
+            } else if (res.sha === branchDataInStorage.sha) {
+              console.log('using localStorage cache')
+              commit('saveBase64EncodedCsv', {
+                branchData: branchDataInStorage,
+                branchName,
+                fileName: res.name
+              })
+            }
+          } else {
+            console.log('using state cache')
           }
 
           const curRes =
@@ -80,8 +96,7 @@ export default {
       }
     }, {})
 
-    console.log(':(', JSON.stringify({ filesBySrc }, null, 2))
-    console.log(':( (2)', JSON.stringify({ files }, null, 2))
+    // console.log(':( (2)', JSON.stringify({ files }, null, 2))
 
     commit('setCsvObj', filesBySrc)
   },
