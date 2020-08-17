@@ -22,7 +22,8 @@ export default {
   },
 
   getBranchData: async ({ commit, state }, branchName) => {
-    commit('setStatusLoading', state.setCsvObj)
+    // commit('setStatusLoading', state.setCsvObj)
+    commit('setStatus', 'csvObj', 'loading')
 
     const token = state.currentUser.token.access_token
     const method = 'GET'

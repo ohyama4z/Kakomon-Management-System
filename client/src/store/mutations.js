@@ -1,7 +1,12 @@
 export default {
-  setStatusLoading: (state, req) => {
-    req.status = 'loading'
+  // setStatusLoading: (state, req) => {
+  //   req.status = 'loading'
+  // },
+
+  setStatus: (state, path, status) => {
+    state[path] = status
   },
+
   upload: (state, newFile) => {
     state.files.push(newFile)
   },
@@ -20,7 +25,9 @@ export default {
   updateLastPage: state => {
     const lastPageInStrage = localStorage.getItem('lastPage')
     const lastPage = lastPageInStrage == null ? 'upload' : lastPageInStrage
-    state.lastPage = lastPage
+    if (state.lastPage === '') {
+      state.lastPage = lastPage
+    }
     console.log(`next page after loging in is ${state.lastPage}`)
   },
 
