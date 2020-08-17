@@ -214,13 +214,6 @@ export default {
               value === '' ? '不明' : value
             ])
           )
-
-          console.log(
-            'file',
-            file,
-            // eslint-disable-next-line camelcase
-            JSON.stringify({ period, subj, tool_type, year, content_type })
-          )
           const fileResult = {
             [period]: {
               [subj]: {
