@@ -28,6 +28,7 @@ export default {
 
   updateLastPage: (state) => {
     const lastPageInStrage = localStorage.getItem('lastPage')
+    console.log("kyz", lastPageInStrage)
     const lastPage = lastPageInStrage == null ? 'upload' : lastPageInStrage
     state.lastPage = lastPage
     console.log('うあ', state.lastPage)
