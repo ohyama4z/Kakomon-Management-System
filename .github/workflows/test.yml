@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+    
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: satackey/action-docker-layer-caching@v0.0.8
+      with:
+        key: docker-cache-${{ hashFiles('**/package-lock.json') }}-{hash}
+        restore-keys: |
+          docker-cache-${{ hashFiles('**/package-lock.json') }}
+
+    - run: docker-compose build client_dev
+    - run: docker-compose run client_dev npm test
+
+    - uses: codecov/codecov-action@v1
+      if: github.event_name == 'push'
+      timeout-minutes: 1
+      continue-on-error: true
+      with:
+        directory: ./client/coverage/
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: satackey/action-docker-layer-caching@v0.0.8
+      with:
+        key: docker-cache-${{ hashFiles('**/package-lock.json') }}-{hash}
+        restore-keys: |
+          docker-cache-${{ hashFiles('**/package-lock.json') }}
+
+    - run: docker-compose build client_dev
+    - run: docker-compose run client_dev npm run build

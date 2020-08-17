@@ -287,3 +287,7 @@
     },
   }
 </script>
+
+<style>
+  @import url('https://use.fontawesome.com/releases/v5.6.1/css/all.css');
+</style>
