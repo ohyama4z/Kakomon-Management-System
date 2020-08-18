@@ -150,10 +150,6 @@ export default {
 
   commitCSV: async ({ state, commit }, branchName) => {
     commit('setStatus', 'csvObj', 'loading')
-    // editCSV: async ( {state}, branchname, editFile ) => {
-    // const token = state.currentUser.token.access_token
-    // const httpRes = await fetch(`http://localhost:8085/.netlify/git//github/git/trees/${branchname}/:metadatas`, {method, headers, body}) //refs/heads/master
-    // }
     console.log('asdfasdfasdfasdf', branchName)
     // console.log(sendObj)
     const token = state.currentUser.token.access_token
@@ -173,9 +169,6 @@ export default {
     // console.log(convertToCSV(objarray))
     const content = convertToCSV(objarray)
     console.log('content', content)
-    // //   // 追々やる
-    // //   // branchName = sendObj.selectedBranch 同じ名前のselectedbranchが大量にある可能性
-    // //   // selectedfilesが共通のもののそれぞれをつなぎ合わせてcontentsにしてbase64encodeするor utf-8のまま
 
     // //   console.log('refarr', resArr[0].sha) //filehash
 
@@ -293,13 +286,7 @@ export default {
   }
 }
 
-// blobs //github/git/blobs post    content:ファイルの文字列(base64エンコードしたものとか) encoding:base64(utf-8という選択もある) request payload
-// master //github/branches/master  get
-// trees //github/git/trees post    base_tree(masterから返ってくるcommithash commit.sha) tree(配列) {path: ,mode: , sha: blobs叩いた時に返ってくるsha, type: "blob"}
-// commit //github/git/commits    author:{name: , email: , date: } parents: [master叩いた時に返ってくるcommit.sha] tree: [trees叩いた時に返ってくるsha]
-// master // github/git/refs/heads/master
-
-const convertToCSV = arr => {
+export const convertToCSV = arr => {
   const array = [Object.keys(arr[0])].concat(arr)
   return array
     .map(it => {
@@ -308,39 +295,6 @@ const convertToCSV = arr => {
     .join('\n')
 }
 
-// const convertCsvToObjArray = (csv) => {
-//     //header:CSV1行目の項目 :csvRows:項目に対する値
-//     const [header, ...csvRows] = csv.split('\n').filter((row) => {
-//       if (row !== '') {
-//         return row;
-//       }
-//     }).map((row) => {
-//       return row.split(',');
-//     });
-
-//     let arrayInKeyAndValue;
-//     let resultArray;
-//     let tmpResultArray;
-
-//     tmpResultArray = csvRows.map((r) => {
-//       arrayInKeyAndValue = header.map((_, index) => {
-//         //ヘッダーの空白文字を削除。keyとvalueに値をセット
-//         return ({ key: header[index].replace(/\s+/g, ''), value: r[index] });
-//       });
-//       arrayInKeyAndValue = arrayInKeyAndValue.reduce((previous, current) => {
-//         //{key: "物", value: "MacBook", メーカー: "apple", 値段: "3000"}を作成
-//         previous[current.key] = current.value;
-//         return previous;
-//       }, {});
-//       return arrayInKeyAndValue;
-//     });
-
-//     resultArray = tmpResultArray.reduce((previous, current) => {
-//       previous[current.src] = current;
-//       return previous;
-//     }, {});
-//     return resultArray;
-//   }
 export const convertCsvToObjArray = csv => {
   // header:CSV1行目の項目 :csvRows:項目に対する値
   const [headerNames, ...csvRows] = csv
@@ -368,13 +322,3 @@ export const convertCsvToObjArray = csv => {
       return previous
     }, {})
 }
-// const asyncLocalStorage = {
-//   setItem: async function (key, value) {
-//       await null;
-//       return localStorage.setItem(key, value);
-//   },
-//   getItem: async function (key) {
-//       await null;
-//       return localStorage.getItem(key);
-//   }
-// };
