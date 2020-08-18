@@ -21,7 +21,7 @@ export default {
     console.log({ getBranches: res })
 
     const branches = Object.fromEntries(
-      res.map(branch => [branch.name, branch.sha])
+      res.map(branch => [branch.name, branch.commit.sha])
     )
     commit('setBranches', { branches })
   },
@@ -92,7 +92,7 @@ export default {
   },
 
   getContentMetadata: async ({ commit, state }, fileSha) => {
-    commit('setContentMetadataStatus', { sha: fileSha, status: 'loading' })
+    // commit('setContentMetadataStatus', { sha: fileSha, status: 'loading' })
 
     const fileDataInLocalStorage = JSON.parse(localStorage.getItem(fileSha))
     if (fileDataInLocalStorage != null) {
@@ -100,7 +100,7 @@ export default {
         sha: fileSha,
         data: fileDataInLocalStorage
       })
-      commit('setContentMetadataStatus', { sha: fileSha, status: 'loaded' })
+      // commit('setContentMetadataStatus', { sha: fileSha, status: 'loaded' })
       return
     }
 
@@ -125,7 +125,6 @@ export default {
     })
 
     localStorage.setItem(fileSha, JSON.stringify(resultObj))
-    commit('setContentMetadataStatus', { sha: fileSha, status: 'loaded' })
   },
 
   updateCurrentUser: async ({ commit }) => {
