@@ -23,7 +23,7 @@
           <select
             class="uk-select uk-form-width-medium"
             v-model="selectedBranch"
-            @change="getBranchData"
+            @change="getCommit"
           >
             <option disabled value="">ブランチを選択</option>
             <option>master</option>
@@ -192,7 +192,7 @@ export default {
       this.$router.push('/login')
     }
     this.$store.dispatch('getMetadatas')
-    this.getBranchData()
+    this.getCommit()
   },
 
   computed: {
@@ -314,8 +314,8 @@ export default {
       this.$router.push('/logout')
     },
 
-    getBranchData() {
-      this.$store.dispatch('getBranchData', this.selectedBranch)
+    getCommit() {
+      this.$store.dispatch('getCommit', this.selectedBranch)
     },
 
     onItemClick(e, item) {

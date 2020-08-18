@@ -121,7 +121,7 @@ describe('action.js', () => {
     })
 
     // localStorage及びstateにデータがある場合キャッシュを使用する
-    await actions.getBranchData({ state, commit }, branchName)
+    await actions.getCommit({ state, commit }, branchName)
     expect(commit).toHaveBeenNthCalledWith(1, 'setStatus', 'csvObj', 'loading')
     expect(commit).toHaveBeenCalledTimes(4) // setStatus + setCsvObjで計2
     expect(localStorage.setItem).not.toHaveBeenCalled()
@@ -191,7 +191,7 @@ describe('action.js', () => {
     })
 
     // localStorageのキャッシュを使用し
-    await actions.getBranchData({ state, commit }, branchName)
+    await actions.getCommit({ state, commit }, branchName)
     expect(commit).toHaveBeenNthCalledWith(1, 'setStatus', 'csvObj', 'loading')
     expect(commit).toHaveBeenCalledTimes(4) // setStatus + saveBase64EncodedCsv*2 + setCsvObjで計4
     expect(localStorage.setItem).not.toHaveBeenCalled()

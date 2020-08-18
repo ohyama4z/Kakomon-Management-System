@@ -31,7 +31,7 @@ export default {
     console.log(`next page after loging in is ${state.lastPage}`)
   },
 
-  getBranches: (state, res) => {
+  setMetadatas: (state, res) => {
     console.log(res)
     const branches = JSON.parse(JSON.stringify(res))
     state.metadatas = {

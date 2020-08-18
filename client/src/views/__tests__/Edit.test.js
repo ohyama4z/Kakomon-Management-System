@@ -22,7 +22,7 @@ describe('Edit.vue', () => {
     }
     const actions = {
       getMetadatas: jest.fn(),
-      getBranchData: jest.fn()
+      getCommit: jest.fn()
     }
     const store = new Vuex.Store({
       state,

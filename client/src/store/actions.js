@@ -18,10 +18,10 @@ export default {
     )
     const res = await httpRes.json()
 
-    commit('getBranches', res)
+    commit('setMetadatas', res)
   },
 
-  getBranchData: async ({ commit, state }, branchName) => {
+  getCommit: async ({ commit, state }, branchName) => {
     // commit('setStatusLoading', state.setCsvObj)
     commit('setStatus', 'csvObj', 'loading')
 
@@ -44,6 +44,7 @@ export default {
     const files = await Promise.all(
       resArr.map(res =>
         pool.open(async () => {
+          console.log(res)
           const previousRes =
             state.setCsvObj.unparsedData[`${branchName}`]?.[`${res.name}`]
           // state.setCsvObj.unparsedData[`${branchName}`]?.[`${res.name}`]の
