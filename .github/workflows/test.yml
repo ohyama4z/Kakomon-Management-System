@@ -4,9 +4,10 @@ on:
   push:
   pull_request: 
   workflow_dispatch:
-    
+
 jobs:
   test:
+    if: github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
 
     steps:
@@ -29,6 +30,7 @@ jobs:
         directory: ./client/coverage/
 
   build:
+    if: github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
 
     steps:
@@ -56,4 +58,18 @@ jobs:
           docker-cache-${{ hashFiles('**/package-lock.json') }}
 
     - run: docker-compose build client_dev
+
     - run: docker-compose run client_dev npm run lint
+      if: github.event_name != 'workflow_dispatch'
+
+    - run: docker-compose run client_dev npm run lint --fix
+      if: github.event_name == 'workflow_dispatch'
+
+    - name: Commit & push
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        git add .
+        git config user.name github-actions[bot]
+        git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+        git commit -m "lint fix"
+        git push
