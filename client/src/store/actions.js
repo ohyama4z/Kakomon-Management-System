@@ -47,6 +47,10 @@ export default {
           console.log(res)
           const previousRes =
             state.setCsvObj.unparsedData[`${branchName}`]?.[`${res.name}`]
+            // state.csvBySha[fileSha] = csv
+            // state.commits[commitSha] = [filesha1, filesha2]
+            // state.currentBranch = 'master'
+            // state.branches[branch] = commitSha
           // state.setCsvObj.unparsedData[`${branchName}`]?.[`${res.name}`]の
           // ?. の部分がわからないときはOptional Chaningでググれ
 
