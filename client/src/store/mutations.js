@@ -3,8 +3,8 @@ export default {
   //   req.status = 'loading'
   // },
 
-  setStatus: (state, path, status) => {
-    state[path] = status
+  setStatus: (state, payload) => {
+    state[payload.path].status = payload.status
   },
 
   upload: (state, newFile) => {
@@ -32,12 +32,18 @@ export default {
   },
 
   setMetadatas: (state, res) => {
-    console.log(res)
     const branches = JSON.parse(JSON.stringify(res))
     state.metadatas = {
       status: 'loaded',
       data: branches
     }
+    state.branches.data = res.reduce((pre, branch) => {
+      if (pre[branch.name] == null) {
+        pre[branch.name] = {}
+      }
+      pre[branch.name] = branch.commit.sha
+      return pre
+    }, {})
   },
 
   setCsvObj: (state, csvObj) => {
@@ -46,7 +52,6 @@ export default {
   },
 
   saveBase64EncodedCsv: (state, data) => {
-    console.log('pass mutation')
     if (state.setCsvObj.unparsedData[data.branchName] == null) {
       state.setCsvObj.unparsedData[data.branchName] = {}
     }

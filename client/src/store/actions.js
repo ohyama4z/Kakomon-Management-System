@@ -7,6 +7,7 @@ export default {
   },
 
   getMetadatas: async ({ commit, state }) => {
+    commit('setStatus', { path: 'branches', status: 'loading' })
     const token = state.currentUser.token.access_token
     const method = 'GET'
     const headers = {
@@ -17,13 +18,13 @@ export default {
       { method, headers }
     )
     const res = await httpRes.json()
-
     commit('setMetadatas', res)
+    commit('setStatus', { path: 'branches', status: 'loaded' })
   },
 
   getCommit: async ({ commit, state }, branchName) => {
     // commit('setStatusLoading', state.setCsvObj)
-    commit('setStatus', 'csvObj', 'loading')
+    commit('setStatus', { path: 'csvObj', status: 'loading' })
 
     const token = state.currentUser.token.access_token
     const method = 'GET'
@@ -37,20 +38,18 @@ export default {
     )
     // const httpRes = await fetch(`http://localhost:8085/.netlify/git/github/contents/metadatas/unassorted.csv?ref=${branchName}`, {method, headers})
     const resArr = await httpRes.json()
-    console.log('^_^', resArr)
 
     const pool = new PromisePool(50) // 50 tasks at once
 
     const files = await Promise.all(
       resArr.map(res =>
         pool.open(async () => {
-          console.log(res)
           const previousRes =
             state.setCsvObj.unparsedData[`${branchName}`]?.[`${res.name}`]
-            // state.csvBySha[fileSha] = csv
-            // state.commits[commitSha] = [filesha1, filesha2]
-            // state.currentBranch = 'master'
-            // state.branches[branch] = commitSha
+          // state.csvBySha[fileSha] = csv
+          // state.commits[commitSha] = [filesha1, filesha2]
+          // state.currentBranch = 'master'
+          // state.branches[branch] = commitSha
           // state.setCsvObj.unparsedData[`${branchName}`]?.[`${res.name}`]の
           // ?. の部分がわからないときはOptional Chaningでググれ
 

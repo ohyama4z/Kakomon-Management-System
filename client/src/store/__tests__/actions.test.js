@@ -122,7 +122,7 @@ describe('action.js', () => {
 
     // localStorage及びstateにデータがある場合キャッシュを使用する
     await actions.getCommit({ state, commit }, branchName)
-    expect(commit).toHaveBeenNthCalledWith(1, 'setStatus', 'csvObj', 'loading')
+    expect(commit).toHaveBeenNthCalledWith(1, 'setStatus', { path: 'csvObj', status: 'loading'})
     expect(commit).toHaveBeenCalledTimes(4) // setStatus + setCsvObjで計2
     expect(localStorage.setItem).not.toHaveBeenCalled()
 
@@ -179,9 +179,9 @@ describe('action.js', () => {
 
     console.log(localStorage)
 
-    const commit = jest.fn((funcName, ...payload) => {
+    const commit = jest.fn((funcName, payload) => {
       if (funcName === 'saveBase64EncodedCsv') {
-        mutations.saveBase64EncodedCsv(state, ...payload)
+        mutations.saveBase64EncodedCsv(state, payload)
       }
     })
     const branchName = 'master'
@@ -192,7 +192,7 @@ describe('action.js', () => {
 
     // localStorageのキャッシュを使用し
     await actions.getCommit({ state, commit }, branchName)
-    expect(commit).toHaveBeenNthCalledWith(1, 'setStatus', 'csvObj', 'loading')
+    expect(commit).toHaveBeenNthCalledWith(1, 'setStatus', { path: 'csvObj', status: 'loading'})
     expect(commit).toHaveBeenCalledTimes(4) // setStatus + saveBase64EncodedCsv*2 + setCsvObjで計4
     expect(localStorage.setItem).not.toHaveBeenCalled()
     expect(commit).toHaveBeenNthCalledWith(4, 'setCsvObj', {})

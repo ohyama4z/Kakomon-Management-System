@@ -13,5 +13,9 @@ export default {
     unparsedData: {}
   },
 
-  files: {}
+  files: {},
+  branches: {
+    status: 'unrequested',
+    data: {}
+  }
 }

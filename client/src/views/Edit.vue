@@ -28,10 +28,10 @@
             <option disabled value="">ブランチを選択</option>
             <option>master</option>
             <option
-              v-for="branch in branches"
-              v-bind:key="branch.commit.sha"
-              v-show="branch.name !== 'master'"
-              >{{ branch.name }}</option
+              v-for="(sha, branchName) in branches"
+              v-bind:key="sha"
+              v-show="branchName !== 'master'"
+              >{{ branchName }}</option
             >
           </select>
         </div>
@@ -235,7 +235,7 @@ export default {
         return result
       },
 
-      branches: state => state.metadatas.data
+      branches: state => state.branches.data
     }),
 
     menuStructure() {
@@ -285,7 +285,7 @@ export default {
       }
 
       return (
-        checkLoading(this.$store.state.metadatas.status) ||
+        checkLoading(this.$store.state.branches.status) ||
         checkLoading(this.$store.state.setCsvObj.status)
       )
       // return false
