@@ -23,7 +23,7 @@
           <select
             class="uk-select uk-form-width-medium"
             v-model="selectedBranch"
-            @change="getBranchData"
+            @change="getBranchData(), commitCSV()"
           >
             <option disabled value="">ブランチを選択</option>
             <option>master</option>
@@ -193,6 +193,7 @@ export default {
     }
     this.$store.dispatch('getMetadatas')
     this.getBranchData()
+    this.commitCSV()
   },
 
   computed: {
@@ -250,20 +251,6 @@ export default {
             icon: 'fas fa-file',
             data: file
           }))
-
-          // isLoading () {
-          //   // console.log('status',this.$store.state.setCsvObj.status)
-          //   // console.log('unassorted',localStorage.getItem('master_unassorted.csv'))
-          //   // const checkLoading = (status) => {
-          //   //   return status == 'loading'
-          //   // }
-
-          //   // const setCsvObjLoaded = checkLoading(this.$store.state.setCsvObj.status) && localStorage.getItem(`${this.selectedBranch}_lastItem`) == 'set'
-
-          //   // // console.log(localStorage.getItem(`${this.selectedBranch}_lastItem`))
-          //   // return checkLoading(this.$store.state.metadatas.status) || !setCsvObjLoaded
-          //   return false
-          // },
 
           return result
         }
@@ -332,6 +319,10 @@ export default {
       this.$store.dispatch('getBranchData', this.selectedBranch)
     },
 
+    commitCSV() {
+      this.$store.dispatch('commitCSV', this.selectedBranch)
+    },
+
     onItemClick(e, item) {
       // データツリーの末端要素をクリックしたときに処理を行う
       if (item.child == null) {
@@ -355,7 +346,7 @@ export default {
     updateEditData() {
       // sendObjは1つのcsvfile
       const sendObj = {
-        selectedBranch: this.selectedBranch,
+        selecteBranch: this.selectedBranch,
         selectedFiles: this.selectedFiles,
         subject: this.subject,
         year: this.year,
@@ -364,6 +355,7 @@ export default {
         contentType: this.contentType,
         author: this.author
       }
+
       this.$store.dispatch('updateEditData', sendObj)
     }
   },

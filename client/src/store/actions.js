@@ -1,5 +1,6 @@
 import PromisePool from 'native-promise-pool'
-const netlifyIdentity = require('netlify-identity-widget')
+import netlifyIdentity from 'netlify-identity-widget'
+
 const moment = require('moment')
 
 export default {
@@ -44,45 +45,46 @@ export default {
 
     const pool = new PromisePool(50) // 50 tasks at once
 
-    // localStorage.removeItem(`${branchName}_lastItem`)
+    // <<<<<<< HEAD
+    //     // localStorage.removeItem(`${branchName}_lastItem`)
 
-    resArr.forEach(res => {
-      pool.open(async () => {
-        const previousResStr = localStorage.getItem(`${branchName}_${res.name}`)
-        const previousRes = JSON.parse(previousResStr)
-        // const previousRes = state[`${branchName}`][`${res.name}`]
+    //     resArr.forEach(res => {
+    //       pool.open(async () => {
+    //         const previousResStr = localStorage.getItem(`${branchName}_${res.name}`)
+    //         const previousRes = JSON.parse(previousResStr)
+    //         // const previousRes = state[`${branchName}`][`${res.name}`]
 
-        if (previousRes == null || res.sha !== previousRes.sha) {
-          console.log('manukemanuke')
-          const httpResponse = await fetch(
-            `http://localhost:8085/.netlify/git/github/git/blobs/${res.sha}?ref=${branchName}`,
-            { method, headers }
-          )
+    //         if (previousRes == null || res.sha !== previousRes.sha) {
+    //           console.log('manukemanuke')
+    //           const httpResponse = await fetch(
+    //             `http://localhost:8085/.netlify/git/github/git/blobs/${res.sha}?ref=${branchName}`,
+    //             { method, headers }
+    //           )
 
-          const response = await httpResponse.json()
-          const strRes = JSON.stringify(response)
-          localStorage.setItem(`${branchName}_${res.name}`, strRes)
-          commit('saveBase64EncodedCsv', {
-            branchData: response,
-            branchName,
-            fileName: res.name
-          })
-        }
+    //           const response = await httpResponse.json()
+    //           const strRes = JSON.stringify(response)
+    //           localStorage.setItem(`${branchName}_${res.name}`, strRes)
+    //           commit('saveBase64EncodedCsv', {
+    //             branchData: response,
+    //             branchName,
+    //             fileName: res.name
+    //           })
+    //         }
 
-        const curResStr = localStorage.getItem(`${branchName}_${res.name}`)
-        const curRes = JSON.parse(curResStr)
-        // const curRes = state[`${branchName}`][`${res.name}`]
-        console.log('^^;', curRes)
-        const buffer = Buffer.from(curRes.content, 'base64')
-        const csvData = buffer.toString('utf8')
-        // console.log(csvData)
-        const resultObj = convertCsvToObjArray(csvData)
-        // console.log(resultObj)
-        console.log('hoge', resultObj)
+    //         const curResStr = localStorage.getItem(`${branchName}_${res.name}`)
+    //         const curRes = JSON.parse(curResStr)
+    //         // const curRes = state[`${branchName}`][`${res.name}`]
+    //         console.log('^^;', curRes)
+    //         const buffer = Buffer.from(curRes.content, 'base64')
+    //         const csvData = buffer.toString('utf8')
+    //         // console.log(csvData)
+    //         const resultObj = convertCsvToObjArray(csvData)
+    //         // console.log(resultObj)
+    //         console.log('hoge', resultObj)
 
-        // csvObj = Object.assign(csvObj, resultObj)
-      })
-    })
+    //         // csvObj = Object.assign(csvObj, resultObj)
+    //       })
+    //     })
 
     const files = await Promise.all(
       resArr.map(res =>
@@ -138,60 +140,44 @@ export default {
         ...v
       }
     }, {})
+    commit('setCsvObj', filesBySrc)
+    console.log(files)
 
     // console.log(':( (2)', JSON.stringify({ files }, null, 2))
 
     // localStorage.setItem(`${branchName}_lastItem`, 'set')
+  },
 
-    const editcsvobj = {
-      changedFiles: {
-        'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験1.jpg': {
-          src: 'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験1.jpg',
-          subj: '倫理社会',
-          tool_type: 'テスト',
-          period: '前期定期',
-          year: '2018',
-          content_type: '',
-          author: '',
-          image_index: '',
-          included_pages_num: '',
-          fix_text: ''
-        },
-        'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験2.jpg': {
-          src: 'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験2.jpg',
-          subj: '',
-          tool_type: '',
-          period: '',
-          year: '',
-          content_type: '',
-          author: '',
-          image_index: '',
-          included_pages_num: '',
-          fix_text: ''
-        }
-      }
+  commitCSV: async ({ state, commit }, branchName) => {
+    commit('setStatus', 'csvObj', 'loading')
+    // editCSV: async ( {state}, branchname, editFile ) => {
+    // const token = state.currentUser.token.access_token
+    // const httpRes = await fetch(`http://localhost:8085/.netlify/git//github/git/trees/${branchname}/:metadatas`, {method, headers, body}) //refs/heads/master
+    // }
+    console.log('asdfasdfasdfasdf', branchName)
+    // console.log(sendObj)
+    const token = state.currentUser.token.access_token
+    const getmethod = 'GET'
+    const postmethod = 'POST'
+    const patchmethod = 'PATCH'
+    const headers = {
+      Authorization: `Bearer ${token}`
     }
 
+    const editcsvobj = state.changedFiles
+    console.log(editcsvobj)
+
     // editedobject→csv
-    console.log(Object.values(editcsvobj.changedFiles))
-    const objarray = Object.values(editcsvobj.changedFiles)
+    console.log(Object.values(editcsvobj))
+    const objarray = Object.values(editcsvobj)
     // console.log(convertToCSV(objarray))
     const content = convertToCSV(objarray)
-
+    console.log('content', content)
     // //   // 追々やる
     // //   // branchName = sendObj.selectedBranch 同じ名前のselectedbranchが大量にある可能性
     // //   // selectedfilesが共通のもののそれぞれをつなぎ合わせてcontentsにしてbase64encodeするor utf-8のまま
 
-    // commitCSV: async ({ state }, sendObj) => {
-    // const token = state.currentUser.token.access_token
-    const getmethod = 'GET'
-    const postmethod = 'POST'
-    const patchmethod = 'PATCH'
-    // const headers = {
-    //   Authorization: `Bearer ${token}`
-    // }
-
-    //   console.log('refarr', resArr[0].sha) //filehash
+    // //   console.log('refarr', resArr[0].sha) //filehash
 
     // refの取得
     const branchref = await fetch(
@@ -199,6 +185,7 @@ export default {
       { getmethod, headers }
     )
     const parseref = await branchref.json()
+    console.log(parseref)
     console.log('branch毎のハッシュ', `${branchName}`, parseref.object.sha)
 
     // commitの取得
@@ -226,8 +213,8 @@ export default {
     const refres = await refhttpRes.json()
     console.log(':q~', refres)
 
-    // const masmaster = await fetch('http://localhost:8085/.netlify/git/github/branches/master', {method: getmethod, headers})
-    // const masres = await masmaster.json()
+    // // const masmaster = await fetch('http://localhost:8085/.netlify/git/github/branches/master', {method: getmethod, headers})
+    // // const masres = await masmaster.json()
 
     // console.log(commitres.sha, masres.commit.sha) 同じ値
     const treesbody = {
@@ -294,8 +281,7 @@ export default {
     console.log('asdf', updaterefres)
     // console.log(':(', csvObj)
     // commit('setCsvObj', csvObj)
-
-    commit('setCsvObj', filesBySrc)
+    commit('commitCSV')
   },
 
   updateCurrentUser: async ({ commit }) => {
@@ -305,11 +291,6 @@ export default {
     }
     commit('updateCurrentUser', user)
   }
-
-  // editCSV: async ( {state}, branchname, editFile ) => {
-  //   const token = state.currentUser.token.access_token
-  //   const httpRes = await fetch(`http://localhost:8085/.netlify/git//github/git/trees/${branchname}/:metadatas`, {method, headers, body}) //refs/heads/master
-  // }
 }
 
 // blobs //github/git/blobs post    content:ファイルの文字列(base64エンコードしたものとか) encoding:base64(utf-8という選択もある) request payload

@@ -1,4 +1,3 @@
-// const netlifyIdentity = require('netlify-identity-widget')
 export default {
   // setStatusLoading: (state, req) => {
   //   req.status = 'loading'
@@ -33,7 +32,7 @@ export default {
   },
 
   getBranches: (state, res) => {
-    console.log(res)
+    console.log('resssss', res)
     const branches = JSON.parse(JSON.stringify(res))
     state.metadatas = {
       status: 'loaded',
@@ -53,5 +52,9 @@ export default {
     }
     state.setCsvObj.unparsedData[data.branchName][data.fileName] =
       data.branchData
+  },
+
+  commitCSV: state => {
+    state.commitcsv.status = 'committed'
   }
 }
