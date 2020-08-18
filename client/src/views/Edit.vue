@@ -23,7 +23,7 @@
           <select
             class="uk-select uk-form-width-medium"
             v-model="selectedBranch"
-            @change="getCommit"
+            @change="selectBranch"
           >
             <option disabled value="">ブランチを選択</option>
             <option>master</option>
@@ -166,7 +166,7 @@
 
 <script>
 import merge from 'deepmerge'
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 
 export default {
   name: 'edit',
@@ -185,58 +185,63 @@ export default {
     }
   },
 
-  mounted() {
+  async mounted() {
     if (this.$store.state.currentUser == null) {
       localStorage.setItem('lastPage', 'edit')
       this.$store.commit('updateLastPage')
       this.$router.push('/login')
     }
-    this.$store.dispatch('getMetadatas')
+    await this.$store.dispatch('getBranches')
+    await this.$store.dispatch('selectBranch', 'master')
     this.getCommit()
   },
 
   computed: {
     ...mapState({
-      intermediateFiles: state => {
-        const files = Object.values(state.files)
-        const beforeMerge = files.map(file => {
-          const {
-            period,
-            subj,
-            // eslint-disable-next-line camelcase
-            tool_type,
-            year,
-            // eslint-disable-next-line camelcase
-            content_type
-          } = Object.fromEntries(
-            Object.entries(file).map(([key, value]) => [
-              key,
-              value === '' ? '不明' : value
-            ])
-          )
-          const fileResult = {
-            [period]: {
-              [subj]: {
-                // eslint-disable-next-line camelcase
-                [tool_type]: {
-                  [year]: {
-                    // eslint-disable-next-line camelcase
-                    [content_type]: {
-                      [file.src.replace(/^.*\//, '')]: file
-                    }
+      branches: state => state.branches.data
+    }),
+
+    ...mapGetters(['currentBranchMetadatas']),
+
+    intermediateFiles(currentBranchMetadatas) {
+      const files = Object.values(currentBranchMetadatas)
+      console.log({})
+      const beforeMerge = files.map(file => {
+        const {
+          period,
+          subj,
+          // eslint-disable-next-line camelcase
+          tool_type,
+          year,
+          // eslint-disable-next-line camelcase
+          content_type
+        } = Object.fromEntries(
+          Object.entries(file).map(([key, value]) => [
+            key,
+            value === '' ? '不明' : value
+          ])
+        )
+
+        const fileResult = {
+          [period]: {
+            [subj]: {
+              // eslint-disable-next-line camelcase
+              [tool_type]: {
+                [year]: {
+                  // eslint-disable-next-line camelcase
+                  [content_type]: {
+                    [file.src.replace(/^.*\//, '')]: file
                   }
                 }
               }
             }
           }
-          return fileResult
-        })
-        const result = merge.all(beforeMerge)
-        return result
-      },
-
-      branches: state => state.branches.data
-    }),
+        }
+        return fileResult
+      })
+      const result = merge.all(beforeMerge)
+      return result
+    },
 
     menuStructure() {
       const icon = 'fa fa-folder'
@@ -314,8 +319,13 @@ export default {
       this.$router.push('/logout')
     },
 
-    getCommit() {
-      this.$store.dispatch('getCommit', this.selectedBranch)
+    async getCommit() {
+      const commitSha = this.$store.state.branches.data[this.selectedBranch]
+      await this.$store.dispatch('getCommit', commitSha)
+    },
+
+    async selectBranch() {
+      await this.$store.dispatch('selectBranch', this.selectedBranch)
     },
 
     onItemClick(e, item) {

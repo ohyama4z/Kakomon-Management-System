@@ -3,6 +3,7 @@ const netlifyIdentity = require('netlify-identity-widget')
 export default {
   currentUser: netlifyIdentity.currentUser(),
   lastPage: '',
+  currentBranch: '',
   metadatas: {
     status: 'unrequested',
     data: []
@@ -12,6 +13,9 @@ export default {
     status: 'unrequested',
     unparsedData: {}
   },
+
+  commits: {},
+  contentMetadatas: {},
 
   files: {},
   branches: {

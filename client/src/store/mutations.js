@@ -11,13 +11,6 @@ export default {
     state.files.push(newFile)
   },
 
-  setBranches: (state, data) => {
-    state.metadata = {
-      status: 'loaded',
-      branches: data
-    }
-  },
-
   updateCurrentUser: (state, user) => {
     state.currentUser = user
   },
@@ -31,19 +24,77 @@ export default {
     console.log(`next page after loging in is ${state.lastPage}`)
   },
 
-  setMetadatas: (state, res) => {
-    const branches = JSON.parse(JSON.stringify(res))
-    state.metadatas = {
+  // setMetadatas: (state, res) => {
+  //   const branches = JSON.parse(JSON.stringify(res))
+  //   state.metadatas = {
+  //     status: 'loaded',
+  //     data: branches
+  //   }
+  //   state.branches.data = res.reduce((pre, branch) => {
+  //     if (pre[branch.name] == null) {
+  //       pre[branch.name] = {}
+  //     }
+  //     pre[branch.name] = branch.commit.sha
+  //     return pre
+  //   }, {})
+  // },
+  setBranches: (state, payload) => {
+    state.branches = {
+      ...state.branches,
       status: 'loaded',
-      data: branches
+      data: payload.branches
     }
-    state.branches.data = res.reduce((pre, branch) => {
-      if (pre[branch.name] == null) {
-        pre[branch.name] = {}
+  },
+
+  //
+  setBranchesStatus: (state, payload) => {
+    state.branches = {
+      ...state.branches,
+      status: payload.status
+    }
+  },
+
+  setCurrentBranch: (state, branchName) => {
+    state.currentBranch = branchName
+  },
+
+  setCommit: (state, payload) => {
+    state.commits = {
+      ...state.commits,
+      [payload.sha]: {
+        status: 'loaded',
+        data: payload.data
       }
-      pre[branch.name] = branch.commit.sha
-      return pre
-    }, {})
+    }
+  },
+
+  setCommitStatus: (state, payload) => {
+    if (state.commits[payload.sha] == null) {
+      state.commits[payload.sha] = {
+        status: '',
+        data: {}
+      }
+    }
+    state.commits[payload.sha].status = payload.status
+  },
+
+  setContentMetadata: (state, payload) => {
+    state.contentMetadatas = {
+      ...state.contentMetadatas,
+      [payload.sha]: {
+        status: 'loaded',
+        data: payload.data
+      }
+    }
+  },
+
+  setContentMetadataStatus: (state, payload) => {
+    state.contentMetadatas = {
+      ...state.contentMetadatas,
+      [payload.sha]: {
+        status: payload.status
+      }
+    }
   },
 
   setCsvObj: (state, csvObj) => {
