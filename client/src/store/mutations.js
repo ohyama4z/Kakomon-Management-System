@@ -79,18 +79,13 @@ export default {
   },
 
   setContentMetadata: (state, payload) => {
-    console.log({ log: 'setContentMetadata1', payload })
     state.contentMetadatas = {
       ...state.contentMetadatas,
       [payload.sha]: {
-        status: 'loadedd',
+        status: 'loaded',
         data: payload.data
       }
     }
-    console.log({
-      log: 'setContentMetadata2',
-      'state.contentMetadatas[payload.sha]': state.contentMetadatas[payload.sha]
-    })
   },
 
   setContentMetadataStatus: (state, payload) => {

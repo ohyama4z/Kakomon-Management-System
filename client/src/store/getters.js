@@ -5,34 +5,45 @@ export default {
     const commits = state.commits
     const contentMetadatas = state.contentMetadatas
 
-    const commitSha = state.branches?.data?.[branch]
-    console.log(branches.status, commits[commitSha]?.status, contentMetadatas)
-
     if (branches.status !== 'loaded') {
-      console.log('branches')
+      console.log(
+        `branches is ${branches.status}, skip generating branch metadatas`
+      )
       return {}
     }
 
-    if (commits[commitSha].status !== 'loaded') {
-      console.log('commits')
+    const commitSha = branches?.data?.[branch]
+    console.log(`branch ${branch} head commit is ${commitSha}`)
+    if (commits[commitSha]?.status !== 'loaded') {
+      console.log(
+        `commits is ${commits[commitSha]?.status}, skip generating metadatas`
+      )
       return {}
     }
 
-    // const fileShas = Object.values(state.commits.data[commitSha]).map(...)
-    return Object.entries(contentMetadatas).reduce(
-      (pre, [fileSha, metadata]) => {
-        if (fileSha !== commitSha) {
-          return pre
-        }
-        if (metadata.status !== 'loaded') {
-          return pre
-        }
-        Object.entries(metadata.data).map(([fileName, value]) => {
-          pre[fileName] = value
-        })
-        return pre
-      },
-      {}
+    const loadedContentMetadataShas = Object.values(
+      state.commits[commitSha].data
+    ).filter(sha => contentMetadatas[sha]?.status === 'loaded')
+
+    if (
+      loadedContentMetadataShas.length !==
+      Object.values(state.commits[commitSha].data).length
+    ) {
+      return {}
+    }
+
+    const loadedMetadatas = loadedContentMetadataShas.map(
+      sha => contentMetadatas[sha]?.data
     )
+
+    const contentMetadatasBySource = loadedMetadatas.flatMap(loadedMetadata =>
+      Object.entries(loadedMetadata)
+    )
+
+    const result = Object.fromEntries(contentMetadatasBySource)
+
+    console.log({ contentMetadatasBySource, result })
+
+    return result
   }
 }

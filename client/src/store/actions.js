@@ -18,7 +18,6 @@ export default {
       { method, headers }
     )
     const res = await httpRes.json()
-    console.log({ getBranches: res })
 
     const branches = Object.fromEntries(
       res.map(branch => [branch.name, branch.commit.sha])
@@ -27,22 +26,14 @@ export default {
   },
 
   selectBranch: async ({ dispatch, commit }, branchName) => {
+    commit('setCurrentBranch', branchName)
     await dispatch('getBranches')
     const commitSha = state.branches.data[branchName]
-    console.log({ commitSha })
     await dispatch('getCommit', commitSha)
   },
 
   getCommit: async ({ dispatch, commit, state }, commitSha) => {
     commit('setCommitStatus', { sha: commitSha, status: 'loading' })
-    // const branchName = Object.entries(state.branches.data).reduce(
-    //   (pre, [key, sha]) => {
-    //     pre = sha === branchSha ? key : pre
-    //     return pre
-    //   },
-    //   null
-    // )
-    // commit('setCurrentBranch', branchName)
     const commitDataInLocalStorage = JSON.parse(localStorage.getItem(commitSha))
     if (commitDataInLocalStorage != null) {
       commit('setCommit', {
@@ -134,97 +125,6 @@ export default {
     }
     commit('updateCurrentUser', user)
   }
-
-  //   getCommitOld: async ({ commit, state }, branchName) => {
-  //     // commit('setStatusLoading', state.setCsvObj)
-  //     commit('setStatus', { path: 'setCsvObj', status: 'loading' })
-  //     commit('setCurrentBranch', branchName)
-
-  //     const token = state.currentUser.token.access_token
-  //     const method = 'GET'
-  //     const headers = {
-  //       Authorization: `Bearer ${token}`
-  //     }
-  //     console.log(branchName)
-  //     const httpRes = await fetch(
-  //       `http://localhost:8085/.netlify/git/github/contents/metadatas?ref=${state.currentBranch}`,
-  //       { method, headers }
-  //     )
-  //     // const httpRes = await fetch(`http://localhost:8085/.netlify/git/github/contents/metadatas/unassorted.csv?ref=${branchName}`, {method, headers})
-  //     const resArr = await httpRes.json()
-  //     console.log('aho', resArr)
-
-  //     commit('setCommits')
-
-  //     const pool = new PromisePool(50) // 50 tasks at once
-
-  //     const files = await Promise.all(
-  //       resArr.map(res =>
-  //         pool.open(async () => {
-  //           const previousRes =
-  //             state.setCsvObj.unparsedData[`${state.currentBranch}`]?.[
-  //               `${res.name}`
-  //             ]
-  //           // state.csvBySha[fileSha] = csv
-  //           // state.commits[commitSha] = [filesha1, filesha2]
-  //           // state.currentBranch = 'master'
-  //           // state.branches[branch] = commitSha
-  //           // state.setCsvObj.unparsedData[`${state.currentBranch}`]?.[`${res.name}`]の
-  //           // ?. の部分がわからないときはOptional Chaningでググれ
-
-  //           if (previousRes == null || res.sha !== previousRes.sha) {
-  //             const unparsed = localStorage.getItem(`${res.sha}`)
-  //             const branchDataInStorage = JSON.parse(unparsed)
-
-  //             if (branchDataInStorage == null) {
-  //               const httpResponse = await fetch(
-  //                 `http://localhost:8085/.netlify/git/github/git/blobs/${res.sha}?ref=${state.currentBranch}`,
-  //                 { method, headers }
-  //               )
-  //               const response = await httpResponse.json()
-  //               commit('saveBase64EncodedCsv', {
-  //                 branchData: response,
-  //                 branchName: state.currentBranch,
-  //                 fileName: res.name
-  //               })
-  //               localStorage.setItem(`${res.sha}`, JSON.stringify(response))
-  //             } else if (res.sha === branchDataInStorage.sha) {
-  //               console.log('using localStorage cache')
-  //               commit('saveBase64EncodedCsv', {
-  //                 branchData: branchDataInStorage,
-  //                 branchName: state.currentBranch,
-  //                 fileName: res.name
-  //               })
-  //             }
-  //           } else {
-  //             console.log('using state cache')
-  //           }
-
-  //           const curRes =
-  //             state.setCsvObj.unparsedData[`${state.currentBranch}`][
-  //               `${res.name}`
-  //             ]
-  //           const csvData = Buffer.from(curRes.content, 'base64').toString('utf8')
-  //           // console.log(csvData)
-  //           const resultObj = convertCsvToObjArray(csvData)
-  //           // console.log(resultObj)
-
-  //           return resultObj
-  //         })
-  //       )
-  //     )
-
-  //     const filesBySrc = files.reduce((p, v) => {
-  //       return {
-  //         ...p,
-  //         ...v
-  //       }
-  //     }, {})
-
-  //     // console.log(':( (2)', JSON.stringify({ files }, null, 2))
-
-  //     commit('setCsvObj', filesBySrc)
-  //   }
 }
 
 export function convertCsvToObjArray(csv) {

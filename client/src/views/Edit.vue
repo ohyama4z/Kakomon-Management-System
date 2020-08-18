@@ -192,7 +192,7 @@ export default {
       this.$router.push('/login')
     }
     await this.$store.dispatch('getBranches')
-    await this.$store.dispatch('selectBranch', 'master')
+    await this.$store.dispatch('selectBranch', this.selectedBranch)
     this.getCommit()
   },
 
@@ -203,8 +203,8 @@ export default {
 
     ...mapGetters(['currentBranchMetadatas']),
 
-    intermediateFiles(currentBranchMetadatas) {
-      const files = Object.values(currentBranchMetadatas)
+    intermediateFiles() {
+      const files = Object.values(this.currentBranchMetadatas)
       console.log({})
       const beforeMerge = files.map(file => {
         const {
