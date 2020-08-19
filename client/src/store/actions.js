@@ -84,7 +84,6 @@ export default {
     })
 
     localStorage.setItem(`${commitSha}`, JSON.stringify(commitData))
-    // commit('setCommitsStatus', { branchSha, status: 'loaded' })
   },
 
   getContentMetadata: async ({ commit, state }, fileSha) => {
