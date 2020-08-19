@@ -25,6 +25,13 @@ export default {
   },
 
   setBranchesStatus: (state, payload) => {
+    if (payload.status !== 'loading' && payload.status !== 'loaded') {
+      state.branches = {
+        ...state.branches,
+        status: 'invalied_status'
+      }
+      return
+    }
     state.branches = {
       ...state.branches,
       status: payload.status
@@ -46,13 +53,19 @@ export default {
   },
 
   setCommitStatus: (state, payload) => {
-    if (state.commits[payload.sha] == null) {
-      state.commits[payload.sha] = {
-        status: '',
-        data: {}
+    if (payload.status !== 'loading' && payload.status !== 'loaded') {
+      state.branches = {
+        ...state.branches,
+        status: 'invalied_status'
+      }
+      return
+    }
+    state.commits = {
+      ...state.commits,
+      [payload.sha]: {
+        status: payload.status
       }
     }
-    state.commits[payload.sha].status = payload.status
   },
 
   setContentMetadata: (state, payload) => {
@@ -66,6 +79,13 @@ export default {
   },
 
   setContentMetadataStatus: (state, payload) => {
+    if (payload.status !== 'loading' && payload.status !== 'loaded') {
+      state.branches = {
+        ...state.branches,
+        status: 'invalied_status'
+      }
+      return
+    }
     state.contentMetadatas = {
       ...state.contentMetadatas,
       [payload.sha]: {

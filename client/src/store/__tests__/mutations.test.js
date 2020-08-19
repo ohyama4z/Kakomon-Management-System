@@ -1,11 +1,4 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils'
-import Vuex from 'vuex'
 import mutations from '../mutations'
-
-const localVue = createLocalVue()
-
-localVue.use(Vuex)
-
 const state = {
   lastPage: '',
   currentBranch: '',
@@ -18,16 +11,9 @@ const state = {
     data: {}
   }
 }
-const store = new Vuex.Store({
-  state
-})
 
 describe('mutations.js', () => {
   it('ユーザーがeditページを読み込んだ際のbranchの書き換え,commitsの書き換え,contentMetadatasの書き換えまでの一連の流れ', () => {
-    shallowMount(mutations, {
-      localVue,
-      store
-    })
 
     state.currentBranch = 'master'
     const payloadForSetBranches = {
