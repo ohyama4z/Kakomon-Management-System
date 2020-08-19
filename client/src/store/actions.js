@@ -130,7 +130,6 @@ export default {
   },
 
   setCommitCSV: async ({ state, commit }, branchName) => {
-    commit('setStatus', 'csvObj', 'loading')
     console.log('asdfasdfasdfasdf', branchName)
     // console.log(sendObj)
     const token = state.currentUser.token.access_token
