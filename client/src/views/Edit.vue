@@ -23,7 +23,7 @@
           <select
             class="uk-select uk-form-width-medium"
             v-model="selectedBranch"
-            @change="selectBranch"
+            @change="selectBranch(), setCommitCSV()"
           >
             <option disabled value="">ブランチを選択</option>
             <option>master</option>
@@ -194,6 +194,7 @@ export default {
     await this.$store.dispatch('getBranches')
     await this.$store.dispatch('selectBranch', this.selectedBranch)
     this.getCommit()
+    this.setCommitCSV()
   },
 
   computed: {
@@ -326,6 +327,10 @@ export default {
       await this.$store.dispatch('selectBranch', this.selectedBranch)
     },
 
+    setCommitCSV() {
+      this.$store.dispatch('setCommitCSV', this.selectedBranch)
+    },
+
     onItemClick(e, item) {
       // データツリーの末端要素をクリックしたときに処理を行う
       if (item.child == null) {
@@ -347,8 +352,9 @@ export default {
     },
 
     updateEditData() {
+      // sendObjは1つのcsvfile
       const sendObj = {
-        selectedBranch: this.selectedBranch,
+        selecteBranch: this.selectedBranch,
         selectedFiles: this.selectedFiles,
         subject: this.subject,
         year: this.year,

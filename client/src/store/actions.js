@@ -1,6 +1,8 @@
 import netlifyIdentity from 'netlify-identity-widget'
 import state from './state'
 
+const moment = require('moment')
+
 export default {
   upload: async ({ commit }, newFile) => {
     commit('upload', newFile)
@@ -127,6 +129,134 @@ export default {
     localStorage.setItem(fileSha, JSON.stringify(resultObj))
   },
 
+  setCommitCSV: async ({ state, commit }, branchName) => {
+    console.log('asdfasdfasdfasdf', branchName)
+    // console.log(sendObj)
+    const token = state.currentUser.token.access_token
+    const getmethod = 'GET'
+    const postmethod = 'POST'
+    const patchmethod = 'PATCH'
+    const headers = {
+      Authorization: `Bearer ${token}`
+    }
+
+    const editcsvobj = state.changedFiles
+    console.log(editcsvobj)
+
+    // editedobject→csv
+    console.log(Object.values(editcsvobj))
+    const objarray = Object.values(editcsvobj)
+    // console.log(convertToCSV(objarray))
+    const content = convertToCSV(objarray)
+    console.log('content', content)
+
+    // //   console.log('refarr', resArr[0].sha) //filehash
+
+    // refの取得
+    const branchref = await fetch(
+      `http://localhost:8085/.netlify/git/github/git/refs/heads/${branchName}`,
+      { getmethod, headers }
+    )
+    const parseref = await branchref.json()
+    console.log(parseref)
+    console.log('branch毎のハッシュ', `${branchName}`, parseref.object.sha)
+
+    // commitの取得
+    const commithttpRes = await fetch(
+      `http://localhost:8085/.netlify/git/github/commits/${parseref.object.sha}`,
+      { getmethod, headers }
+    )
+    const commitres = await commithttpRes.json()
+    console.log(':p~', commitres)
+    // console.log(':p~', commitres, sendObj)
+
+    const postcontents = {
+      // content: 'dGVzdCBjb21taXQ=',
+      // encoding: 'base64'
+      content,
+      encoding: 'utf-8'
+    }
+    const bodys = JSON.stringify(postcontents)
+
+    // blobの作成
+    const refhttpRes = await fetch(
+      `http://localhost:8085/.netlify/git/github/git/blobs?ref=${branchName}`,
+      { method: postmethod, headers, body: bodys }
+    ) // { headerss: {'Content-Type': 'application/json'}}
+    const refres = await refhttpRes.json()
+    console.log(':q~', refres)
+
+    // // const masmaster = await fetch('http://localhost:8085/.netlify/git/github/branches/master', {method: getmethod, headers})
+    // // const masres = await masmaster.json()
+
+    // console.log(commitres.sha, masres.commit.sha) 同じ値
+    const treesbody = {
+      // base_tree: commitres.sha,
+      base_tree: commitres.commit.tree.sha,
+      tree: [
+        {
+          path: 'test.csv',
+          mode: '100644', // 100644  100755 , 040000 160000  シンボリックリンクのパス120000
+          type: 'blob',
+          sha: refres.sha
+        }
+      ]
+    }
+
+    // treeの作成
+    const treesbodys = JSON.stringify(treesbody)
+    const branchhttpRes = await fetch(
+      'http://localhost:8085/.netlify/git/github/git/trees',
+      { method: postmethod, headers, body: treesbodys }
+    )
+    const branchres = await branchhttpRes.json()
+    console.log('branchesres', branchres)
+    console.log('check', refres.sha, branchres.sha, parseref.object.sha)
+    const date = moment().format('YYYY-MM-DDTHH:mm:ssZ')
+    console.log('time', date)
+
+    const commitsbody = {
+      message: date,
+      author: {
+        name: 'test',
+        email: 'hoge@gmail.com',
+        date
+      },
+      parents: [
+        // refres.sha
+        parseref.object.sha
+      ],
+      tree: branchres.sha
+    }
+    const commitsbodys = JSON.stringify(commitsbody)
+    console.log(commitsbodys)
+
+    // commitの作成
+    const createcommithttpres = await fetch(
+      `http://localhost:8085/.netlify/git/github/git/commits?ref=${branchName}`,
+      { method: postmethod, headers, body: commitsbodys }
+    )
+    const createcommitres = await createcommithttpres.json()
+    console.log('commithash', createcommitres.sha)
+
+    // refの更新
+    const updatebody = {
+      sha: createcommitres.sha,
+      force: false // 強制pushするか否
+    }
+    const updatebodys = JSON.stringify(updatebody)
+    const updaterefhttpres = await fetch(
+      `http://localhost:8085/.netlify/git/github/git/refs/heads/${branchName}`,
+      { method: patchmethod, headers, body: updatebodys }
+    )
+    // console.log(updatebodys)
+    const updaterefres = await updaterefhttpres.json()
+    console.log('asdf', updaterefres)
+    // console.log(':(', csvObj)
+    // commit('setCsvObj', csvObj)
+    commit('setCommitCSV')
+  },
+
   updateCurrentUser: async ({ commit }) => {
     const user = netlifyIdentity.currentUser()
     if (user != null && user.token.access_token == null) {
@@ -134,6 +264,15 @@ export default {
     }
     commit('updateCurrentUser', user)
   }
+}
+
+export function convertToCSV(arr) {
+  const array = [Object.keys(arr[0])].concat(arr)
+  return array
+    .map(it => {
+      return Object.values(it).toString()
+    })
+    .join('\n')
 }
 
 export function convertCsvToObj(csv) {

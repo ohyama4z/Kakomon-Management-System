@@ -92,5 +92,9 @@ export default {
         status: payload.status
       }
     }
+  },
+
+  setCommitCSV: state => {
+    state.setCommitCSV.status = 'committed'
   }
 }
