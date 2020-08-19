@@ -198,6 +198,17 @@ export default {
 
   computed: {
     ...mapState({
+      isLoading: state => {
+        const checkLoading = status => {
+          return status === 'loading'
+        }
+
+        return (
+          checkLoading(state.branches.status) ||
+          checkLoading(state.commits[state.currentBranch]?.status)
+        )
+      },
+
       branches: state => state.branches.data
     }),
 
@@ -205,7 +216,6 @@ export default {
 
     intermediateFiles() {
       const files = Object.values(this.currentBranchMetadatas)
-      console.log({})
       const beforeMerge = files.map(file => {
         const {
           period,
@@ -282,18 +292,6 @@ export default {
         this.contentType &&
         this.author
       )
-    },
-
-    isLoading() {
-      const checkLoading = status => {
-        return status === 'loading'
-      }
-
-      return (
-        checkLoading(this.$store.state.branches.status) ||
-        checkLoading(this.$store.state.setCsvObj.status)
-      )
-      // return false
     },
 
     sidebarMenu() {
