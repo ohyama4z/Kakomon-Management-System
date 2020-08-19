@@ -117,7 +117,9 @@ export default {
     const res = await httpRes.json()
 
     const csvData = Buffer.from(res.content, 'base64').toString('utf8')
-    const resultObj = convertCsvToObjArray(csvData)
+    const resultObj = convertCsvToObj(csvData)
+
+    console.log(resultObj)
 
     commit('setContentMetadata', {
       sha: fileSha,
@@ -136,7 +138,7 @@ export default {
   }
 }
 
-export function convertCsvToObjArray(csv) {
+export function convertCsvToObj(csv) {
   // header:CSV1行目の項目 :csvRows:項目に対する値
   const [headerNames, ...csvRows] = csv
     .split('\n')

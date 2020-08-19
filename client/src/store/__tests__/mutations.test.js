@@ -14,7 +14,6 @@ const state = {
 
 describe('mutations.js', () => {
   it('ユーザーがeditページを読み込んだ際のbranchの書き換え,commitsの書き換え,contentMetadatasの書き換えまでの一連の流れ', () => {
-
     state.currentBranch = 'master'
     const payloadForSetBranches = {
       branches: {
@@ -59,7 +58,7 @@ describe('mutations.js', () => {
       data: {
         'file1-1.jpg': {
           src: 'file1-1.jpg'
-        },
+        }
       }
     }
     const resultForSetContentMetaData = {
@@ -68,7 +67,7 @@ describe('mutations.js', () => {
         data: {
           'file1-1.jpg': {
             src: 'file1-1.jpg'
-          },
+          }
         }
       }
     }
