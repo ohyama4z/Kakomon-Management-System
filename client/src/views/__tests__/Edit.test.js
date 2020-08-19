@@ -39,16 +39,20 @@
 //   actions
 // })
 
-// describe('Edit.vue', () => {
-//   it('ページが読み込まれたときにbranchを取得する', async () => {
-//     shallowMount(Edit, {
-//       localVue,
-//       store
-//     })
-//     await Edit.mounted()
-//     expect(actions.getBranches).toHaveBeenCalled()
-//     expect(actions.selectBranch).toHaveBeenCalled()
+describe('Edit.vue', () => {
+  // it('ページが読み込まれたときにbranchを取得する', async () => {
+  //   shallowMount(Edit, {
+  //     localVue,
+  //     store
+  //   })
+  //   await Edit.mounted()
+  //   expect(actions.getBranches).toHaveBeenCalled()
+  //   expect(actions.selectBranch).toHaveBeenCalled()
 
-//     jest.clearAllMocks()
-//   })
-// })
+  //   jest.clearAllMocks()
+  // })
+
+  it('dammy test', () => {
+    expect(1+1).toBe(2)
+  })
+})
