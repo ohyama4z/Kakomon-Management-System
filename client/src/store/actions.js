@@ -119,8 +119,6 @@ export default {
     const csvData = Buffer.from(res.content, 'base64').toString('utf8')
     const resultObj = convertCsvToObj(csvData)
 
-    console.log(resultObj)
-
     commit('setContentMetadata', {
       sha: fileSha,
       data: resultObj

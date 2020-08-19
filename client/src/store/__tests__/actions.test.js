@@ -263,8 +263,8 @@ describe('action.js', () => {
     const commit = jest.fn()
     const fileSha = 'fileSha'
     const payload = {
-        sha: fileSha,
-        data: {}
+      sha: fileSha,
+      data: {}
     }
 
     await actions.getContentMetadata({ commit, state }, fileSha)
@@ -276,6 +276,67 @@ describe('action.js', () => {
     expect(localStorage.setItem).toHaveBeenCalled()
 
     fetchMock.restore()
+    localStorage.setItem.mockClear()
+    jest.clearAllMocks()
+  })
+
+  it('ファイルごとのshaからファイル情報を取得する(localStorageのキャッシュを使用する)', async () => {
+    shallowMount(actions, {
+      localVue,
+      store
+    })
+
+    const commit = jest.fn()
+    const fileSha = 'fileSha'
+    localStorage[fileSha] = JSON.stringify({
+      status: 'loaded',
+      data: {
+        'file1.jpg': { src: 'file1.jpg' }
+      }
+    })
+    const payload = {
+      sha: fileSha,
+      data: JSON.parse(localStorage[fileSha])
+    }
+
+    await actions.getContentMetadata({ commit, state }, fileSha)
+    expect(commit).toHaveBeenNthCalledWith(1, 'setContentMetadataStatus', {
+      sha: fileSha,
+      status: 'loading'
+    })
+    expect(commit).toHaveBeenNthCalledWith(2, 'setContentMetadata', payload)
+    expect(localStorage.setItem).not.toHaveBeenCalled()
+
+    localStorage.setItem.mockClear()
+    jest.clearAllMocks()
+  })
+
+  it('ファイルごとのshaからファイル情報を取得する(stateのキャッシュを使用する)', async () => {
+    shallowMount(actions, {
+      localVue,
+      store
+    })
+
+    state.contentMetadatas = {
+      fileSha: {
+        status: 'loaded',
+        data: {
+          'file1.jpg': { src: 'file1.jpg' }
+        }
+      }
+    }
+
+    const commit = jest.fn()
+    const fileSha = 'fileSha'
+
+    await actions.getContentMetadata({ commit, state }, fileSha)
+    expect(commit).not.toHaveBeenCalledWith('setContentMetadataStatus', {
+      sha: fileSha,
+      status: 'loading'
+    })
+    expect(localStorage.getItem).not.toHaveBeenCalled()
+    expect(localStorage.setItem).not.toHaveBeenCalled()
+
     localStorage.setItem.mockClear()
     jest.clearAllMocks()
   })
