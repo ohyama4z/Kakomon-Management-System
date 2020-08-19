@@ -34,7 +34,7 @@ export default {
 
   getCommit: async ({ dispatch, commit, state }, commitSha) => {
     const commitDataInState = state.commits?.[commitSha]
-    if (commitDataInState != null) {
+    if (commitDataInState?.status === 'loaded') {
       Object.entries(commitDataInState.data).map(async ([, sha]) => {
         await dispatch('getContentMetadata', sha)
       })
@@ -87,8 +87,8 @@ export default {
   },
 
   getContentMetadata: async ({ commit, state }, fileSha) => {
-    const fileDataInState = state.getContentMetadatas?.[fileSha]
-    if (fileDataInState != null) {
+    const fileDataInState = state.contentMetadatas?.[fileSha]
+    if (fileDataInState?.status === 'loaded') {
       return
     }
 
@@ -96,6 +96,7 @@ export default {
 
     const fileDataInLocalStorage = JSON.parse(localStorage.getItem(fileSha))
     if (fileDataInLocalStorage != null) {
+      console.log('getContentMetadata by localStorage cache')
       commit('setContentMetadata', {
         sha: fileSha,
         data: fileDataInLocalStorage
