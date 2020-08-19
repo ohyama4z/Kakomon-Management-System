@@ -1,21 +1,6 @@
 export default {
-  // setStatusLoading: (state, req) => {
-  //   req.status = 'loading'
-  // },
-
-  setStatus: (state, path, status) => {
-    state[path] = status
-  },
-
   upload: (state, newFile) => {
     state.files.push(newFile)
-  },
-
-  setBranches: (state, data) => {
-    state.metadata = {
-      status: 'loaded',
-      branches: data
-    }
   },
 
   updateCurrentUser: (state, user) => {
@@ -31,26 +16,81 @@ export default {
     console.log(`next page after loging in is ${state.lastPage}`)
   },
 
-  getBranches: (state, res) => {
-    console.log(res)
-    const branches = JSON.parse(JSON.stringify(res))
-    state.metadatas = {
+  setBranches: (state, payload) => {
+    state.branches = {
+      ...state.branches,
       status: 'loaded',
-      data: branches
+      data: payload.branches
     }
   },
 
-  setCsvObj: (state, csvObj) => {
-    state.setCsvObj.status = 'loaded'
-    state.files = csvObj
+  setBranchesStatus: (state, payload) => {
+    if (payload.status !== 'loading' && payload.status !== 'loaded') {
+      state.branches = {
+        ...state.branches,
+        status: 'invalied_status'
+      }
+      return
+    }
+    state.branches = {
+      ...state.branches,
+      status: payload.status
+    }
   },
 
-  saveBase64EncodedCsv: (state, data) => {
-    console.log('pass mutation')
-    if (state.setCsvObj.unparsedData[data.branchName] == null) {
-      state.setCsvObj.unparsedData[data.branchName] = {}
+  setCurrentBranch: (state, branchName) => {
+    state.currentBranch = branchName
+  },
+
+  setCommit: (state, payload) => {
+    state.commits = {
+      ...state.commits,
+      [payload.sha]: {
+        status: 'loaded',
+        data: payload.data
+      }
     }
-    state.setCsvObj.unparsedData[data.branchName][data.fileName] =
-      data.branchData
+  },
+
+  setCommitStatus: (state, payload) => {
+    if (payload.status !== 'loading' && payload.status !== 'loaded') {
+      state.branches = {
+        ...state.branches,
+        status: 'invalied_status'
+      }
+      return
+    }
+    state.commits = {
+      ...state.commits,
+      [payload.sha]: {
+        status: payload.status
+      }
+    }
+  },
+
+  setContentMetadata: (state, payload) => {
+    state.contentMetadatas = {
+      ...state.contentMetadatas,
+      [payload.sha]: {
+        status: 'loaded',
+        data: payload.data
+      }
+    }
+  },
+
+  setContentMetadataStatus: (state, payload) => {
+    if (payload.status !== 'loading' && payload.status !== 'loaded') {
+      state.branches = {
+        ...state.branches,
+        status: 'invalied_status'
+      }
+      return
+    }
+    state.contentMetadatas = {
+      ...state.contentMetadatas,
+      [payload.sha]: {
+        status: payload.status
+      }
+    }
   }
 }

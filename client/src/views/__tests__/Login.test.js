@@ -2,7 +2,6 @@ import { createLocalVue, shallowMount } from '@vue/test-utils'
 import VueRouter from 'vue-router'
 import Vuex from 'vuex'
 import Login from '../Login'
-// import Mctions from '../../store/mutations'
 
 const netlifyIdentity = require('netlify-identity-widget')
 

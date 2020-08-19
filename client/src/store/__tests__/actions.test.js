@@ -4,8 +4,7 @@ import 'jest-fetch-mock'
 import 'jest-localstorage-mock'
 import netlifyIdentity from 'netlify-identity-widget'
 import Vuex from 'vuex'
-import actions, { convertCsvToObjArray } from '../actions'
-import mutations from '../mutations'
+import actions, { convertCsvToObj } from '../actions'
 
 const localVue = createLocalVue()
 
@@ -25,19 +24,21 @@ jest.mock('node-fetch', () => jest.fn())
 const state = {
   currentUser: {
     token: {
-      accens_token: 'aaa'
+      access_token: 'token'
     }
   },
-  setCsvObj: {
-    unparsedData: {
-      master: {
-        aho: { content: '44Ki44Ob44OQ44Kr44Oe44OM44Kx' },
-        afo: { content: 'aWRpb3QhIV93dGZfcl91X2RvaW4=' }
-      }
-    },
-    status: 'unrequested'
+  lastPage: '',
+  currentBranch: '',
+
+  commits: {},
+  contentMetadatas: {},
+
+  branches: {
+    status: 'unrequested',
+    data: {}
   }
 }
+
 const store = new Vuex.Store({
   state,
   actions
@@ -58,145 +59,285 @@ describe('action.js', () => {
         birthday: 'c'
       }
     }
-    expect(convertCsvToObjArray(csv)).toEqual(result)
+    expect(convertCsvToObj(csv)).toEqual(result)
+
+    jest.clearAllMocks()
   })
 
-  it('branchの各データの取得の際stateのキャッシュがあれば使用する', async () => {
-    state.setCsvObj.unparsedData.master.aho = {
-      content: '44Ki44Ob44OQ44Kr44Oe44OM44Kx'
-    }
-    state.setCsvObj.unparsedData.master.afo = {
-      content: 'aWRpb3QhIV93dGZfcl91X2RvaW4='
-    }
-
-    localStorage['111'] = JSON.stringify({
-      sha: '111',
-      str: 'AHO_BAKA_MANUKE',
-      content: '44Ki44Ob44OQ44Kr44Oe44OM44Kx'
+  it('ブランチの一覧を取得する', async () => {
+    shallowMount(actions, {
+      localVue,
+      store
     })
 
-    localStorage['222'] = JSON.stringify({
-      sha: '222',
-      str: '阿呆_馬鹿_間抜',
-      content: 'aWRpb3QhIV93dGZfcl91X2RvaW4='
+    fetchMock.get('http://localhost:8085/.netlify/git/github/branches', {
+      status: 200,
+      body: [
+        {
+          name: 'master',
+          commit: {
+            sha: 'sha1'
+          }
+        },
+        {
+          name: 'branch1',
+          commit: {
+            sha: 'sha2'
+          }
+        }
+      ]
+    })
+
+    const commit = jest.fn()
+    const branches = {
+      master: 'sha1',
+      branch1: 'sha2'
+    }
+
+    await actions.getBranches({ commit, state })
+    expect(commit).toHaveBeenNthCalledWith(1, 'setBranchesStatus', {
+      path: 'branches',
+      status: 'loading'
+    })
+    expect(commit).toHaveBeenNthCalledWith(2, 'setBranches', { branches })
+
+    jest.clearAllMocks()
+  })
+
+  it('コミットごとのファイルの状態を取得する(キャシュを使用しない場合)', async () => {
+    shallowMount(actions, {
+      localVue,
+      store
     })
 
     fetchMock.get(
-      `http://localhost:8085/.netlify/git/github/contents/metadatas?ref=master`,
+      'http://localhost:8085/.netlify/git/github/contents/metadatas?ref=commitSha',
       {
         status: 200,
         body: [
-          { sha: '111', name: 'aho' },
-          { sha: '222', name: 'afo' }
+          {
+            name: 'file1.csv',
+            sha: 'sha1'
+          },
+          {
+            name: 'file2.csv',
+            sha: 'sha2'
+          }
         ]
       }
     )
-    fetchMock.get(
-      `http://localhost:8085/.netlify/git/github/git/blobs/111?ref=master`,
-      {
-        status: 200,
-        body: {
-          str: 'AHO_BAKA_MANUKE',
-          content: '44Ki44Ob44OQ44Kr44Oe44OM44Kx'
+
+    const commitSha = 'commitSha'
+    const dispatch = jest.fn()
+    const commit = jest.fn()
+    const payloadForSetCommitStatus = { sha: commitSha, status: 'loading' }
+    const commitData = {
+      'file1.csv': 'sha1',
+      'file2.csv': 'sha2'
+    }
+    const payloadForSetCommit = {
+      sha: commitSha,
+      data: commitData
+    }
+
+    await actions.getCommit({ dispatch, commit, state }, commitSha)
+    expect(commit).toHaveBeenNthCalledWith(
+      1,
+      'setCommitStatus',
+      payloadForSetCommitStatus
+    )
+    expect(localStorage.getItem).toHaveBeenCalled()
+    expect(dispatch).toHaveBeenCalled()
+    expect(commit).toHaveBeenNthCalledWith(2, 'setCommit', payloadForSetCommit)
+    expect(localStorage.setItem).toHaveBeenCalled()
+
+    fetchMock.restore()
+    localStorage.setItem.mockClear()
+    jest.clearAllMocks()
+  })
+
+  it('コミットごとのファイルの状態を取得する(localStorageのキャシュを使用)', async () => {
+    shallowMount(actions, {
+      localVue,
+      store
+    })
+
+    const commitSha = 'commitSha'
+    const dispatch = jest.fn()
+    const commit = jest.fn()
+    const payloadForSetCommitStatus = { sha: commitSha, status: 'loading' }
+    localStorage.commitSha = JSON.stringify({
+      'file1.csv': 'sha1',
+      'file2.csv': 'sha2'
+    })
+    const payloadForSetCommit = {
+      sha: commitSha,
+      data: JSON.parse(localStorage[commitSha])
+    }
+
+    await actions.getCommit({ dispatch, commit, state }, commitSha)
+    expect(commit).toHaveBeenNthCalledWith(
+      1,
+      'setCommitStatus',
+      payloadForSetCommitStatus
+    )
+    expect(localStorage.getItem).toHaveBeenCalled()
+    expect(dispatch).toHaveBeenCalled()
+    expect(commit).toHaveBeenNthCalledWith(2, 'setCommit', payloadForSetCommit)
+    expect(localStorage.setItem).not.toHaveBeenCalled()
+
+    localStorage.setItem.mockClear()
+    jest.clearAllMocks()
+  })
+
+  it('コミットごとのファイルの状態を取得する(stateのキャッシュを使用)', async () => {
+    shallowMount(actions, {
+      localVue,
+      store
+    })
+
+    const commitSha = 'commitSha'
+    const dispatch = jest.fn()
+    const commit = jest.fn()
+    const payloadForSetCommitStatus = { sha: commitSha, status: 'loading' }
+    state.commits = {
+      commitSha: {
+        status: 'loaded',
+        data: {
+          'file1.csv': 'sha1',
+          'file2.csv': 'sha2'
         }
       }
+    }
+
+    await actions.getCommit({ dispatch, commit, state }, commitSha)
+    expect(commit).not.toHaveBeenCalledWith(
+      'setCommitStatus',
+      payloadForSetCommitStatus
     )
+    expect(localStorage.getItem).not.toHaveBeenCalled()
+    expect(dispatch).toHaveBeenCalled()
+    expect(localStorage.setItem).not.toHaveBeenCalled()
+
+    localStorage.setItem.mockClear()
+    jest.clearAllMocks()
+  })
+
+  it('branchを選択した際にbranchの情報、コミット情報を取得するactionを走らせる', async () => {
+    shallowMount(actions, {
+      localVue,
+      store
+    })
+    state.branches = {
+      status: 'loaded',
+      data: { master: 'sha1' }
+    }
+    const dispatch = jest.fn()
+    const commit = jest.fn()
+    const branchName = 'master'
+
+    await actions.selectBranch({ dispatch, commit }, branchName)
+    expect(commit).toHaveBeenCalledWith('setCurrentBranch', branchName)
+    expect(dispatch).toHaveBeenCalledTimes(2)
+
+    jest.clearAllMocks()
+  })
+
+  it('ファイルごとのshaからファイル情報を取得する(キャシュを使用しない場合)', async () => {
+    shallowMount(actions, {
+      localVue,
+      store
+    })
 
     fetchMock.get(
-      `http://localhost:8085/.netlify/git/github/git/blobs/222?ref=master`,
+      'http://localhost:8085/.netlify/git/github/git/blobs/fileSha',
       {
         status: 200,
         body: {
-          str: '阿呆_馬鹿_間抜',
-          content: 'aWRpb3QhIV93dGZfcl91X2RvaW4='
+          content: 'content1',
+          sha: 'sha1'
         }
       }
     )
 
     const commit = jest.fn()
-    const branchName = 'master'
-    shallowMount(actions, {
-      localVue,
-      store
-    })
+    const fileSha = 'fileSha'
+    const payload = {
+      sha: fileSha,
+      data: {}
+    }
 
-    // localStorage及びstateにデータがある場合キャッシュを使用する
-    await actions.getBranchData({ state, commit }, branchName)
-    expect(commit).toHaveBeenNthCalledWith(1, 'setStatus', 'csvObj', 'loading')
-    expect(commit).toHaveBeenCalledTimes(4) // setStatus + setCsvObjで計2
-    expect(localStorage.setItem).not.toHaveBeenCalled()
+    await actions.getContentMetadata({ commit, state }, fileSha)
+    expect(commit).toHaveBeenNthCalledWith(1, 'setContentMetadataStatus', {
+      sha: fileSha,
+      status: 'loading'
+    })
+    expect(commit).toHaveBeenNthCalledWith(2, 'setContentMetadata', payload)
+    expect(localStorage.setItem).toHaveBeenCalled()
 
     fetchMock.restore()
+    localStorage.setItem.mockClear()
+    jest.clearAllMocks()
   })
 
-  it('stateのキャッシュが無く,localStorageにキャッシュがある場合はlocalStorageのキャッシュを使用しstateにデータを追加する', async () => {
-    state.setCsvObj.unparsedData.master.aho = null
-    state.setCsvObj.unparsedData.master.afo = null
-
-    localStorage['111'] = JSON.stringify({
-      sha: '111',
-      str: 'AHO_BAKA_MANUKE',
-      content: '44Ki44Ob44OQ44Kr44Oe44OM44Kx'
-    })
-
-    localStorage['222'] = JSON.stringify({
-      sha: '222',
-      str: '阿呆_馬鹿_間抜',
-      content: 'aWRpb3QhIV93dGZfcl91X2RvaW4='
-    })
-
-    fetchMock.get(
-      `http://localhost:8085/.netlify/git/github/contents/metadatas?ref=master`,
-      {
-        status: 200,
-        body: [
-          { sha: '111', name: 'aho' },
-          { sha: '222', name: 'afo' }
-        ]
-      }
-    )
-    fetchMock.get(
-      `http://localhost:8085/.netlify/git/github/git/blobs/111?ref=master`,
-      {
-        status: 200,
-        body: {
-          str: 'AHO_BAKA_MANUKE',
-          content: '44Ki44Ob44OQ44Kr44Oe44OM44Kx'
-        }
-      }
-    )
-
-    fetchMock.get(
-      `http://localhost:8085/.netlify/git/github/git/blobs/222?ref=master`,
-      {
-        status: 200,
-        body: {
-          str: '阿呆_馬鹿_間抜',
-          content: 'aWRpb3QhIV93dGZfcl91X2RvaW4='
-        }
-      }
-    )
-
-    console.log(localStorage)
-
-    const commit = jest.fn((funcName, ...payload) => {
-      if (funcName === 'saveBase64EncodedCsv') {
-        mutations.saveBase64EncodedCsv(state, ...payload)
-      }
-    })
-    const branchName = 'master'
+  it('ファイルごとのshaからファイル情報を取得する(localStorageのキャッシュを使用する)', async () => {
     shallowMount(actions, {
       localVue,
       store
     })
 
-    // localStorageのキャッシュを使用し
-    await actions.getBranchData({ state, commit }, branchName)
-    expect(commit).toHaveBeenNthCalledWith(1, 'setStatus', 'csvObj', 'loading')
-    expect(commit).toHaveBeenCalledTimes(4) // setStatus + saveBase64EncodedCsv*2 + setCsvObjで計4
-    expect(localStorage.setItem).not.toHaveBeenCalled()
-    expect(commit).toHaveBeenNthCalledWith(4, 'setCsvObj', {})
+    const commit = jest.fn()
+    const fileSha = 'fileSha'
+    localStorage[fileSha] = JSON.stringify({
+      status: 'loaded',
+      data: {
+        'file1.jpg': { src: 'file1.jpg' }
+      }
+    })
+    const payload = {
+      sha: fileSha,
+      data: JSON.parse(localStorage[fileSha])
+    }
 
-    fetchMock.restore()
+    await actions.getContentMetadata({ commit, state }, fileSha)
+    expect(commit).toHaveBeenNthCalledWith(1, 'setContentMetadataStatus', {
+      sha: fileSha,
+      status: 'loading'
+    })
+    expect(commit).toHaveBeenNthCalledWith(2, 'setContentMetadata', payload)
+    expect(localStorage.setItem).not.toHaveBeenCalled()
+
+    localStorage.setItem.mockClear()
+    jest.clearAllMocks()
+  })
+
+  it('ファイルごとのshaからファイル情報を取得する(stateのキャッシュを使用する)', async () => {
+    shallowMount(actions, {
+      localVue,
+      store
+    })
+
+    state.contentMetadatas = {
+      fileSha: {
+        status: 'loaded',
+        data: {
+          'file1.jpg': { src: 'file1.jpg' }
+        }
+      }
+    }
+
+    const commit = jest.fn()
+    const fileSha = 'fileSha'
+
+    await actions.getContentMetadata({ commit, state }, fileSha)
+    expect(commit).not.toHaveBeenCalledWith('setContentMetadataStatus', {
+      sha: fileSha,
+      status: 'loading'
+    })
+    expect(localStorage.getItem).not.toHaveBeenCalled()
+    expect(localStorage.setItem).not.toHaveBeenCalled()
+
+    localStorage.setItem.mockClear()
+    jest.clearAllMocks()
   })
 })

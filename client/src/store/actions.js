@@ -1,12 +1,13 @@
-import PromisePool from 'native-promise-pool'
 import netlifyIdentity from 'netlify-identity-widget'
+import state from './state'
 
 export default {
   upload: async ({ commit }, newFile) => {
     commit('upload', newFile)
   },
 
-  getMetadatas: async ({ commit, state }) => {
+  getBranches: async ({ commit, state }) => {
+    commit('setBranchesStatus', { path: 'branches', status: 'loading' })
     const token = state.currentUser.token.access_token
     const method = 'GET'
     const headers = {
@@ -18,87 +19,112 @@ export default {
     )
     const res = await httpRes.json()
 
-    commit('getBranches', res)
+    const branches = Object.fromEntries(
+      res.map(branch => [branch.name, branch.commit.sha])
+    )
+    commit('setBranches', { branches })
   },
 
-  getBranchData: async ({ commit, state }, branchName) => {
-    // commit('setStatusLoading', state.setCsvObj)
-    commit('setStatus', 'csvObj', 'loading')
+  selectBranch: async ({ dispatch, commit }, branchName) => {
+    commit('setCurrentBranch', branchName)
+    await dispatch('getBranches')
+    const commitSha = state.branches.data[branchName]
+    await dispatch('getCommit', commitSha)
+  },
+
+  getCommit: async ({ dispatch, commit, state }, commitSha) => {
+    const commitDataInState = state.commits?.[commitSha]
+    if (commitDataInState?.status === 'loaded') {
+      Object.entries(commitDataInState.data).map(async ([, sha]) => {
+        await dispatch('getContentMetadata', sha)
+      })
+
+      return
+    }
+
+    commit('setCommitStatus', { sha: commitSha, status: 'loading' })
+
+    const commitDataInLocalStorage = JSON.parse(localStorage.getItem(commitSha))
+    if (commitDataInLocalStorage != null) {
+      commit('setCommit', {
+        sha: commitSha,
+        data: commitDataInLocalStorage
+      })
+
+      Object.entries(commitDataInLocalStorage).map(async ([, sha]) => {
+        await dispatch('getContentMetadata', sha)
+      })
+
+      return
+    }
 
     const token = state.currentUser.token.access_token
     const method = 'GET'
     const headers = {
       Authorization: `Bearer ${token}`
     }
-    console.log(branchName)
+
     const httpRes = await fetch(
-      `http://localhost:8085/.netlify/git/github/contents/metadatas?ref=${branchName}`,
+      `http://localhost:8085/.netlify/git/github/contents/metadatas?ref=${commitSha}`,
       { method, headers }
     )
-    // const httpRes = await fetch(`http://localhost:8085/.netlify/git/github/contents/metadatas/unassorted.csv?ref=${branchName}`, {method, headers})
-    const resArr = await httpRes.json()
-    console.log('^_^', resArr)
+    const res = await httpRes.json()
 
-    const pool = new PromisePool(50) // 50 tasks at once
-
-    const files = await Promise.all(
-      resArr.map(res =>
-        pool.open(async () => {
-          const previousRes =
-            state.setCsvObj.unparsedData[`${branchName}`]?.[`${res.name}`]
-          // state.setCsvObj.unparsedData[`${branchName}`]?.[`${res.name}`]の
-          // ?. の部分がわからないときはOptional Chaningでググれ
-
-          if (previousRes == null || res.sha !== previousRes.sha) {
-            const unparsed = localStorage.getItem(`${res.sha}`)
-            const branchDataInStorage = JSON.parse(unparsed)
-
-            if (branchDataInStorage == null) {
-              const httpResponse = await fetch(
-                `http://localhost:8085/.netlify/git/github/git/blobs/${res.sha}?ref=${branchName}`,
-                { method, headers }
-              )
-              const response = await httpResponse.json()
-              commit('saveBase64EncodedCsv', {
-                branchData: response,
-                branchName,
-                fileName: res.name
-              })
-              localStorage.setItem(`${res.sha}`, JSON.stringify(response))
-            } else if (res.sha === branchDataInStorage.sha) {
-              console.log('using localStorage cache')
-              commit('saveBase64EncodedCsv', {
-                branchData: branchDataInStorage,
-                branchName,
-                fileName: res.name
-              })
-            }
-          } else {
-            console.log('using state cache')
-          }
-
-          const curRes =
-            state.setCsvObj.unparsedData[`${branchName}`][`${res.name}`]
-          const csvData = Buffer.from(curRes.content, 'base64').toString('utf8')
-          // console.log(csvData)
-          const resultObj = convertCsvToObjArray(csvData)
-          // console.log(resultObj)
-
-          return resultObj
-        })
-      )
+    const commitData = Object.fromEntries(
+      res.map(file => [file.name, file.sha])
     )
 
-    const filesBySrc = files.reduce((p, v) => {
-      return {
-        ...p,
-        ...v
-      }
-    }, {})
+    Object.entries(commitData).map(async ([, sha]) => {
+      await dispatch('getContentMetadata', sha)
+    })
 
-    // console.log(':( (2)', JSON.stringify({ files }, null, 2))
+    commit('setCommit', {
+      sha: commitSha,
+      data: commitData
+    })
 
-    commit('setCsvObj', filesBySrc)
+    localStorage.setItem(`${commitSha}`, JSON.stringify(commitData))
+  },
+
+  getContentMetadata: async ({ commit, state }, fileSha) => {
+    const fileDataInState = state.contentMetadatas?.[fileSha]
+    if (fileDataInState?.status === 'loaded') {
+      return
+    }
+
+    commit('setContentMetadataStatus', { sha: fileSha, status: 'loading' })
+
+    const fileDataInLocalStorage = JSON.parse(localStorage.getItem(fileSha))
+    if (fileDataInLocalStorage != null) {
+      console.log('getContentMetadata by localStorage cache')
+      commit('setContentMetadata', {
+        sha: fileSha,
+        data: fileDataInLocalStorage
+      })
+      return
+    }
+
+    const token = state.currentUser.token.access_token
+    const method = 'GET'
+    const headers = {
+      Authorization: `Bearer ${token}`
+    }
+
+    const httpRes = await fetch(
+      `http://localhost:8085/.netlify/git/github/git/blobs/${fileSha}`,
+      { method, headers }
+    )
+    const res = await httpRes.json()
+
+    const csvData = Buffer.from(res.content, 'base64').toString('utf8')
+    const resultObj = convertCsvToObj(csvData)
+
+    commit('setContentMetadata', {
+      sha: fileSha,
+      data: resultObj
+    })
+
+    localStorage.setItem(fileSha, JSON.stringify(resultObj))
   },
 
   updateCurrentUser: async ({ commit }) => {
@@ -110,7 +136,7 @@ export default {
   }
 }
 
-export const convertCsvToObjArray = csv => {
+export function convertCsvToObj(csv) {
   // header:CSV1行目の項目 :csvRows:項目に対する値
   const [headerNames, ...csvRows] = csv
     .split('\n')
