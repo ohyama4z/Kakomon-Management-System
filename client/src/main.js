@@ -12,6 +12,7 @@ import Vuikit from 'vuikit'
 import App from './App.vue'
 import router from './router.js'
 import actions from './store/actions'
+import getters from './store/getters'
 import mutations from './store/mutations'
 import state from './store/state'
 
@@ -36,6 +37,7 @@ netlifyIdentity.init({
 
 const store = new Vuex.Store({
   state,
+  getters,
   mutations,
   actions
 })

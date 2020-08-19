@@ -3,17 +3,10 @@ const netlifyIdentity = require('netlify-identity-widget')
 export default {
   currentUser: netlifyIdentity.currentUser(),
   lastPage: '',
-  metadatas: {
-    status: 'unrequested',
-    data: []
-  },
+  currentBranch: '',
 
-  setCsvObj: {
-    status: 'unrequested',
-    unparsedData: {}
-  },
-
-  files: {},
+  commits: {},
+  contentMetadatas: {},
 
   changedFiles: {
     'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験1.jpg': {
@@ -42,7 +35,12 @@ export default {
     }
   },
 
-  commitcsv: {
+  setCommitCSV: {
     status: 'unrequested'
+  },
+
+  branches: {
+    status: 'unrequested',
+    data: {}
   }
 }

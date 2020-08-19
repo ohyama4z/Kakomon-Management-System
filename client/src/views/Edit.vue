@@ -23,15 +23,15 @@
           <select
             class="uk-select uk-form-width-medium"
             v-model="selectedBranch"
-            @change="getBranchData(), commitCSV()"
+            @change="selectBranch(), setCommitCSV()"
           >
             <option disabled value="">ブランチを選択</option>
             <option>master</option>
             <option
-              v-for="branch in branches"
-              v-bind:key="branch.commit.sha"
-              v-show="branch.name !== 'master'"
-              >{{ branch.name }}</option
+              v-for="(sha, branchName) in branches"
+              v-bind:key="sha"
+              v-show="branchName !== 'master'"
+              >{{ branchName }}</option
             >
           </select>
         </div>
@@ -166,7 +166,7 @@
 
 <script>
 import merge from 'deepmerge'
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 
 export default {
   name: 'edit',
@@ -185,59 +185,74 @@ export default {
     }
   },
 
-  mounted() {
+  async mounted() {
     if (this.$store.state.currentUser == null) {
       localStorage.setItem('lastPage', 'edit')
       this.$store.commit('updateLastPage')
       this.$router.push('/login')
     }
-    this.$store.dispatch('getMetadatas')
-    this.getBranchData()
-    this.commitCSV()
+    await this.$store.dispatch('getBranches')
+    await this.$store.dispatch('selectBranch', this.selectedBranch)
+    this.getCommit()
+    this.setCommitCSV()
   },
 
   computed: {
     ...mapState({
-      intermediateFiles: state => {
-        const files = Object.values(state.files)
-        const beforeMerge = files.map(file => {
-          const {
-            period,
-            subj,
-            // eslint-disable-next-line camelcase
-            tool_type,
-            year,
-            // eslint-disable-next-line camelcase
-            content_type
-          } = Object.fromEntries(
-            Object.entries(file).map(([key, value]) => [
-              key,
-              value === '' ? '不明' : value
-            ])
-          )
-          const fileResult = {
-            [period]: {
-              [subj]: {
-                // eslint-disable-next-line camelcase
-                [tool_type]: {
-                  [year]: {
-                    // eslint-disable-next-line camelcase
-                    [content_type]: {
-                      [file.src.replace(/^.*\//, '')]: file
-                    }
+      isLoading: state => {
+        const checkLoading = status => {
+          return status === 'loading'
+        }
+
+        return (
+          checkLoading(state.branches.status) ||
+          checkLoading(state.commits[state.currentBranch]?.status)
+        )
+      },
+
+      branches: state => state.branches.data
+    }),
+
+    ...mapGetters(['currentBranchMetadatas']),
+
+    intermediateFiles() {
+      const files = Object.values(this.currentBranchMetadatas)
+      const beforeMerge = files.map(file => {
+        const {
+          period,
+          subj,
+          // eslint-disable-next-line camelcase
+          tool_type,
+          year,
+          // eslint-disable-next-line camelcase
+          content_type
+        } = Object.fromEntries(
+          Object.entries(file).map(([key, value]) => [
+            key,
+            value === '' ? '不明' : value
+          ])
+        )
+
+        const fileResult = {
+          [period]: {
+            [subj]: {
+              // eslint-disable-next-line camelcase
+              [tool_type]: {
+                [year]: {
+                  // eslint-disable-next-line camelcase
+                  [content_type]: {
+                    [file.src.replace(/^.*\//, '')]: file
                   }
                 }
               }
             }
           }
-          return fileResult
-        })
-        const result = merge.all(beforeMerge)
-        return result
-      },
-
-      branches: state => state.metadatas.data
-    }),
+        }
+        return fileResult
+      })
+      const result = merge.all(beforeMerge)
+      return result
+    },
 
     menuStructure() {
       const icon = 'fa fa-folder'
@@ -280,18 +295,6 @@ export default {
       )
     },
 
-    isLoading() {
-      const checkLoading = status => {
-        return status === 'loading'
-      }
-
-      return (
-        checkLoading(this.$store.state.metadatas.status) ||
-        checkLoading(this.$store.state.setCsvObj.status)
-      )
-      // return false
-    },
-
     sidebarMenu() {
       const header = [
         {
@@ -315,12 +318,17 @@ export default {
       this.$router.push('/logout')
     },
 
-    getBranchData() {
-      this.$store.dispatch('getBranchData', this.selectedBranch)
+    async getCommit() {
+      const commitSha = this.$store.state.branches.data[this.selectedBranch]
+      await this.$store.dispatch('getCommit', commitSha)
     },
 
-    commitCSV() {
-      this.$store.dispatch('commitCSV', this.selectedBranch)
+    async selectBranch() {
+      await this.$store.dispatch('selectBranch', this.selectedBranch)
+    },
+
+    setCommitCSV() {
+      this.$store.dispatch('setCommitCSV', this.selectedBranch)
     },
 
     onItemClick(e, item) {
