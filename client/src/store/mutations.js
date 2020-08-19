@@ -24,7 +24,6 @@ export default {
     }
   },
 
-  //
   setBranchesStatus: (state, payload) => {
     state.branches = {
       ...state.branches,
