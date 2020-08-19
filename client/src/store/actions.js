@@ -7,7 +7,7 @@ export default {
   },
 
   getBranches: async ({ commit, state }) => {
-    commit('setBrachesStatus', { path: 'branches', status: 'loading' })
+    commit('setBranchesStatus', { path: 'branches', status: 'loading' })
     const token = state.currentUser.token.access_token
     const method = 'GET'
     const headers = {
@@ -33,7 +33,17 @@ export default {
   },
 
   getCommit: async ({ dispatch, commit, state }, commitSha) => {
+    const commitDataInState = state.commits?.[commitSha]
+    if (commitDataInState != null) {
+      Object.entries(commitDataInState.data).map(async ([, sha]) => {
+        await dispatch('getContentMetadata', sha)
+      })
+
+      return
+    }
+
     commit('setCommitStatus', { sha: commitSha, status: 'loading' })
+
     const commitDataInLocalStorage = JSON.parse(localStorage.getItem(commitSha))
     if (commitDataInLocalStorage != null) {
       commit('setCommit', {
@@ -60,11 +70,6 @@ export default {
     )
     const res = await httpRes.json()
 
-    // const commitData = res.reduce((pre, file) => {
-    //   pre[file.name] = file.sha
-    //   return pre
-    // }, {})
-
     const commitData = Object.fromEntries(
       res.map(file => [file.name, file.sha])
     )
@@ -83,7 +88,12 @@ export default {
   },
 
   getContentMetadata: async ({ commit, state }, fileSha) => {
-    // commit('setContentMetadataStatus', { sha: fileSha, status: 'loading' })
+    const fileDataInState = state.getContentMetadatas?.[fileSha]
+    if (fileDataInState != null) {
+      return
+    }
+
+    commit('setContentMetadataStatus', { sha: fileSha, status: 'loading' })
 
     const fileDataInLocalStorage = JSON.parse(localStorage.getItem(fileSha))
     if (fileDataInLocalStorage != null) {
@@ -91,7 +101,6 @@ export default {
         sha: fileSha,
         data: fileDataInLocalStorage
       })
-      // commit('setContentMetadataStatus', { sha: fileSha, status: 'loaded' })
       return
     }
 

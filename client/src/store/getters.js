@@ -13,7 +13,6 @@ export default {
     }
 
     const commitSha = branches?.data?.[branch]
-    console.log(`branch ${branch} head commit is ${commitSha}`)
     if (commits[commitSha]?.status !== 'loaded') {
       console.log(
         `commits is ${commits[commitSha]?.status}, skip generating metadatas`
@@ -41,8 +40,6 @@ export default {
     )
 
     const result = Object.fromEntries(contentMetadatasBySource)
-
-    console.log({ contentMetadatasBySource, result })
 
     return result
   }
