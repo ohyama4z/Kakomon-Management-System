@@ -1,7 +1,8 @@
 import VuikitIcons, {
   IconChevronDown,
   IconChevronRight,
-  IconCloudUpload
+  IconCloudUpload,
+  IconQuestion
 } from '@vuikit/icons'
 import '@vuikit/theme'
 import Vue from 'vue'
@@ -22,6 +23,7 @@ const netlifyIdentity = require('netlify-identity-widget')
 Vue.component('VKIconCheveronRight', IconChevronRight)
 Vue.component('VKIconCloudpload', IconCloudUpload)
 Vue.component('VKIconChevronDown', IconChevronDown)
+Vue.component('VKIconQuestion', IconQuestion)
 Vue.component('file-upload', VueUploadComponent)
 
 Vue.use(Vuex)

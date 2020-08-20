@@ -1,8 +1,6 @@
 <template>
   <div>
-    <vk-sticky>
-      <Navbar></Navbar>
-    </vk-sticky>
+    <Navbar></Navbar>
 
     <vk-spinner
       class="uk-position-medium uk-position-center"
@@ -12,7 +10,7 @@
 
     <div v-if="!isLoading">
       <Sidebar></Sidebar>
-      <div v-bind:class="{ collapsed: collapase }">
+      <div class="forms" v-bind:class="{ collapsed: collapase }">
         <!-- <div
             class="uk-position-medium uk-position-top-right uk-overlay uk-overlay-default"
           >
@@ -188,8 +186,7 @@ export default {
       contentType: '',
       author: '',
       selectedBranch: 'master',
-      editType: '',
-      selectedFiles: []
+      editType: ''
     }
   },
 
@@ -285,8 +282,8 @@ export default {
 
 <style>
 @import url('https://use.fontawesome.com/releases/v5.6.1/css/all.css');
-.main {
-  padding-top: 80px;
+.forms {
+  padding-top: 50px;
 }
 .collapsed {
   padding-left: 350px;

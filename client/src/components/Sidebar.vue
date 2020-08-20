@@ -12,6 +12,11 @@ import { mapGetters } from 'vuex'
 
 export default {
   name: 'Sidebar',
+  data() {
+    return {
+      selectedFiles: []
+    }
+  },
 
   computed: {
     ...mapGetters(['currentBranchMetadatas']),
@@ -109,18 +114,18 @@ export default {
   },
 
   methods: {
-    onItemClick(e, item) {
-      // データツリーの末端要素をクリックしたときに処理を行う
-      if (item.child == null) {
-        console.log(item.data)
-        const sameItem = this.selectedFiles.find(
-          file => file.title === item.title
-        )
-        if (sameItem == null) {
-          this.selectedFiles.push(item)
-        }
-      }
-    },
+    // onItemClick(e, item) {
+    //   // データツリーの末端要素をクリックしたときに処理を行う
+    //   if (item.child == null) {
+    //     console.log(item.data)
+    //     const sameItem = this.selectedFiles.find(
+    //       file => file.title === item.title
+    //     )
+    //     if (sameItem == null) {
+    //       this.selectedFiles.push(item)
+    //     }
+    //   }
+    // },
     onToggleCollapse(collapsed) {
       this.$store.commit('setCollapased', !collapsed)
     }
@@ -130,8 +135,8 @@ export default {
 
 <style>
 .v-sidebar-menu {
-  margin-top: 80px;
-  height: -80px;
+  margin-top: 10vh;
+  height: 90vh;
 }
 .v-sidebar-menu .vsm--toggle-btn {
   order: -1;

@@ -1,27 +1,25 @@
 <template>
-  <div>
-    <vk-navbar-full>
-      <vk-navbar-nav>
-        <vk-navbar-logo>Logo</vk-navbar-logo>
+  <vk-sticky>
+    <div>
+      <vk-navbar-full class="custom-navbar">
         <vk-navbar-nav>
-          <vk-navbar-nav-item icon="star" title="Features"></vk-navbar-nav-item>
+          <vk-navbar-logo>KMS</vk-navbar-logo>
+          <!-- <vk-navbar-nav-item>
+            <vk-button class="custom-button">アップロード</vk-button>
+            <router-link to="/upload">アップロード</router-link>
+          </vk-navbar-nav-item> -->
+          <vk-navbar-nav-item
+            icon="question"
+            href="https://github.com/asann3/Kakomon-Management-System/blob/master/client/manuals/README.md"
+            target="_blank"
+          ></vk-navbar-nav-item>
         </vk-navbar-nav>
-        <vk-navbar-item>
-          <div>Some <a>Link</a></div>
-        </vk-navbar-item>
-        <vk-navbar-item>
-          <form action="javascript:void(0)">
-            <input
-              class="uk-input uk-form-width-small uk-margin-small-right"
-              type="text"
-              placeholder="Input"
-            />
-            <vk-button>Button</vk-button>
-          </form>
-        </vk-navbar-item>
-      </vk-navbar-nav>
-    </vk-navbar-full>
-  </div>
+        <vk-navbar-nav slot="right">
+          <vk-navabar-navitem> </vk-navabar-navitem>
+        </vk-navbar-nav>
+      </vk-navbar-full>
+    </div>
+  </vk-sticky>
 </template>
 
 <script>
@@ -29,3 +27,12 @@ export default {
   name: 'Navbar'
 }
 </script>
+
+<style scoped>
+.custom-navbar {
+  height: 10vh;
+}
+.custom-button {
+  border-radius: 500px;
+}
+</style>
