@@ -27,43 +27,21 @@ describe('mutations.js', () => {
 
   it('updateLastPage', () => {
     beforeEach(() => {
-      localStorage.clear();
-    });
-  
-    // const lastPageInStrage = 'test'
-    // const lastPage = null
-    // const state = 'hoge'
+      localStorage.clear()
+    })
+
     const state = { lastPage: '' }
 
     mutations.updateLastPage(state)
-    // console.log(':p~', mutations.updateLastPage)
 
     expect(state.lastPage).toEqual('upload')
   })
 
-  // it('setBranches', () => {
-  //   const payload = 'asdf'
-  //   const state = { branches: { status: '', branches: '' } }
-  //   mutations.setBranches(state, payload)
-  //   console.log('hoge', state, state.metadata.status)
-
-  //   expect(state.branches.status).toBe('loaded')
-  //   expect(state.branches.branches).toEqual('asdf')
-  // })
-
   it('setBranchesStatus(payload.statusがloadingでもloadedでもない時)', () => {
-    console.log('51', state.branches)
     state.branches = {
       status: 'loading',
     }
-    console.log('55', state.branches)
-    // const payload = {
-    //   status: 'unrequested'
-    // }
     const payloadForSetStatusBranches = {
-      // branches: {
-      //   ...state.branches,
-      // },
       status: 'unrequested',
     }
     const resultForSetStatusBranches = {
@@ -71,31 +49,16 @@ describe('mutations.js', () => {
       data: {}
     }
     mutations.setBranchesStatus(state, payloadForSetStatusBranches)
-    console.log('51', state.branches)
+
     expect(state.branches.status).toEqual(resultForSetStatusBranches.status)
-    // expect(state.branches).toEqual(resultForSetStatusBranches)
   })
 
-  // it('getBranches', () => {
-  //   const state = { metadatas: { status: '', data: '' } }
-  //   const res = { a: 'b', c: 'd' }
-  //   mutations.getBranches(state, res)
-  //   expect(state.metadatas.status).toBe('loaded')
-  //   expect(state.metadatas.data).toEqual({ a: 'b', c: 'd' })
-  // })
   it('setBranchesStatus(payload.statusがlaodingかloadedの時)', () => {
-    console.log('51', state.branches)
+
     state.branches = {
       status: 'loading',
     }
-    console.log('55', state.branches)
-    // const payload = {
-    //   status: 'unrequested'
-    // }
     const payloadForSetStatusBranches = {
-      // branches: {
-      //   ...state.branches,
-      // },
       status: 'loaded',
     }
     const resultForSetStatusBranches = {
@@ -103,9 +66,7 @@ describe('mutations.js', () => {
       data: {}
     }
     mutations.setBranchesStatus(state, payloadForSetStatusBranches)
-    console.log('51', state.branches)
     expect(state.branches.status).toEqual(resultForSetStatusBranches.status)
-    // expect(state.branches).toEqual(resultForSetStatusBranches)
   })
 
   
@@ -129,7 +90,6 @@ describe('mutations.js', () => {
       status: 'unrequested'
     }
     mutations.setCommitStatus(state, payloadForSetCommitStatus)
-    console.log(state.branches.status)
     expect(state.branches.status).toBe(resultForSetCommitStatus.branches.status)
   })
 
@@ -142,7 +102,6 @@ describe('mutations.js', () => {
       status: 'loading',
       sha: commitsha
     }
-    // console.log('status', state.commits.status)
     mutations.setCommitStatus(state, payloadForSetCommitStatus)
     const resultForSetCommitStatus = {
       branches: {
@@ -154,7 +113,6 @@ describe('mutations.js', () => {
   })
 
   it('setContentMetadataStatus(payload.statusがloadingでもloadedでもない時)', () => {
-    // console.log(state.branches.status)
     state.contentMetadatas = {
       sha: 'asdf1',
       data: 'resultObj'
@@ -176,7 +134,6 @@ describe('mutations.js', () => {
   })
 
   it('setContentMetadataStatus(payload.statusがloadingかloadedの時)', () => {
-    // console.log(state.branches.status)
     state.contentMetadatas = {
       sha: 'asdf1',
       data: 'resultObj'
@@ -202,16 +159,6 @@ describe('mutations.js', () => {
     mutations.setCommitCSV(state)
     expect(state.setCommitCSV.status).toEqual('committed')
   })
-
-
-
-  // it('setcsvobj', () => {
-  //   const state = { setCsvObj: { status: '' }, files: { x: 'y' } }
-  //   const csvObj = { x: 'y' }
-  //   mutations.setCsvObj(state, csvObj)
-  //   expect(state.setCsvObj.status).toBe('loaded')
-  //   expect(state.files).toEqual({ x: 'y' })
-  // })
 
   it('ユーザーがeditページを読み込んだ際のbranchの書き換え,commitsの書き換え,contentMetadatasの書き換えまでの一連の流れ', () => {
     state.currentBranch = 'master'
@@ -249,7 +196,6 @@ describe('mutations.js', () => {
     }
 
     mutations.setCommit(state, payloadForSetCommit)
-    console.log('statecommits', state.commits, resultForSetCommit)
     expect(state.commits).toEqual(resultForSetCommit)
 
     const currentFile = 'file1.csv'
