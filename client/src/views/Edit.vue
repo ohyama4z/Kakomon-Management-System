@@ -120,45 +120,14 @@
           >
         </div>
 
-        <div
+        <!-- <div
           class="uk-text-center@s uk-margin"
           v-for="file in selectedFiles"
           v-bind:key="file.title"
         >
           {{ file.title }}
           <button @click="trashFile(file)">削除</button>
-        </div>
-      </div>
-    </div>
-
-    <div
-      class="uk-position-bottom uk-overlay uk-overlay-default uk-text-center"
-    >
-      ※過去問編集フォームの使い方がわからない場合は、
-      <a
-        class="uk-link-toggle"
-        href="https://github.com/asann3/Kakomon-Management-System/blob/master/client/manuals/README.md"
-        target="_blank"
-      >
-        README.md
-      </a>
-      を参照してください。
-    </div>
-
-    <div
-      class="uk-position-medium uk-position-bottom-right uk-overlay uk-overlay-default"
-    >
-      <div v-if="!isLoading">
-        <button class="uk-button uk-button-link" v-on:click="toUpload">
-          アップロード画面へ
-          <vk-icon icon="chevron-right"></vk-icon>
-        </button>
-      </div>
-      <div>
-        <button class="uk-button uk-button-link" v-on:click="logout">
-          ログアウト
-          <vk-icon icon="chevron-right"></vk-icon>
-        </button>
+        </div> -->
       </div>
     </div>
   </div>
@@ -254,18 +223,18 @@ export default {
     // setCommitCSV() {
     //   this.$store.dispatch('setCommitCSV', this.selectedBranch)
     // },
-    trashFile(file) {
-      const index = this.selectedFiles.findIndex(
-        item => item.title === file.title
-      )
-      this.selectedFiles.splice(index, 1)
-    },
+    // trashFile(file) {
+    //   const index = this.selectedFiles.findIndex(
+    //     item => item.title === file.title
+    //   )
+    //   this.selectedFiles.splice(index, 1)
+    // },
 
     updateEditData() {
       // sendObjは1つのcsvfile
       const sendObj = {
         selecteBranch: this.selectedBranch,
-        selectedFiles: this.selectedFiles,
+        // selectedFiles: this.selectedFiles,
         subject: this.subject,
         year: this.year,
         toolType: this.toolType,

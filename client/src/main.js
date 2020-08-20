@@ -2,7 +2,8 @@ import VuikitIcons, {
   IconChevronDown,
   IconChevronRight,
   IconCloudUpload,
-  IconQuestion
+  IconQuestion,
+  IconSighOut
 } from '@vuikit/icons'
 import '@vuikit/theme'
 import Vue from 'vue'
@@ -24,6 +25,7 @@ Vue.component('VKIconCheveronRight', IconChevronRight)
 Vue.component('VKIconCloudpload', IconCloudUpload)
 Vue.component('VKIconChevronDown', IconChevronDown)
 Vue.component('VKIconQuestion', IconQuestion)
+Vue.component('VKIconSignOut', IconSighOut)
 Vue.component('file-upload', VueUploadComponent)
 
 Vue.use(Vuex)

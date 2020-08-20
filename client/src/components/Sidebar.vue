@@ -1,9 +1,5 @@
 <template>
-  <sidebar-menu
-    :menu="sidebarMenu"
-    @item-click="onItemClick"
-    @toggle-collapse="onToggleCollapse"
-  />
+  <sidebar-menu :menu="sidebarMenu" @toggle-collapse="onToggleCollapse" />
 </template>
 
 <script>
@@ -12,11 +8,11 @@ import { mapGetters } from 'vuex'
 
 export default {
   name: 'Sidebar',
-  data() {
-    return {
-      selectedFiles: []
-    }
-  },
+  // data() {
+  //   return {
+  //     selectedFiles: []
+  //   }
+  // },
 
   computed: {
     ...mapGetters(['currentBranchMetadatas']),

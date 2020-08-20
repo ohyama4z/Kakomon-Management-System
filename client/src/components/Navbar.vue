@@ -3,19 +3,61 @@
     <div>
       <vk-navbar-full class="custom-navbar">
         <vk-navbar-nav>
-          <vk-navbar-logo>KMS</vk-navbar-logo>
-          <!-- <vk-navbar-nav-item>
-            <vk-button class="custom-button">アップロード</vk-button>
-            <router-link to="/upload">アップロード</router-link>
-          </vk-navbar-nav-item> -->
-          <vk-navbar-nav-item
-            icon="question"
+          <a
+            class="help-logo"
             href="https://github.com/asann3/Kakomon-Management-System/blob/master/client/manuals/README.md"
             target="_blank"
-          ></vk-navbar-nav-item>
+          >
+            <vk-navbar-logo>
+              KMS
+            </vk-navbar-logo>
+            <vk-navbar-item>
+              <vk-iconnav>
+                <vk-iconnav-item icon="question" />
+              </vk-iconnav>
+            </vk-navbar-item>
+          </a>
+          <vk-navbar-item>
+            <vk-button
+              class="custom-button"
+              v-bind:type="uploadButtonType"
+              @click="toUpload"
+            >
+              アップロード
+            </vk-button>
+          </vk-navbar-item>
+          <vk-navbar-item>
+            <vk-button
+              class="custom-button"
+              v-bind:type="editButtonType"
+              @click="toEdit"
+              >編集</vk-button
+            >
+          </vk-navbar-item>
         </vk-navbar-nav>
         <vk-navbar-nav slot="right">
-          <vk-navabar-navitem> </vk-navabar-navitem>
+          <vk-navbar-item>
+            <select
+              class="uk-select uk-form-width-medium"
+              v-model="selectedBranch"
+              @change="selectBranch"
+            >
+              <option disabled value="">ブランチを選択</option>
+              <option>master</option>
+              <option
+                v-for="(sha, branchName) in branches"
+                v-bind:key="sha"
+                v-show="branchName !== 'master'"
+                >{{ branchName }}</option
+              >
+            </select>
+          </vk-navbar-item>
+          <vk-navbar-item>
+            <vk-button type="text" @click="logout"
+              >ログアウト
+              <vk-icon icon="sign-out"></vk-icon>
+            </vk-button>
+          </vk-navbar-item>
         </vk-navbar-nav>
       </vk-navbar-full>
     </div>
@@ -23,8 +65,59 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
+
 export default {
-  name: 'Navbar'
+  name: 'Navbar',
+
+  data() {
+    return {
+      selectedBranch: 'master'
+    }
+  },
+
+  computed: {
+    ...mapState({
+      branches: state => {
+        return state.branches.data
+      }
+    }),
+
+    uploadButtonType() {
+      if (this.$route.path === '/upload') {
+        return false
+      }
+
+      return 'primary'
+    },
+    editButtonType() {
+      if (this.$route.path === '/edit') {
+        return false
+      }
+
+      return 'primary'
+    }
+  },
+
+  methods: {
+    toUpload() {
+      this.$router.push('/upload')
+    },
+
+    toEdit() {
+      this.$router.push('/edit')
+    },
+
+    logout() {
+      localStorage.setItem('lastPage', 'edit')
+      this.$store.commit('updateLastPage')
+      this.$router.push('/logout')
+    },
+
+    async selectBranch() {
+      await this.$store.dispatch('selectBranch', this.selectedBranch)
+    }
+  }
 }
 </script>
 
@@ -33,6 +126,14 @@ export default {
   height: 10vh;
 }
 .custom-button {
+  border: 1px solid #39f;
   border-radius: 500px;
+}
+.help-logo {
+  display: flex;
+}
+
+a {
+  text-decoration: none;
 }
 </style>
