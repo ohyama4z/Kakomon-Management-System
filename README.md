@@ -1,4 +1,5 @@
 [![codecov](https://codecov.io/gh/ohyama4z/Kakomon-Management-System/branch/master/graph/badge.svg)](https://codecov.io/gh/ohyama4z/Kakomon-Management-System)
+![CI](https://github.com/ohyama4z/Kakomon-Management-System/workflows/CI/badge.svg?branch=master)
 # ローカルでのホストの手順
 ## 1. GitHubでの設定
 ### personal access tokenの作成
