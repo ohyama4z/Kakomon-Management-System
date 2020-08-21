@@ -1,0 +1,4 @@
+version: "3"
+services:
+  client_dev:
+    command: sleep infinity

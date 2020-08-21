@@ -1,0 +1,23 @@
+{
+  "name": "Vue.js Dev",
+
+  "dockerComposeFile": ["../docker-compose.yml"],
+
+  "service": "client_dev",
+
+  "workspaceFolder": "/app",
+
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/zsh"
+  },
+
+  "extensions": [
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "visualstudioexptteam.vscodeintellicode",
+    "donjayamanne.githistory",
+    "xyz.local-history"
+  ],
+
+  "postCreateCommand": "set -x && apk update && apk add git zsh sudo && git clone --depth=1 --recursive https://github.com/sorin-ionescu/prezto.git $HOME/.zprezto && git clone https://github.com/satackey/dotfiles $HOME/dotfiles && ln -s $HOME/dotfiles/.z* $HOME"
+}
