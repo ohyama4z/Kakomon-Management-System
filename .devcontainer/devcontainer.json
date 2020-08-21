@@ -1,13 +1,16 @@
 {
   "name": "Vue.js Dev",
 
-  "dockerComposeFile": ["../docker-compose.yml"],
+  "dockerComposeFile": ["../docker-compose.yml", "./docker-compose.yml"],
 
   "service": "client_dev",
 
   "workspaceFolder": "/app",
 
   "settings": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true
+    },
     "terminal.integrated.shell.linux": "/bin/zsh"
   },
 
@@ -16,8 +19,10 @@
     "dbaeumer.vscode-eslint",
     "visualstudioexptteam.vscodeintellicode",
     "donjayamanne.githistory",
-    "xyz.local-history"
+    "xyz.local-history",
+    "octref.vetur",
+    "ms-vsliveshare.vsliveshare"
   ],
 
-  "postCreateCommand": "set -x && apk update && apk add git zsh sudo && git clone --depth=1 --recursive https://github.com/sorin-ionescu/prezto.git $HOME/.zprezto && git clone https://github.com/satackey/dotfiles $HOME/dotfiles && ln -s $HOME/dotfiles/.z* $HOME"
+  "postCreateCommand": "set -x && apt-get update && apt-get install -y git zsh sudo wget && git clone --depth=1 --recursive https://github.com/sorin-ionescu/prezto.git $HOME/.zprezto && git clone https://github.com/satackey/dotfiles $HOME/dotfiles && ln -s $HOME/dotfiles/.z* $HOME && wget -O ~/vsls-reqs https://aka.ms/vsls-linux-prereq-script && chmod +x ~/vsls-reqs && ~/vsls-reqs"
 }

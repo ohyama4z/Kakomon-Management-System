@@ -5,9 +5,14 @@
 <script>
 import merge from 'deepmerge'
 import { mapGetters } from 'vuex'
+import { SidebarMenu } from 'vue-sidebar-menu'
 
 export default {
   name: 'Sidebar',
+  components: {
+    SidebarMenu
+  },
+
   // data() {
   //   return {
   //     selectedFiles: []

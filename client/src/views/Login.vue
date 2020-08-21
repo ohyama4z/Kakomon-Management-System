@@ -8,7 +8,7 @@
 </template>
 
 <script>
-const netlifyIdentity = require('netlify-identity-widget')
+import netlifyIdentity from 'netlify-identity-widget'
 export default {
   name: 'login',
   data() {

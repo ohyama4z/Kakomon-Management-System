@@ -56,9 +56,18 @@
 </template>
 
 <script>
-const netlifyIdentity = require('netlify-identity-widget')
+import { IconCloudUpload } from '@vuikit/icons'
+import { Button, Icon } from 'vuikit'
+import netlifyIdentity from 'netlify-identity-widget'
+
 export default {
   name: 'upload',
+  component: {
+    VkIconCloudpload: IconCloudUpload,
+    VkButton: Button,
+    VkIcon: Icon
+  },
+
   data() {
     return {
       uploadedFiles: [],

@@ -67,9 +67,33 @@
 
 <script>
 import { mapState } from 'vuex'
+import {
+  Sticky,
+  NavbarFull,
+  NavbarNav,
+  NavbarItem,
+  NavbarLogo,
+  IconNav,
+  IconNavItem,
+  Button
+} from 'vuikit'
+import { IconQuestion, IconSighOut, IconGitBranch } from '@vuikit/icons'
 
 export default {
   name: 'Navbar',
+  component: {
+    VkIconQuestion: IconQuestion,
+    VkIconSignOut: IconSighOut,
+    VkIconGitBranch: IconGitBranch,
+    VkSticky: Sticky,
+    VkNavbarFull: NavbarFull,
+    VkNavbarNav: NavbarNav,
+    VkNavbarItem: NavbarItem,
+    VkNavbarLogo: NavbarLogo,
+    VkIconNav: IconNav,
+    VkIconNavItem: IconNavItem,
+    VkIconButton: Button
+  },
 
   data() {
     return {

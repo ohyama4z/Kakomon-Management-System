@@ -101,6 +101,7 @@
 
 <script>
 import { mapState } from 'vuex'
+import { Spinner, Button } from 'vuikit'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
 
@@ -109,7 +110,9 @@ export default {
 
   components: {
     Sidebar,
-    Navbar
+    Navbar,
+    VkSpinner: Spinner,
+    VkButton: Button
   },
 
   data() {
@@ -167,16 +170,6 @@ export default {
   },
 
   methods: {
-    toUpload() {
-      this.$router.push('upload')
-    },
-
-    logout() {
-      localStorage.setItem('lastPage', 'edit')
-      this.$store.commit('updateLastPage')
-      this.$router.push('/logout')
-    },
-
     async getCommit() {
       const commitSha = this.$store.state.branches.data[this.selectedBranch]
       await this.$store.dispatch('getCommit', commitSha)
