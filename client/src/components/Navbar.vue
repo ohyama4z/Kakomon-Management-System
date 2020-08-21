@@ -37,6 +37,7 @@
         </vk-navbar-nav>
         <vk-navbar-nav slot="right">
           <vk-navbar-item>
+            <vk-icon icon="git-branch"></vk-icon>
             <select
               class="uk-select uk-form-width-medium"
               v-model="selectedBranch"
@@ -85,14 +86,14 @@ export default {
 
     uploadButtonType() {
       if (this.$route.path === '/upload') {
-        return false
+        return ''
       }
 
       return 'primary'
     },
     editButtonType() {
       if (this.$route.path === '/edit') {
-        return false
+        return ''
       }
 
       return 'primary'

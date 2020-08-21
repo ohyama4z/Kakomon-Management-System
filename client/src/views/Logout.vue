@@ -1,10 +1,8 @@
 <template>
   <div>
-    ログアウトできてるよ！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
     <vk-spinner
       class="uk-position-medium uk-position-center"
       ratio="5"
-      v-if="isLoading"
     ></vk-spinner>
   </div>
 </template>

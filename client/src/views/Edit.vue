@@ -11,31 +11,6 @@
     <div v-if="!isLoading">
       <Sidebar></Sidebar>
       <div class="forms" v-bind:class="{ collapsed: collapase }">
-        <!-- <div
-            class="uk-position-medium uk-position-top-right uk-overlay uk-overlay-default"
-          >
-            <div class="uk-text-center@s uk-margin">
-              編集するブランチを選択してください。
-            </div>
-
-            <div class="uk-margin uk-flex uk-flex-center">
-              <select
-                class="uk-select uk-form-width-medium"
-                v-model="selectedBranch"
-                @change="selectBranch"
-              >
-                <option disabled value="">ブランチを選択</option>
-                <option>master</option>
-                <option
-                  v-for="(sha, branchName) in branches"
-                  v-bind:key="sha"
-                  v-show="branchName !== 'master'"
-                  >{{ branchName }}</option
-                >
-              </select>
-            </div>
-          </div> -->
-
         <div class="uk-margin uk-flex uk-flex-center">
           <input
             class="uk-input uk-form-width-medium"
@@ -119,15 +94,6 @@
             >編集をコミット</vk-button
           >
         </div>
-
-        <!-- <div
-          class="uk-text-center@s uk-margin"
-          v-for="file in selectedFiles"
-          v-bind:key="file.title"
-        >
-          {{ file.title }}
-          <button @click="trashFile(file)">削除</button>
-        </div> -->
       </div>
     </div>
   </div>
@@ -252,7 +218,7 @@ export default {
 <style>
 @import url('https://use.fontawesome.com/releases/v5.6.1/css/all.css');
 .forms {
-  padding-top: 50px;
+  padding-top: 10vh;
 }
 .collapsed {
   padding-left: 350px;

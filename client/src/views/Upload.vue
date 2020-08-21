@@ -52,37 +52,6 @@
         >アップロード</vk-button
       >
     </div>
-
-    <div
-      class="uk-position-bottom uk-overlay uk-overlay-default uk-text-center"
-    >
-      ※過去問アップロードフォームの使い方がわからない場合は、
-      <a
-        class="uk-link-toggle"
-        href="https://github.com/asann3/Kakomon-Management-System/blob/master/client/manuals/README.md"
-        target="_blank"
-      >
-        README.md
-      </a>
-      を参照してください。
-    </div>
-
-    <div
-      class="uk-position-medium uk-position-bottom-right uk-overlay uk-overlay-default"
-    >
-      <div v-if="!isLoading">
-        <button class="uk-button uk-button-link" v-on:click="toEdit">
-          編集画面へ
-          <vk-icon icon="chevron-right"></vk-icon>
-        </button>
-      </div>
-      <div>
-        <button class="uk-button uk-button-link" v-on:click="logout">
-          ログアウト
-          <vk-icon icon="chevron-right"></vk-icon>
-        </button>
-      </div>
-    </div>
   </div>
 </template>
 

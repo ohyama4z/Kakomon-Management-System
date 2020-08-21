@@ -2,6 +2,7 @@ import VuikitIcons, {
   IconChevronDown,
   IconChevronRight,
   IconCloudUpload,
+  IconGitBranch,
   IconQuestion,
   IconSighOut
 } from '@vuikit/icons'
@@ -26,6 +27,7 @@ Vue.component('VKIconCloudpload', IconCloudUpload)
 Vue.component('VKIconChevronDown', IconChevronDown)
 Vue.component('VKIconQuestion', IconQuestion)
 Vue.component('VKIconSignOut', IconSighOut)
+Vue.component('VKIconGitBranch', IconGitBranch)
 Vue.component('file-upload', VueUploadComponent)
 
 Vue.use(Vuex)
