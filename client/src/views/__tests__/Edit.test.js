@@ -1,4 +1,4 @@
-import { createLocalVue, mount } from '@vue/test-utils'
+import { createLocalVue, shallowMount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 import 'jest-localstorage-mock'
 import netlifyIdentity from 'netlify-identity-widget'
@@ -71,12 +71,22 @@ const store = new Vuex.Store({
   actions
 })
 
+const stubs = {
+  'vk-spinner': {
+    template: `<div class="vk-spinner-stub"></div>`
+  },
+  'vk-button': {
+    template: `<button class="vk-button-stub"></button>`
+  }
+}
+
 describe('Edit.vue', () => {
   it('ページが読み込まれたときにbranchの取得,及びファイルの取得を行う', async () => {
-    mount(Edit, {
+    shallowMount(Edit, {
       store,
       router,
-      localVue
+      localVue,
+      stubs
     })
 
     await flushPromises()
@@ -91,10 +101,11 @@ describe('Edit.vue', () => {
   it('ユーザ情報がstate上にない場合ログインページに遷移する', async () => {
     state.currentUser = null
 
-    const wrapper = mount(Edit, {
+    const wrapper = shallowMount(Edit, {
       store,
       router,
-      localVue
+      localVue,
+      stubs
     })
 
     await flushPromises()
@@ -116,17 +127,11 @@ describe('Edit.vue', () => {
     }
     state.branches.status = 'loading'
 
-    // const stubs = {
-    //   VkSpinner: {
-    //     template: `<div class="vk-spinner-stub-inline"></div>`,
-    //     name: `VkSpinner`
-    //   }
-    // }
-
-    const wrapper = mount(Edit, {
+    const wrapper = shallowMount(Edit, {
       store,
       router,
-      localVue
+      localVue,
+      stubs
     })
 
     const vkspinnerComponent = wrapper.find('.vk-spinner-stub')
@@ -134,25 +139,29 @@ describe('Edit.vue', () => {
     console.log(vkspinnerComponent)
     expect(wrapper.vm.isLoading).toBe(true)
     expect(vkspinnerComponent.exists()).toBe(true)
+
+    jest.clearAllMocks()
   })
 
-  // it('コミット情報の取得中にはロード中表示にする', () => {
-  //   state.currentBranch = 'master'
-  //   state.commits = {
-  //     master: {
-  //       status: 'loading'
-  //     }
-  //   }
-  //   const wrapper = mount(Edit, {
-  //     store,
-  //     router,
-  //     localVue
-  //   })
+  it('コミット情報の取得中にはロード中表示にする', () => {
+    state.currentBranch = 'master'
+    state.commits = {
+      master: {
+        status: 'loading'
+      }
+    }
+    state.branches.status = 'loaded'
 
-  //   expect(wrapper.findComponent({ name: 'vk-spinner' }).exists()).toBe(true)
-  // })
+    const wrapper = shallowMount(Edit, {
+      store,
+      router,
+      localVue,
+      stubs
+    })
 
-  // it('選択branchが変更されたらbranchの情報を取得するactionが走る', async () => {
+    expect(wrapper.vm.isLoading).toBe(true)
+    expect(wrapper.find('.vk-spinner-stub').exists()).toBe(true)
 
-  // })
+    jest.clearAllMocks()
+  })
 })

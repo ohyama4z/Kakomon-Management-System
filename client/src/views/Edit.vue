@@ -153,7 +153,6 @@ export default {
         )
       },
 
-      branches: state => state.branches.data,
       collapase: state => state.collapased
     }),
 
@@ -174,11 +173,6 @@ export default {
       const commitSha = this.$store.state.branches.data[this.selectedBranch]
       await this.$store.dispatch('getCommit', commitSha)
     },
-
-    async selectBranch() {
-      await this.$store.dispatch('selectBranch', this.selectedBranch)
-    },
-
     // setCommitCSV() {
     //   this.$store.dispatch('setCommitCSV', this.selectedBranch)
     // },
