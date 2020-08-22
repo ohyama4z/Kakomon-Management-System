@@ -25,7 +25,8 @@ const state = {
   currentUser: {
     token: {
       access_token: 'token'
-    }
+    },
+    email: 'ahoge@gmail.com'
   },
   lastPage: '',
   currentBranch: '',
