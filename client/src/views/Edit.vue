@@ -101,18 +101,19 @@
 
 <script>
 import { mapState } from 'vuex'
-import { Spinner, Button } from 'vuikit'
+import { Button } from 'vuikit/lib/button'
+import { Spinner } from 'vuikit/lib/spinner'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
 
 export default {
-  name: 'edit',
+  name: 'Edit',
 
   components: {
-    Sidebar,
-    Navbar,
     VkSpinner: Spinner,
-    VkButton: Button
+    VkButton: Button,
+    Sidebar,
+    Navbar
   },
 
   data() {

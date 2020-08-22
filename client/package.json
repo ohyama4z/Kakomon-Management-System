@@ -104,6 +104,9 @@
     "setupFiles": [
       "jest-localstorage-mock",
       "./src/setupTests.js"
+    ],
+    "transformIgnorePatterns": [
+      "/node_modules/(?!vuikit)"
     ]
   },
   "browserslist": [

@@ -71,22 +71,12 @@ const store = new Vuex.Store({
   actions
 })
 
-const stubs = {
-  'vk-spinner': {
-    template: `<div class="vk-spinner-stub"></div>`
-  },
-  'vk-button': {
-    template: `<button class="vk-button-stub"></button>`
-  }
-}
-
 describe('Edit.vue', () => {
   it('ページが読み込まれたときにbranchの取得,及びファイルの取得を行う', async () => {
     shallowMount(Edit, {
       store,
       router,
-      localVue,
-      stubs
+      localVue
     })
 
     await flushPromises()
@@ -104,8 +94,7 @@ describe('Edit.vue', () => {
     const wrapper = shallowMount(Edit, {
       store,
       router,
-      localVue,
-      stubs
+      localVue
     })
 
     await flushPromises()
@@ -130,15 +119,11 @@ describe('Edit.vue', () => {
     const wrapper = shallowMount(Edit, {
       store,
       router,
-      localVue,
-      stubs
+      localVue
     })
 
-    const vkspinnerComponent = wrapper.find('.vk-spinner-stub')
-
-    console.log(vkspinnerComponent)
     expect(wrapper.vm.isLoading).toBe(true)
-    expect(vkspinnerComponent.exists()).toBe(true)
+    expect(wrapper.find('vk-spinner-stub').exists()).toBe(true)
 
     jest.clearAllMocks()
   })
@@ -155,12 +140,11 @@ describe('Edit.vue', () => {
     const wrapper = shallowMount(Edit, {
       store,
       router,
-      localVue,
-      stubs
+      localVue
     })
 
     expect(wrapper.vm.isLoading).toBe(true)
-    expect(wrapper.find('.vk-spinner-stub').exists()).toBe(true)
+    expect(wrapper.find('vk-spinner-stub').exists()).toBe(true)
 
     jest.clearAllMocks()
   })

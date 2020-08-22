@@ -63,7 +63,7 @@ const store = new Vuex.Store({
   mutations
 })
 
-describe('Edit.vue', () => {
+describe('Sidebar.vue', () => {
   it('gettersから取得したファイル情報からvue-sidebar-menuに合う構造のオブジェクトを作る', () => {
     state.currentBranch = 'master'
     const wrapper = shallowMount(Sidebar, {
