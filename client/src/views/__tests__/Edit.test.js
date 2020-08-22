@@ -73,6 +73,11 @@ const store = new Vuex.Store({
 })
 
 describe('Edit.vue', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    localStorage.clear()
+  })
+
   it('ページが読み込まれたときにbranchの取得,及びファイルの取得を行う', async () => {
     shallowMount(Edit, {
       store,
@@ -85,8 +90,6 @@ describe('Edit.vue', () => {
     expect(actions.getBranches).toHaveBeenCalled()
     expect(actions.selectBranch).toHaveBeenCalled()
     expect(actions.getCommit).toHaveBeenCalled()
-
-    jest.clearAllMocks()
   })
 
   it('ユーザ情報がstate上にない場合ログインページに遷移する', async () => {
@@ -103,9 +106,6 @@ describe('Edit.vue', () => {
     expect(localStorage.setItem).toHaveBeenCalled()
     expect(mutations.updateLastPage).toHaveBeenCalled()
     expect(wrapper.vm.$route.path).toBe('/login')
-
-    localStorage.setItem.mockClear()
-    jest.clearAllMocks()
   })
 
   it('ブランチ一覧の取得中にはロード中表示にする', () => {
@@ -125,8 +125,6 @@ describe('Edit.vue', () => {
 
     expect(wrapper.vm.isLoading).toBe(true)
     expect(wrapper.findComponent(Spinner).exists()).toBe(true)
-
-    jest.clearAllMocks()
   })
 
   it('コミット情報の取得中にはロード中表示にする', () => {
@@ -146,7 +144,5 @@ describe('Edit.vue', () => {
 
     expect(wrapper.vm.isLoading).toBe(true)
     expect(wrapper.findComponent(Spinner).exists()).toBe(true)
-
-    jest.clearAllMocks()
   })
 })

@@ -65,6 +65,10 @@ const store = new Vuex.Store({
 })
 
 describe('Edit.vue', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
   it(`"アップロード"ボタンを押すと/uploadに遷移する`, () => {
     router.push(`/edit`)
     const wrapper = mount(Navbar, {
@@ -78,8 +82,6 @@ describe('Edit.vue', () => {
     expect(uploadButtonWrapper.text()).toBe(`アップロード`)
     uploadButtonWrapper.trigger('click')
     expect(wrapper.vm.$route.path).toBe('/upload')
-
-    jest.clearAllMocks()
   })
 
   it(`"編集"ボタンを押すと/editに遷移する`, () => {
@@ -95,8 +97,6 @@ describe('Edit.vue', () => {
     expect(editButtonWrapper.text()).toBe(`編集`)
     editButtonWrapper.trigger('click')
     expect(wrapper.vm.$route.path).toBe('/edit')
-
-    jest.clearAllMocks()
   })
 
   it(`/uploadの場合"アップロード"ボタンは枠線だけの表示にし、"編集"ボタンは青色の表示にする`, () => {
@@ -110,8 +110,6 @@ describe('Edit.vue', () => {
     const editButtonWrapper = wrapper.findAllComponents(Button).at(1)
     expect(uploadButtonWrapper.attributes().type).toBe(``)
     expect(editButtonWrapper.attributes().type).toBe(`primary`)
-
-    jest.clearAllMocks()
   })
 
   it(`/editの場合"編集"ボタンは枠線だけの表示にし、"アップロード"ボタンは青色の表示にする`, () => {
@@ -125,8 +123,6 @@ describe('Edit.vue', () => {
     const editButtonWrapper = wrapper.findAllComponents(Button).at(1)
     expect(uploadButtonWrapper.attributes().type).toBe(`primary`)
     expect(editButtonWrapper.attributes().type).toBe(``)
-
-    jest.clearAllMocks()
   })
 
   it(`branchを選択するとそのコミット情報を取得するactionが走る`, () => {
@@ -138,8 +134,6 @@ describe('Edit.vue', () => {
 
     wrapper.find('select').trigger('change')
     expect(actions.selectBranch).toHaveBeenCalled()
-
-    jest.clearAllMocks()
   })
 
   it('ログアウトを押すと/logoutに遷移する', () => {
