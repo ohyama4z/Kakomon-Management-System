@@ -4,6 +4,7 @@ import 'jest-localstorage-mock'
 import netlifyIdentity from 'netlify-identity-widget'
 import VueRouter from 'vue-router'
 import Vuex from 'vuex'
+import { Spinner } from 'vuikit/lib/spinner'
 import Edit from '../Edit'
 
 const localVue = createLocalVue()
@@ -123,7 +124,7 @@ describe('Edit.vue', () => {
     })
 
     expect(wrapper.vm.isLoading).toBe(true)
-    expect(wrapper.find('vk-spinner-stub').exists()).toBe(true)
+    expect(wrapper.findComponent(Spinner).exists()).toBe(true)
 
     jest.clearAllMocks()
   })
@@ -144,7 +145,7 @@ describe('Edit.vue', () => {
     })
 
     expect(wrapper.vm.isLoading).toBe(true)
-    expect(wrapper.find('vk-spinner-stub').exists()).toBe(true)
+    expect(wrapper.findComponent(Spinner).exists()).toBe(true)
 
     jest.clearAllMocks()
   })

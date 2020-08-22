@@ -1,14 +1,18 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils'
+import { createLocalVue, mount, shallowMount } from '@vue/test-utils'
+import VuikitIcons from '@vuikit/icons'
 import 'jest-localstorage-mock'
 import VueRouter from 'vue-router'
 import Vuex from 'vuex'
+import Vuikit from 'vuikit'
+import { Button } from 'vuikit/lib/button'
 import Navbar from '../Navbar'
 
 const localVue = createLocalVue()
 
 localVue.use(Vuex)
 localVue.use(VueRouter)
-// localVue.use(Vuikit)
+localVue.use(Vuikit)
+localVue.use(VuikitIcons)
 
 const router = new VueRouter()
 
@@ -61,14 +65,94 @@ const store = new Vuex.Store({
 })
 
 describe('Edit.vue', () => {
-  it('"アップロード"ボタンを押すと/uploadに遷移する', () => {
-    const wrapper = shallowMount(Navbar, {
+  it(`"アップロード"ボタンを押すと/uploadに遷移する`, () => {
+    router.push(`/edit`)
+    const wrapper = mount(Navbar, {
       store,
       router,
       localVue
     })
 
-    console.log(wrapper.html())
-    // console.log(wrapper.find('vk-button-stub'))
+    const uploadButtonWrapper = wrapper.findAllComponents(Button).at(0)
+
+    expect(uploadButtonWrapper.text()).toBe(`アップロード`)
+    uploadButtonWrapper.trigger('click')
+    expect(wrapper.vm.$route.path).toBe('/upload')
+
+    jest.clearAllMocks()
+  })
+
+  it(`"編集"ボタンを押すと/editに遷移する`, () => {
+    router.push(`/upload`)
+    const wrapper = mount(Navbar, {
+      store,
+      router,
+      localVue
+    })
+
+    const editButtonWrapper = wrapper.findAllComponents(Button).at(1)
+
+    expect(editButtonWrapper.text()).toBe(`編集`)
+    editButtonWrapper.trigger('click')
+    expect(wrapper.vm.$route.path).toBe('/edit')
+
+    jest.clearAllMocks()
+  })
+
+  it(`/uploadの場合"アップロード"ボタンは枠線だけの表示にし、"編集"ボタンは青色の表示にする`, () => {
+    router.push(`/upload`)
+    const wrapper = shallowMount(Navbar, {
+      store,
+      router,
+      localVue
+    })
+    const uploadButtonWrapper = wrapper.findAllComponents(Button).at(0)
+    const editButtonWrapper = wrapper.findAllComponents(Button).at(1)
+    expect(uploadButtonWrapper.attributes().type).toBe(``)
+    expect(editButtonWrapper.attributes().type).toBe(`primary`)
+
+    jest.clearAllMocks()
+  })
+
+  it(`/editの場合"編集"ボタンは枠線だけの表示にし、"アップロード"ボタンは青色の表示にする`, () => {
+    router.push(`/edit`)
+    const wrapper = shallowMount(Navbar, {
+      store,
+      router,
+      localVue
+    })
+    const uploadButtonWrapper = wrapper.findAllComponents(Button).at(0)
+    const editButtonWrapper = wrapper.findAllComponents(Button).at(1)
+    expect(uploadButtonWrapper.attributes().type).toBe(`primary`)
+    expect(editButtonWrapper.attributes().type).toBe(``)
+
+    jest.clearAllMocks()
+  })
+
+  it(`branchを選択するとそのコミット情報を取得するactionが走る`, () => {
+    const wrapper = mount(Navbar, {
+      store,
+      router,
+      localVue
+    })
+
+    wrapper.find('select').trigger('change')
+    expect(actions.selectBranch).toHaveBeenCalled()
+
+    jest.clearAllMocks()
+  })
+
+  it('ログアウトを押すと/logoutに遷移する', () => {
+    router.push(`/edit`)
+    const wrapper = mount(Navbar, {
+      store,
+      router,
+      localVue
+    })
+
+    const logoutButtonWrapper = wrapper.findAllComponents(Button).at(2)
+    expect(logoutButtonWrapper.text()).toBe(`ログアウト`)
+    logoutButtonWrapper.trigger('click')
+    expect(wrapper.vm.$route.path).toBe('/logout')
   })
 })
