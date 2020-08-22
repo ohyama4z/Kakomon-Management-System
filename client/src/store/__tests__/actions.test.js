@@ -78,6 +78,8 @@ const store = new Vuex.Store({
 describe('action.js', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    localStorage.clear()
+    fetchMock.restore()
   })
   it('csvをオブジェクトにする関数が機能するか見る', () => {
     const csv = `src,name,birthday\n` + `aho,TARO,0616\n` + `\n` + `a,b,c\n`
@@ -180,12 +182,9 @@ describe('action.js', () => {
     expect(dispatch).toHaveBeenCalled()
     expect(commit).toHaveBeenNthCalledWith(2, 'setCommit', payloadForSetCommit)
     expect(localStorage.setItem).toHaveBeenCalled()
-
-    fetchMock.restore()
-    localStorage.setItem.mockClear()
   })
 
-  it('コミットごとのファイルの状態を取得する(localStorageのキャシュを使用)', async () => {
+  it('コミットごとのファイルの状態を取得する(localStorageのキャッシュを使用)', async () => {
     shallowMount(actions, {
       localVue,
       store
@@ -214,8 +213,6 @@ describe('action.js', () => {
     expect(dispatch).toHaveBeenCalled()
     expect(commit).toHaveBeenNthCalledWith(2, 'setCommit', payloadForSetCommit)
     expect(localStorage.setItem).not.toHaveBeenCalled()
-
-    localStorage.setItem.mockClear()
   })
 
   it('コミットごとのファイルの状態を取得する(stateのキャッシュを使用)', async () => {
@@ -246,11 +243,10 @@ describe('action.js', () => {
     expect(localStorage.getItem).not.toHaveBeenCalled()
     expect(dispatch).toHaveBeenCalled()
     expect(localStorage.setItem).not.toHaveBeenCalled()
-
-    localStorage.setItem.mockClear()
   })
 
   it('branchを選択した際にbranchの情報、コミット情報を取得するactionを走らせる', async () => {
+    console.log('localstorageclearcheck', localStorage)
     shallowMount(actions, {
       localVue,
       store
@@ -299,9 +295,6 @@ describe('action.js', () => {
     })
     expect(commit).toHaveBeenNthCalledWith(2, 'setContentMetadata', payload)
     expect(localStorage.setItem).toHaveBeenCalled()
-
-    fetchMock.restore()
-    localStorage.setItem.mockClear()
   })
 
   it('ファイルごとのshaからファイル情報を取得する(localStorageのキャッシュを使用する)', async () => {
@@ -330,8 +323,6 @@ describe('action.js', () => {
     })
     expect(commit).toHaveBeenNthCalledWith(2, 'setContentMetadata', payload)
     expect(localStorage.setItem).not.toHaveBeenCalled()
-
-    localStorage.setItem.mockClear()
   })
 
   it('ファイルごとのshaからファイル情報を取得する(stateのキャッシュを使用する)', async () => {
@@ -359,8 +350,6 @@ describe('action.js', () => {
     })
     expect(localStorage.getItem).not.toHaveBeenCalled()
     expect(localStorage.setItem).not.toHaveBeenCalled()
-
-    localStorage.setItem.mockClear()
   })
 
   it('objectToCsVが機能するかテスト', () => {
