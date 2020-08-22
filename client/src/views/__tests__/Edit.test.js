@@ -4,6 +4,7 @@ import 'jest-localstorage-mock'
 import netlifyIdentity from 'netlify-identity-widget'
 import VueRouter from 'vue-router'
 import Vuex from 'vuex'
+import { Spinner } from 'vuikit/lib/spinner'
 import Edit from '../Edit'
 
 const localVue = createLocalVue()
@@ -71,22 +72,17 @@ const store = new Vuex.Store({
   actions
 })
 
-const stubs = {
-  'vk-spinner': {
-    template: `<div class="vk-spinner-stub"></div>`
-  },
-  'vk-button': {
-    template: `<button class="vk-button-stub"></button>`
-  }
-}
-
 describe('Edit.vue', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    localStorage.clear()
+  })
+
   it('ページが読み込まれたときにbranchの取得,及びファイルの取得を行う', async () => {
     shallowMount(Edit, {
       store,
       router,
-      localVue,
-      stubs
+      localVue
     })
 
     await flushPromises()
@@ -94,8 +90,6 @@ describe('Edit.vue', () => {
     expect(actions.getBranches).toHaveBeenCalled()
     expect(actions.selectBranch).toHaveBeenCalled()
     expect(actions.getCommit).toHaveBeenCalled()
-
-    jest.clearAllMocks()
   })
 
   it('ユーザ情報がstate上にない場合ログインページに遷移する', async () => {
@@ -104,8 +98,7 @@ describe('Edit.vue', () => {
     const wrapper = shallowMount(Edit, {
       store,
       router,
-      localVue,
-      stubs
+      localVue
     })
 
     await flushPromises()
@@ -113,9 +106,6 @@ describe('Edit.vue', () => {
     expect(localStorage.setItem).toHaveBeenCalled()
     expect(mutations.updateLastPage).toHaveBeenCalled()
     expect(wrapper.vm.$route.path).toBe('/login')
-
-    localStorage.setItem.mockClear()
-    jest.clearAllMocks()
   })
 
   it('ブランチ一覧の取得中にはロード中表示にする', () => {
@@ -130,17 +120,11 @@ describe('Edit.vue', () => {
     const wrapper = shallowMount(Edit, {
       store,
       router,
-      localVue,
-      stubs
+      localVue
     })
 
-    const vkspinnerComponent = wrapper.find('.vk-spinner-stub')
-
-    console.log(vkspinnerComponent)
     expect(wrapper.vm.isLoading).toBe(true)
-    expect(vkspinnerComponent.exists()).toBe(true)
-
-    jest.clearAllMocks()
+    expect(wrapper.findComponent(Spinner).exists()).toBe(true)
   })
 
   it('コミット情報の取得中にはロード中表示にする', () => {
@@ -155,13 +139,10 @@ describe('Edit.vue', () => {
     const wrapper = shallowMount(Edit, {
       store,
       router,
-      localVue,
-      stubs
+      localVue
     })
 
     expect(wrapper.vm.isLoading).toBe(true)
-    expect(wrapper.find('.vk-spinner-stub').exists()).toBe(true)
-
-    jest.clearAllMocks()
+    expect(wrapper.findComponent(Spinner).exists()).toBe(true)
   })
 })

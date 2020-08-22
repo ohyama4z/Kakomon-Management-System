@@ -63,7 +63,10 @@ const store = new Vuex.Store({
   mutations
 })
 
-describe('Edit.vue', () => {
+describe('Sidebar.vue', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
   it('gettersから取得したファイル情報からvue-sidebar-menuに合う構造のオブジェクトを作る', () => {
     state.currentBranch = 'master'
     const wrapper = shallowMount(Sidebar, {
@@ -187,8 +190,6 @@ describe('Edit.vue', () => {
 
     expect(getters.currentBranchMetadatas).toHaveBeenCalled()
     expect(wrapper.vm.sidebarMenu).toEqual(result)
-
-    jest.clearAllMocks()
   })
 
   it('サイドバー全体を開閉した際に、state上にあるサイドバーの開閉の情報を更新する', () => {
@@ -201,7 +202,5 @@ describe('Edit.vue', () => {
 
     wrapper.vm.onToggleCollapse(collapse)
     expect(mutations.setCollapased).toHaveBeenCalled()
-
-    jest.clearAllMocks()
   })
 })

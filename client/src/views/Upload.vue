@@ -57,7 +57,8 @@
 
 <script>
 import { IconCloudUpload } from '@vuikit/icons'
-import { Button, Icon } from 'vuikit'
+import { Button } from 'vuikit/lib/button'
+import { Icon } from 'vuikit/lib/icon'
 import netlifyIdentity from 'netlify-identity-widget'
 
 export default {
