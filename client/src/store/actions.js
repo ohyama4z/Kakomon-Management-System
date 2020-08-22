@@ -140,12 +140,12 @@ export default {
     }
 
     const editcsvobj = state.changedFiles
+    console.log(state)
     console.log(editcsvobj)
 
     // editedobject→csv
     console.log(Object.values(editcsvobj))
     const objarray = Object.values(editcsvobj)
-    // console.log(convertToCSV(objarray))
     const content = convertToCSV(objarray)
     console.log('content', content)
 
@@ -158,6 +158,7 @@ export default {
     )
     const parseref = await branchref.json()
     console.log(parseref)
+    console.log(parseref.object)
     console.log('branch毎のハッシュ', `${branchName}`, parseref.object.sha)
 
     // commitの取得
