@@ -1,5 +1,10 @@
 <template>
-  <sidebar-menu :menu="sidebarMenu" @toggle-collapse="onToggleCollapse" />
+  <sidebar-menu
+    :menu="sidebarMenu"
+    :show-one-child="true"
+    @toggle-collapse="onToggleCollapse"
+    @item-click="onItemClick"
+  />
 </template>
 
 <script>
@@ -71,20 +76,20 @@ export default {
           const result = Object.entries(intermediate).map(([key, file]) => ({
             title: key,
             icon: 'fas fa-file',
-            data: file
+            data: file,
+            isSecondFromEnd: false
           }))
 
           return result
         }
         return Object.entries(intermediate).reduce((previous, [key, value]) => {
-          if (num === 2) {
-          }
           return [
             ...previous,
             {
               title: key,
               icon,
-              child: generateMenuStructure(value, num - 1)
+              child: generateMenuStructure(value, num - 1),
+              isSecondFromEnd: num === 2 // 末端ファイルの元となるフォルダかを確かめる
             }
           ]
         }, [])
@@ -96,37 +101,29 @@ export default {
         {
           header: true,
           title: `Branch : ${this.$store.state.currentBranch}`,
-          icon: '',
           hiddenOnCollapse: true
         }
       ]
-
-      const component = [
-        {
-          props: {
-            collapse: {
-              default: true
-            }
-          }
-        }
-      ]
-      return [...header, ...this.menuStructure, ...component]
+      return [...header, ...this.menuStructure]
     }
   },
 
   methods: {
-    // onItemClick(e, item) {
-    //   // データツリーの末端要素をクリックしたときに処理を行う
-    //   if (item.child == null) {
-    //     console.log(item.data)
-    //     const sameItem = this.selectedFiles.find(
-    //       file => file.title === item.title
-    //     )
-    //     if (sameItem == null) {
-    //       this.selectedFiles.push(item)
-    //     }
-    //   }
-    // },
+    onItemClick(e, item) {
+      // データツリーの末端ファイルの元となるフォルダをクリックしたときに処理を行う
+      if (item.isSecondFromEnd) {
+        console.log(item.child)
+        const selectedFiles = Object.fromEntries(
+          item.child.map(file => {
+            console.log({ [file.data.src]: file.data })
+            return [file.data.src, file.data]
+          })
+        )
+
+        console.log(selectedFiles)
+        this.$store.dispatch('getImages', item.child)
+      }
+    },
     onToggleCollapse(collapsed) {
       this.$store.commit('setCollapased', !collapsed)
     }

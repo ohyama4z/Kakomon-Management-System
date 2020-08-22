@@ -246,7 +246,6 @@ describe('action.js', () => {
   })
 
   it('branchを選択した際にbranchの情報、コミット情報を取得するactionを走らせる', async () => {
-    console.log('localstorageclearcheck', localStorage)
     shallowMount(actions, {
       localVue,
       store
@@ -383,7 +382,7 @@ describe('action.js', () => {
       `src,subj,tool_type,period,year,content_type,author,image_index,included_pages_num,fix_text\n` +
       `scanned/20180802_2年3紐。5組『倫理社会」前期定期試験1.jpg,倫理社会,テスト,前期定期,2018,,,,,\n` +
       `scanned/20180802_2年3紐。5組『倫理社会」前期定期試験2.jpg,,,,,,,,,`
-    console.log(convertToCSV(objarr), result)
+    // console.log(convertToCSV(objarr), result)
     expect(convertToCSV(objarr)).toEqual(result)
   })
 

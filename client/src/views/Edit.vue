@@ -103,6 +103,7 @@
             >コミット</vk-button
           >
         </div>
+        <!-- <Preview></Preview> -->
       </div>
     </div>
   </div>
@@ -114,6 +115,7 @@ import { Button } from 'vuikit/lib/button'
 import { Spinner } from 'vuikit/lib/spinner'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
+// import Preview from '../components/Preview'
 
 export default {
   name: 'Edit',
@@ -123,6 +125,7 @@ export default {
     VkButton: Button,
     Sidebar,
     Navbar
+    // Preview
   },
 
   data() {
@@ -189,12 +192,6 @@ export default {
         this.$store.state.currentBranch
       )
     },
-    // trashFile(file) {
-    //   const index = this.selectedFiles.findIndex(
-    //     item => item.title === file.title
-    //   )
-    //   this.selectedFiles.splice(index, 1)
-    // },
 
     updateEditData() {
       // sendObjは1つのcsvfile

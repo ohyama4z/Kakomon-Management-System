@@ -80,32 +80,37 @@ describe('Sidebar.vue', () => {
       {
         header: true,
         title: `Branch : ${state.currentBranch}`,
-        icon: '',
         hiddenOnCollapse: true
       },
       {
         title: 'period1',
         icon,
+        isSecondFromEnd: false,
         child: [
           {
             title: 'subj1',
             icon,
+            isSecondFromEnd: false,
             child: [
               {
                 title: 'tool_type1',
                 icon,
+                isSecondFromEnd: false,
                 child: [
                   {
                     title: 'year1',
                     icon,
+                    isSecondFromEnd: false,
                     child: [
                       {
                         title: 'content_type1',
                         icon,
+                        isSecondFromEnd: true,
                         child: [
                           {
                             title: 'src1',
                             icon: 'fas fa-file',
+                            isSecondFromEnd: false,
                             data: {
                               src: 'src1',
                               subj: 'subj1',
@@ -118,6 +123,7 @@ describe('Sidebar.vue', () => {
                           {
                             title: 'src2',
                             icon: 'fas fa-file',
+                            isSecondFromEnd: false,
                             data: {
                               src: 'src2',
                               subj: 'subj1',
@@ -140,26 +146,32 @@ describe('Sidebar.vue', () => {
       {
         title: 'period3',
         icon,
+        isSecondFromEnd: false,
         child: [
           {
             title: 'subj3',
             icon,
+            isSecondFromEnd: false,
             child: [
               {
                 title: 'tool_type3',
                 icon,
+                isSecondFromEnd: false,
                 child: [
                   {
                     title: 'year3',
                     icon,
+                    isSecondFromEnd: false,
                     child: [
                       {
                         title: 'content_type3',
                         icon,
+                        isSecondFromEnd: true,
                         child: [
                           {
                             title: 'src3',
                             icon: 'fas fa-file',
+                            isSecondFromEnd: false,
                             data: {
                               src: 'src3',
                               subj: 'subj3',
@@ -178,13 +190,6 @@ describe('Sidebar.vue', () => {
             ]
           }
         ]
-      },
-      {
-        props: {
-          collapse: {
-            default: true
-          }
-        }
       }
     ]
 
