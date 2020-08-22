@@ -98,7 +98,6 @@ export default {
 
     const fileDataInLocalStorage = JSON.parse(localStorage.getItem(fileSha))
     if (fileDataInLocalStorage != null) {
-      console.log('getContentMetadata by localStorage cache')
       commit('setContentMetadata', {
         sha: fileSha,
         data: fileDataInLocalStorage

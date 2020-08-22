@@ -14,6 +14,7 @@ const router = new VueRouter()
 
 // netlifyIdentityの関数を使えるようにする
 jest.mock('netlify-identity-widget')
+
 netlifyIdentity.open = jest.fn()
 netlifyIdentity.on = jest.fn().mockImplementation((event, callback) => {
   if (event === 'login') {

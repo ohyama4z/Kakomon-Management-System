@@ -58,7 +58,7 @@ services:
   client_dev:
     build: ./client
     volumes:
-      - ./client:/app
-      - /app/node_modules
+      - ./:/app
+      - /app/client/node_modules
     ports:
       - 8082:8080

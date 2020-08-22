@@ -1,6 +1,6 @@
-FROM node:12.18.3-alpine
+FROM node:12.18.3-slim
 
-WORKDIR /app
+WORKDIR /app/client
 COPY package.json ./
 COPY package-lock.json ./
 

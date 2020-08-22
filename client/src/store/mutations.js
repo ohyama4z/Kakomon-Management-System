@@ -1,10 +1,11 @@
 export default {
-  upload: (state, newFile) => {
-    state.files.push(newFile)
-  },
+  // upload: (state, newFile) => {
+  //   state.files.push(newFile)
+  // },
 
   updateCurrentUser: (state, user) => {
     state.currentUser = user
+    console.log(user)
   },
 
   updateLastPage: state => {
@@ -96,5 +97,9 @@ export default {
 
   setCommitCSV: state => {
     state.setCommitCSV.status = 'committed'
+  },
+
+  setCollapased: (state, collapased) => {
+    state.collapased = collapased
   }
 }

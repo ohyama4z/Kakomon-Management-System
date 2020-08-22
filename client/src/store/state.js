@@ -4,6 +4,7 @@ export default {
   currentUser: netlifyIdentity.currentUser(),
   lastPage: '',
   currentBranch: '',
+  collapased: true,
 
   commits: {},
   contentMetadatas: {},

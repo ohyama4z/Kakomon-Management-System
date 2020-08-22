@@ -20,7 +20,7 @@ jobs:
           docker-cache-${{ hashFiles('**/package-lock.json') }}
 
     - run: docker-compose build client_dev
-    - run: docker-compose run client_dev npm test
+    - run: docker-compose run client_dev npm test -- --coverage=true
 
     - uses: codecov/codecov-action@v1
       if: github.event_name == 'push'
