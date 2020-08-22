@@ -352,7 +352,7 @@ describe('action.js', () => {
     expect(localStorage.setItem).not.toHaveBeenCalled()
   })
 
-  it('objectToCsVが機能するかテスト', () => {
+  it('objectToCsvが機能するかテスト', () => {
     const objarr = [
       {
         src: 'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験1.jpg',
@@ -707,6 +707,6 @@ describe('action.js', () => {
     )
 
     await actions.setCommitCSV({ state, commit }, branchName)
-    // expect().
+    expect(commit).toHaveBeenNthCalledWith(1, 'setCommitCSV')
   })
 })
