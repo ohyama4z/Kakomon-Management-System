@@ -1,4 +1,4 @@
-import mutations from '../mutations';
+import mutations from '../mutations'
 const state = {
   lastPage: '',
   currentBranch: '',
@@ -22,7 +22,6 @@ describe('mutations.js', () => {
     const user = 'hogetarou'
     mutations.updateCurrentUser(state, user)
     expect(state.currentUser).toBe('hogetarou')
-
   })
 
   it('updateLastPage', () => {
@@ -39,10 +38,10 @@ describe('mutations.js', () => {
 
   it('setBranchesStatus(payload.statusがloadingでもloadedでもない時)', () => {
     state.branches = {
-      status: 'loading',
+      status: 'loading'
     }
     const payloadForSetStatusBranches = {
-      status: 'unrequested',
+      status: 'unrequested'
     }
     const resultForSetStatusBranches = {
       status: 'invalied_status',
@@ -54,12 +53,11 @@ describe('mutations.js', () => {
   })
 
   it('setBranchesStatus(payload.statusがlaodingかloadedの時)', () => {
-
     state.branches = {
-      status: 'loading',
+      status: 'loading'
     }
     const payloadForSetStatusBranches = {
-      status: 'loaded',
+      status: 'loaded'
     }
     const resultForSetStatusBranches = {
       status: payloadForSetStatusBranches.status,
@@ -69,7 +67,6 @@ describe('mutations.js', () => {
     expect(state.branches.status).toEqual(resultForSetStatusBranches.status)
   })
 
-  
   it('setCurrentBranch', () => {
     const payloadBranchName = 'master'
     mutations.setCurrentBranch(state, payloadBranchName)
@@ -109,7 +106,9 @@ describe('mutations.js', () => {
         data: {}
       }
     }
-    expect(state.commits[payloadForSetCommitStatus.sha].status).toBe(resultForSetCommitStatus.branches.status)
+    expect(state.commits[payloadForSetCommitStatus.sha].status).toBe(
+      resultForSetCommitStatus.branches.status
+    )
   })
 
   it('setContentMetadataStatus(payload.statusがloadingでもloadedでもない時)', () => {
@@ -129,8 +128,13 @@ describe('mutations.js', () => {
       }
     }
 
-    mutations.setContentMetadataStatus(state, payloadForSetContentMetaDataStatus)
-    expect(state.branches.status).toBe(resultForSetContentMetaDataStatus.branches.status)
+    mutations.setContentMetadataStatus(
+      state,
+      payloadForSetContentMetaDataStatus
+    )
+    expect(state.branches.status).toBe(
+      resultForSetContentMetaDataStatus.branches.status
+    )
   })
 
   it('setContentMetadataStatus(payload.statusがloadingかloadedの時)', () => {
@@ -150,8 +154,13 @@ describe('mutations.js', () => {
       }
     }
 
-    mutations.setContentMetadataStatus(state, payloadForSetContentMetaDataStatus)
-    expect(state.contentMetadatas[payloadForSetContentMetaDataStatus.sha].status).toEqual(resultForSetContentMetaDataStatus.branches.status)
+    mutations.setContentMetadataStatus(
+      state,
+      payloadForSetContentMetaDataStatus
+    )
+    expect(
+      state.contentMetadatas[payloadForSetContentMetaDataStatus.sha].status
+    ).toEqual(resultForSetContentMetaDataStatus.branches.status)
   })
 
   it('setCommitCSV', () => {

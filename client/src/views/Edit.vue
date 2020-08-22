@@ -94,6 +94,15 @@
             >編集をコミット</vk-button
           >
         </div>
+
+        <div class="uk-flex uk-flex-center uk-margin">
+          <vk-button
+            type="primary"
+            class="uk-margin"
+            v-on:click="setCommitCSV()"
+            >コミット</vk-button
+          >
+        </div>
       </div>
     </div>
   </div>
@@ -137,7 +146,7 @@ export default {
     await this.$store.dispatch('getBranches')
     await this.$store.dispatch('selectBranch', this.selectedBranch)
     this.getCommit()
-    // this.setCommitCSV()
+    this.setCommitCSV()
   },
 
   computed: {
@@ -173,9 +182,12 @@ export default {
       const commitSha = this.$store.state.branches.data[this.selectedBranch]
       await this.$store.dispatch('getCommit', commitSha)
     },
-    // setCommitCSV() {
-    //   this.$store.dispatch('setCommitCSV', this.selectedBranch)
-    // },
+    async setCommitCSV() {
+      await this.$store.dispatch(
+        'setCommitCSV',
+        this.$store.state.currentBranch
+      )
+    },
     // trashFile(file) {
     //   const index = this.selectedFiles.findIndex(
     //     item => item.title === file.title
