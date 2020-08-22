@@ -138,6 +138,12 @@ export default {
     const headers = {
       Authorization: `Bearer ${token}`
     }
+    const userEmail = state.currentUser.email
+    const userNameLength = userEmail.search('@')
+    // console.log(found);
+    // console.log(userEmail.slice(0, userNameLength));
+    const userName = userEmail.slice(0, userNameLength)
+    console.log('username', userName)
 
     const editcsvobj = state.changedFiles
     console.log(state)
@@ -218,8 +224,8 @@ export default {
     const commitsbody = {
       message: date,
       author: {
-        name: 'test',
-        email: 'hoge@gmail.com',
+        name: userName,
+        email: userEmail,
         date
       },
       parents: [
