@@ -87,12 +87,20 @@ describe('action.js', () => {
       aho: {
         src: 'aho',
         name: 'TARO',
-        birthday: '0616'
+        birthday: '0616',
+        sha: {
+          status: 'unrequested',
+          data: {}
+        }
       },
       a: {
         src: 'a',
         name: 'b',
-        birthday: 'c'
+        birthday: 'c',
+        sha: {
+          status: 'unrequested',
+          data: {}
+        }
       }
     }
     expect(convertCsvToObj(csv)).toEqual(result)

@@ -52,10 +52,11 @@ export default {
         sha: commitSha,
         data: commitDataInLocalStorage
       })
-
-      Object.entries(commitDataInLocalStorage).map(async ([, sha]) => {
-        await dispatch('getContentMetadata', sha)
-      })
+      await Promise.all([
+        Object.entries(commitDataInLocalStorage).map(async ([, sha]) => {
+          await dispatch('getContentMetadata', sha)
+        })
+      ])
 
       return
     }
@@ -263,6 +264,61 @@ export default {
       await netlifyIdentity.refresh()
     }
     commit('updateCurrentUser', user)
+  },
+
+  getImageShas: async ({ state, commit }, { commitSha, directoryPath }) => {
+    if (state.imageShas?.[commitSha]?.[directoryPath]?.status === 'loaded') {
+      return
+    }
+
+    const token = state.currentUser.token.access_token
+    const method = 'GET'
+    const headers = {
+      Authorization: `Bearer ${token}`
+    }
+
+    const httpRes = await fetch(
+      `http://localhost:8085/.netlify/git/github/contents/${directoryPath}?ref=${commitSha}`,
+      { method, headers }
+    )
+    const res = await httpRes.json()
+
+    const data = Object.fromEntries(res.map(file => [file.name, file.sha]))
+    commit('setImageShas', { commitSha, directoryPath, data })
+  },
+
+  getImageDatas: async ({ dispatch, state, commit }, fileSha) => {
+    const commitSha = state.branches.data[state.currentBranch]
+    const files = state.contentMetadatas[fileSha].data
+    const directoryPath = Object.keys(files)[0].substr(
+      0,
+      Object.keys(files)[0].lastIndexOf('/')
+    )
+    await dispatch('getImageShas', { commitSha, directoryPath })
+
+    await Promise.all([
+      Object.entries(state.imageShas[commitSha][directoryPath].data).map(
+        async ([fileName, sha]) => {
+          const token = state.currentUser.token.access_token
+          const method = 'GET'
+          const headers = {
+            Authorization: `Bearer ${token}`
+          }
+          const httpRes = await fetch(
+            `http://localhost:8085/.netlify/git/github/git/blobs/${sha}`,
+            { method, headers }
+          )
+          const res = await httpRes.json()
+
+          const imageType = fileName.substr(fileName.lastIndexOf('.') + 1)
+          const buffer = Buffer.from(res.content, 'base64')
+          const blob = new Blob(buffer, { type: `image/${imageType}` })
+          const blobUri = URL.createObjectURL(blob)
+
+          commit('setImageData', { sha, blobUri })
+        }
+      )
+    ])
   }
 }
 
@@ -298,7 +354,10 @@ export function convertCsvToObj(csv) {
         }, {})
     })
     .reduce((previous, current) => {
-      previous[current.src] = current
+      previous[current.src] = {
+        ...current,
+        sha: { status: 'unrequested', data: {} }
+      }
       return previous
     }, {})
 }

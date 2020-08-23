@@ -43,5 +43,16 @@ export default {
   branches: {
     status: 'unrequested',
     data: {}
-  }
+  },
+
+  imageDatas: {},
+  imageShas: {}
 }
+
+// state.imageShas[commitSha][directoryPath] = {
+//   status: 'loaded',
+//   data: {
+//     '----.jpg': 'a40c3ee1ebd4aa6ae0479c47b93438b2'
+//     '----.jpg': 'a40c3ee1ebd4aa6ae0479c47b93438b2'
+//   }
+// }

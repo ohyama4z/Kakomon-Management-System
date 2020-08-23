@@ -112,16 +112,14 @@ export default {
     onItemClick(e, item) {
       // データツリーの末端ファイルの元となるフォルダをクリックしたときに処理を行う
       if (item.isSecondFromEnd) {
-        console.log(item.child)
-        const selectedFiles = Object.fromEntries(
-          item.child.map(file => {
-            console.log({ [file.data.src]: file.data })
-            return [file.data.src, file.data]
-          })
-        )
+        // const selectedFiles = Object.fromEntries(
+        //   item.child.map(file => {
+        //     return [file.data.src, file.data]
+        //   })
+        // )
 
-        console.log(selectedFiles)
-        this.$store.dispatch('getImages', item.child)
+        const fileSha = item.child[0].data.sha
+        this.$store.dispatch('getImageDatas', fileSha)
       }
     },
     onToggleCollapse(collapsed) {

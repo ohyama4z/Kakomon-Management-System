@@ -103,7 +103,7 @@
             >コミット</vk-button
           >
         </div>
-        <!-- <Preview></Preview> -->
+        <Preview></Preview>
       </div>
     </div>
   </div>
@@ -115,7 +115,7 @@ import { Button } from 'vuikit/lib/button'
 import { Spinner } from 'vuikit/lib/spinner'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
-// import Preview from '../components/Preview'
+import Preview from '../components/Preview'
 
 export default {
   name: 'Edit',
@@ -124,8 +124,8 @@ export default {
     VkSpinner: Spinner,
     VkButton: Button,
     Sidebar,
-    Navbar
-    // Preview
+    Navbar,
+    Preview
   },
 
   data() {
