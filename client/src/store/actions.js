@@ -294,31 +294,40 @@ export default {
       0,
       Object.keys(files)[0].lastIndexOf('/')
     )
+
+    const filePaths = Object.keys(files)
+    commit('setDisplayedFiles', filePaths)
     await dispatch('getImageShas', { commitSha, directoryPath })
 
-    await Promise.all([
-      Object.entries(state.imageShas[commitSha][directoryPath].data).map(
-        async ([fileName, sha]) => {
-          const token = state.currentUser.token.access_token
-          const method = 'GET'
-          const headers = {
-            Authorization: `Bearer ${token}`
-          }
-          const httpRes = await fetch(
-            `http://localhost:8085/.netlify/git/github/git/blobs/${sha}`,
-            { method, headers }
-          )
-          const res = await httpRes.json()
+    console.log(state.imageShas[commitSha][directoryPath].data)
 
-          const imageType = fileName.substr(fileName.lastIndexOf('.') + 1)
-          const buffer = Buffer.from(res.content, 'base64')
-          const blob = new Blob(buffer, { type: `image/${imageType}` })
-          const blobUri = URL.createObjectURL(blob)
+    const filenames = Object.values(files).map(file => {
+      const path = file.src
+      return path.substr(path.lastIndexOf('/') + 1)
+    })
 
-          commit('setImageData', { sha, blobUri })
+    await Promise.all(
+      filenames.map(async filename => {
+        const sha = state.imageShas[commitSha][directoryPath].data[filename]
+        const token = state.currentUser.token.access_token
+        const method = 'GET'
+        const headers = {
+          Authorization: `Bearer ${token}`
         }
-      )
-    ])
+        const httpRes = await fetch(
+          `http://localhost:8085/.netlify/git/github/git/blobs/${sha}`,
+          { method, headers }
+        )
+        const res = await httpRes.json()
+
+        // Todo: image/ だけじゃなくpdfとかもあるので対応できるようにする
+        const imageType = filename.substr(filename.lastIndexOf('.') + 1)
+        const blob = toBlob(res.content, imageType)
+        const blobUri = URL.createObjectURL(blob)
+
+        commit('setImageData', { sha, blobUri })
+      })
+    )
   }
 }
 
@@ -360,4 +369,15 @@ export function convertCsvToObj(csv) {
       }
       return previous
     }, {})
+}
+
+function toBlob(base64, type) {
+  const bin = atob(base64.replace(/^.*,/, ''))
+  const buffer = new Uint8Array(bin.length)
+  for (let i = 0; i < bin.length; i++) {
+    buffer[i] = bin.charCodeAt(i)
+  }
+  // Blobを作成
+
+  return new Blob([buffer.buffer], { type })
 }

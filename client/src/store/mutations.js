@@ -124,5 +124,9 @@ export default {
         data: payload.blobUri
       }
     }
+  },
+
+  setDisplayedFiles: (state, filePaths) => {
+    state.displayedFiles = filePaths
   }
 }

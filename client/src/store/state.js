@@ -46,7 +46,8 @@ export default {
   },
 
   imageDatas: {},
-  imageShas: {}
+  imageShas: {},
+  displayedFiles: []
 }
 
 // state.imageShas[commitSha][directoryPath] = {
