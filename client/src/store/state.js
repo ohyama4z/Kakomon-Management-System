@@ -36,7 +36,7 @@ export default {
     }
   },
 
-  setCommitCSV: {
+  setCommitCsv: {
     status: 'unrequested'
   },
 

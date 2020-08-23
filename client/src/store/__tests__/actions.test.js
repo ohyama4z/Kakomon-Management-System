@@ -4,7 +4,7 @@ import 'jest-fetch-mock'
 import 'jest-localstorage-mock'
 import netlifyIdentity from 'netlify-identity-widget'
 import Vuex from 'vuex'
-import actions, { convertCsvToObj, convertToCSV } from '../actions'
+import actions, { convertCsvToObj, convertObjToCsv } from '../actions'
 
 const localVue = createLocalVue()
 
@@ -66,7 +66,7 @@ const state = {
     }
   },
 
-  setCommitCSV: {
+  setCommitCsv: {
     status: 'unrequested'
   }
 }
@@ -384,11 +384,11 @@ describe('action.js', () => {
       `src,subj,tool_type,period,year,content_type,author,image_index,included_pages_num,fix_text\n` +
       `scanned/20180802_2年3紐。5組『倫理社会」前期定期試験1.jpg,倫理社会,テスト,前期定期,2018,,,,,\n` +
       `scanned/20180802_2年3紐。5組『倫理社会」前期定期試験2.jpg,,,,,,,,,`
-    console.log(convertToCSV(objarr), result)
-    expect(convertToCSV(objarr)).toEqual(result)
+    console.log(convertObjToCsv(objarr), result)
+    expect(convertObjToCsv(objarr)).toEqual(result)
   })
 
-  it('setCommitCSV', async () => {
+  it('setCommitCsv', async () => {
     // const state
     const commit = jest.fn()
     const branchName = 'cmstest'
@@ -707,7 +707,7 @@ describe('action.js', () => {
       }
     )
 
-    await actions.setCommitCSV({ state, commit }, branchName)
-    expect(commit).toHaveBeenNthCalledWith(1, 'setCommitCSV')
+    await actions.postCommitCsv({ state, commit }, branchName)
+    expect(commit).toHaveBeenNthCalledWith(1, 'setCommitCsv')
   })
 })
