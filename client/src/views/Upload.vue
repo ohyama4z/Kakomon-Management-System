@@ -8,9 +8,18 @@
           <input
             class="uk-input uk-form-width-medium"
             type="text"
-            placeholder="ブランチ名を入力"
+            placeholder="ブランチを検索"
             v-model="branchName"
+            list="branchList"
           />
+          <datalist id="branchList">
+            <option
+              v-for="(sha, branchName) in branches"
+              v-bind:key="sha"
+              v-show="branchName !== 'master'"
+              >{{ branchName }}</option
+            >
+          </datalist>
         </div>
       </div>
 
@@ -35,7 +44,7 @@
 
       <div
         class="uk-flex uk-flex-center uk-margin-small"
-        v-for="[filename, blobUri] in Object.entries(uploadedFiles)"
+        v-for="(blobUri, filename) in uploadedFiles"
         v-bind:key="blobUri"
       >
         <vk-iconnav>
@@ -49,6 +58,7 @@
 
       <div class="uk-text-center@s uk-margin">
         <div v-if="!branchName">ブランチ名を入力してください</div>
+        <div v-if="branchName === 'master'">master branchは選択できません</div>
         <div v-if="Object.keys(uploadedFiles).length < 1">
           1つ以上ファイルを選択してください
         </div>
@@ -58,7 +68,11 @@
         <vk-button
           type="primary"
           class="uk-margin"
-          v-bind:disabled="Object.keys(uploadedFiles).length < 1 || !branchName"
+          v-bind:disabled="
+            Object.keys(uploadedFiles).length < 1 ||
+            !branchName ||
+            branchName === 'master'
+          "
           v-on:click="uploadNewFile()"
           >アップロード</vk-button
         >
@@ -72,6 +86,7 @@ import { Button } from 'vuikit/lib/button'
 import { Icon } from 'vuikit/lib/icon'
 import { Iconnav, IconnavItem } from 'vuikit/lib/iconnav'
 import Navbar from '../components/Navbar'
+import { mapState } from 'vuex'
 
 export default {
   name: 'Upload',
@@ -89,14 +104,22 @@ export default {
       branchName: ''
     }
   },
-  mounted() {
+  async mounted() {
     if (this.$store.state.currentUser == null) {
       localStorage.setItem('lastPage', 'upload')
       this.$store.commit('updateLastPage')
       this.$router.push('/login')
     }
+    await this.$store.dispatch('getBranches')
   },
-  computed: {},
+  computed: {
+    ...mapState({
+      branches: state => {
+        const { master, ...branches } = state.branches.data
+        return branches
+      }
+    })
+  },
   methods: {
     toEdit() {
       this.$router.push('edit')
@@ -110,6 +133,10 @@ export default {
 
     async uploadNewFile() {
       console.log({ files: this.uploadedFiles, branch: this.branchName })
+      await this.$store.dispatch('upload', {
+        files: this.uploadedFiles,
+        branch: this.branchName
+      })
     },
 
     dropFile() {

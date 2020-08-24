@@ -4,10 +4,6 @@ import state from './state'
 const moment = require('moment')
 
 export default {
-  upload: async ({ commit }, newFile) => {
-    commit('upload', newFile)
-  },
-
   getBranches: async ({ commit, state }) => {
     commit('setBranchesStatus', { path: 'branches', status: 'loading' })
     const token = state.currentUser.token.access_token
@@ -334,6 +330,100 @@ export default {
         commit('setImageData', { sha, blobUri })
       })
     )
+  },
+
+  upload: async ({ commit, dispatch }, payload) => {
+    const token = state.currentUser.token.access_token
+    const method = 'GET'
+    const headers = {
+      Authorization: `Bearer ${token}`
+    }
+    const httpRes = await fetch(
+      `http://localhost:8085/.netlify/git/github/git/refs/heads/master`,
+      { method, headers }
+    )
+    const res = await httpRes.json()
+    const masterSha = res.object.sha
+
+    // branchの作成
+    const body = JSON.stringify({
+      ref: `refs/heads/${payload.branch}`,
+      sha: `${masterSha}`
+    })
+
+    const newBranchHttpRes = await fetch(
+      `http://localhost:8085/.netlify/git/github/git/refs`,
+      {
+        method: 'POST',
+        headers,
+        body
+      }
+    )
+    const newBranchRes = await newBranchHttpRes.json()
+
+    const createCommitPayload = {
+      commitSha: newBranchRes.sha,
+      branch: payload.branch,
+      files: payload.files
+    }
+    dispatch('createCommit', createCommitPayload)
+  },
+
+  createCommit: async ({ commit, dispatch }, payload) => {
+    // https://int128.hatenablog.com/entry/2017/09/05/161641 詳しくはここ見ろ
+    const token = state.currentUser.token.access_token
+    const headers = {
+      Authorization: `Bearer ${token}`
+    }
+
+    const commitHttpRes = await fetch(
+      `http://localhost:8085/.netlify/git/github/git/commits/${payload.commitSha}`,
+      {
+        method: 'GET',
+        headers
+      }
+    )
+    const commitRes = await commitHttpRes.json()
+
+    const httpBlob = await fetch(`${payload.blob}`)
+    const blob = httpBlob.blob
+    const reader = new FileReader()
+    const base64 = reader.readAsDataURL(blob)
+
+    const blobShaHttpRes = await fetch(
+      `http://localhost:8085/.netlify/git/github/git/commits/${payload.commitSha}`,
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          content: base64,
+          encoding: 'base64'
+        })
+      }
+    )
+    const blobShaRes = await blobShaHttpRes.json()
+
+    const treeData = {
+      base_tree: commitRes.tree.sha,
+      tree: [
+        {
+          path: 'file.jpg',
+          mode: '100644',
+          type: 'blob',
+          sha: blobShaRes.shs
+        }
+      ]
+    }
+    const createTreeHttpRes = await fetch(
+      `http://localhost:8085/.netlify/git/github/git/trees`,
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(treeData)
+      }
+    )
+    const createTreeRes = await createTreeHttpRes.json()
+    // ↑treeの作成まで
   }
 }
 
