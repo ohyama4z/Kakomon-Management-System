@@ -57,10 +57,15 @@ const mutations = {
   setCollapased: jest.fn()
 }
 
+const actions = {
+  getImageDatas: jest.fn()
+}
+
 const store = new Vuex.Store({
   state,
   getters,
-  mutations
+  mutations,
+  actions
 })
 
 describe('Sidebar.vue', () => {
@@ -207,5 +212,29 @@ describe('Sidebar.vue', () => {
 
     wrapper.vm.onToggleCollapse(collapse)
     expect(mutations.setCollapased).toHaveBeenCalled()
+  })
+
+  it('ファイルツリーの末端フォルダーをクリックすると画像表示のactionsが呼ばれる', () => {
+    const wrapper = shallowMount(Sidebar, {
+      store,
+      localVue
+    })
+
+    const item = {
+      title: '問題',
+      icon: 'fa fa-folder',
+      isSecondFromEnd: true,
+      child: [
+        {
+          title: 'file1',
+          data: { sha: 'sha' },
+          isSecondFromEnd: false
+        }
+      ]
+    }
+    const e = true
+
+    wrapper.vm.onItemClick(e, item)
+    expect(actions.getImageDatas).toHaveBeenCalled()
   })
 })

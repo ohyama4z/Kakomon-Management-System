@@ -67,7 +67,10 @@ const state = {
 
   setCommitCSV: {
     status: 'unrequested'
-  }
+  },
+
+  imageShas: {},
+  imageDatas: {}
 }
 
 const store = new Vuex.Store({
@@ -715,5 +718,126 @@ describe('action.js', () => {
 
     await actions.setCommitCSV({ state, commit }, branchName)
     expect(commit).toHaveBeenNthCalledWith(1, 'setCommitCSV')
+  })
+
+  it('画像ファイルのshaを取得する(キャッシュなし)', async () => {
+    fetchMock.get(
+      `http://localhost:8085/.netlify/git/github/contents/dir?ref=sha`,
+      {
+        status: 200,
+        body: [
+          { name: 'file1.jpg', sha: 'imageSha1' },
+          { name: 'file2.jpg', sha: 'imageSha2' }
+        ]
+      }
+    )
+
+    shallowMount(actions, {
+      localVue,
+      store
+    })
+
+    const commit = jest.fn()
+    const directoryPath = 'dir'
+    const commitSha = 'sha'
+
+    const payload = {
+      directoryPath,
+      commitSha,
+      data: {
+        'file1.jpg': 'imageSha1',
+        'file2.jpg': 'imageSha2'
+      }
+    }
+
+    await actions.getImageShas({ state, commit }, { directoryPath, commitSha })
+    expect(commit).toHaveBeenCalledWith('setImageShas', payload)
+  })
+
+  it('画像ファイルのshaを取得する(stateキャッシュあり)', async () => {
+    const commit = jest.fn()
+    const directoryPath = 'dir'
+    const commitSha = 'sha'
+    state.imageShas = {
+      sha: {
+        dir: { status: 'loaded' }
+      }
+    }
+
+    shallowMount(actions, {
+      localVue,
+      store
+    })
+
+    const payload = {
+      directoryPath,
+      commitSha,
+      data: {
+        'file1.jpg': 'imageSha1',
+        'file2.jpg': 'imageSha2'
+      }
+    }
+
+    await actions.getImageShas({ state, commit }, { directoryPath, commitSha })
+    expect(commit).not.toHaveBeenCalledWith('setImageShas', payload)
+  })
+
+  it('ファイルのshaから画像データを取得する', async () => {
+    state.currentBranch = 'master'
+    state.branches = {
+      status: 'loaded',
+      data: { master: 'commitSha' }
+    }
+    state.contentMetadatas = {
+      fileSha: {
+        status: 'loaded',
+        data: {
+          'dir/file1': { src: 'dir/file1' },
+          'dir/file2': { src: 'dir/file2' }
+        }
+      }
+    }
+    state.imageShas = {
+      commitSha: {
+        dir: {
+          data: {
+            file1: 'sha1',
+            file2: 'sha2'
+          }
+        }
+      }
+    }
+
+    fetchMock.get(`http://localhost:8085/.netlify/git/github/git/blobs/sha1`, {
+      status: 200,
+      body: {
+        content: '1b64'
+      }
+    })
+    fetchMock.get(`http://localhost:8085/.netlify/git/github/git/blobs/sha2`, {
+      status: 200,
+      body: {
+        content: '2b64'
+      }
+    })
+
+    shallowMount(actions, {
+      localVue,
+      store
+    })
+
+    const commit = jest.fn()
+    const dispatch = jest.fn()
+    global.URL.createObjectURL = jest.fn()
+    await actions.getImageDatas({ dispatch, state, commit }, 'fileSha')
+    expect(commit).toHaveBeenNthCalledWith(1, 'setDisplayedFiles', [
+      'dir/file1',
+      'dir/file2'
+    ])
+    expect(dispatch).toHaveBeenCalledWith('getImageShas', {
+      commitSha: 'commitSha',
+      directoryPath: 'dir'
+    })
+    expect(commit).toHaveBeenCalledTimes(3)
   })
 })

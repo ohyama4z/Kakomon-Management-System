@@ -9,7 +9,7 @@
 //     await STO(3, 1000)
 // }
 
-// count()afadf
+// count()
 
 // 画像データについてのstateの構造例
 // const state: {
@@ -28,5 +28,13 @@
 //         'src4.jpg': {}
 //       }
 //     }
+//   }
+// }
+
+// state.imageShas[commitSha][directoryPath] = {
+//   status: 'loaded',
+//   data: {
+//     '----.jpg': 'a40c3ee1ebd4aa6ae0479c47b93438b2'
+//     '----.jpg': 'a40c3ee1ebd4aa6ae0479c47b93438b2'
 //   }
 // }

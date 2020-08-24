@@ -1,67 +1,65 @@
 <template>
   <vk-sticky>
-    <div>
-      <vk-navbar-full class="custom-navbar">
-        <vk-navbar-nav>
-          <a
-            class="help-logo"
-            href="https://github.com/asann3/Kakomon-Management-System/blob/master/client/manuals/README.md"
-            target="_blank"
+    <vk-navbar-full class="custom-navbar">
+      <vk-navbar-nav>
+        <a
+          class="help-logo"
+          href="https://github.com/asann3/Kakomon-Management-System/blob/master/client/manuals/README.md"
+          target="_blank"
+        >
+          <vk-navbar-logo>
+            KMS
+          </vk-navbar-logo>
+          <vk-navbar-item>
+            <vk-iconnav>
+              <vk-iconnav-item icon="question" />
+            </vk-iconnav>
+          </vk-navbar-item>
+        </a>
+        <vk-navbar-item>
+          <vk-button
+            class="custom-button"
+            v-bind:type="uploadButtonType"
+            @click="toUpload"
           >
-            <vk-navbar-logo>
-              KMS
-            </vk-navbar-logo>
-            <vk-navbar-item>
-              <vk-iconnav>
-                <vk-iconnav-item icon="question" />
-              </vk-iconnav>
-            </vk-navbar-item>
-          </a>
-          <vk-navbar-item>
-            <vk-button
-              class="custom-button"
-              v-bind:type="uploadButtonType"
-              @click="toUpload"
+            アップロード
+          </vk-button>
+        </vk-navbar-item>
+        <vk-navbar-item>
+          <vk-button
+            class="custom-button"
+            v-bind:type="editButtonType"
+            @click="toEdit"
+            >編集</vk-button
+          >
+        </vk-navbar-item>
+      </vk-navbar-nav>
+      <vk-navbar-nav slot="right">
+        <vk-navbar-item>
+          <vk-icon icon="git-branch"></vk-icon>
+          <select
+            class="uk-select uk-form-width-medium"
+            v-model="selectedBranch"
+            @change="selectBranch"
+          >
+            <option disabled value="">ブランチを選択</option>
+            <option>master</option>
+            <option
+              v-for="(sha, branchName) in branches"
+              v-bind:key="sha"
+              v-show="branchName !== 'master'"
+              >{{ branchName }}</option
             >
-              アップロード
-            </vk-button>
-          </vk-navbar-item>
-          <vk-navbar-item>
-            <vk-button
-              class="custom-button"
-              v-bind:type="editButtonType"
-              @click="toEdit"
-              >編集</vk-button
-            >
-          </vk-navbar-item>
-        </vk-navbar-nav>
-        <vk-navbar-nav slot="right">
-          <vk-navbar-item>
-            <vk-icon icon="git-branch"></vk-icon>
-            <select
-              class="uk-select uk-form-width-medium"
-              v-model="selectedBranch"
-              @change="selectBranch"
-            >
-              <option disabled value="">ブランチを選択</option>
-              <option>master</option>
-              <option
-                v-for="(sha, branchName) in branches"
-                v-bind:key="sha"
-                v-show="branchName !== 'master'"
-                >{{ branchName }}</option
-              >
-            </select>
-          </vk-navbar-item>
-          <vk-navbar-item>
-            <vk-button type="text" @click="logout"
-              >ログアウト
-              <vk-icon icon="sign-out"></vk-icon>
-            </vk-button>
-          </vk-navbar-item>
-        </vk-navbar-nav>
-      </vk-navbar-full>
-    </div>
+          </select>
+        </vk-navbar-item>
+        <vk-navbar-item>
+          <vk-button type="text" @click="logout"
+            >ログアウト
+            <vk-icon icon="sign-out"></vk-icon>
+          </vk-button>
+        </vk-navbar-item>
+      </vk-navbar-nav>
+    </vk-navbar-full>
   </vk-sticky>
 </template>
 

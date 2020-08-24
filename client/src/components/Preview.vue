@@ -1,14 +1,13 @@
 <template>
   <div class="uk-margin">
-    <vk-spinner class="uk-flex uk-flex-center" v-if="!images" ratio="5" />
-    <ul v-else v-vk-margin>
+    <ul v-if="images">
       <template>
         <li
           v-for="image in images"
           v-bind:key="image"
           class="uk-flex uk-flex-center"
         >
-          <img :src="image" width="60%" v-if="image" />
+          <img :src="image" width="700" v-if="image" />
           <vk-spinner raito="5" v-else />
         </li>
       </template>
