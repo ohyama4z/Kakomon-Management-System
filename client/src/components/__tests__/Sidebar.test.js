@@ -54,7 +54,7 @@ const getters = {
 }
 
 const mutations = {
-  setCollapased: jest.fn()
+  setExpand: jest.fn()
 }
 
 const actions = {
@@ -211,7 +211,7 @@ describe('Sidebar.vue', () => {
     const collapse = true
 
     wrapper.vm.onToggleCollapse(collapse)
-    expect(mutations.setCollapased).toHaveBeenCalled()
+    expect(mutations.setExpand).toHaveBeenCalled()
   })
 
   it('ファイルツリーの末端フォルダーをクリックすると画像表示のactionsが呼ばれる', () => {
