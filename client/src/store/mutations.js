@@ -99,8 +99,8 @@ export default {
     state.setCommitCSV.status = 'committed'
   },
 
-  setCollapased: (state, collapased) => {
-    state.collapased = collapased
+  setExpand: (state, expand) => {
+    state.expand = expand
   },
 
   setImageShas: (state, payload) => {

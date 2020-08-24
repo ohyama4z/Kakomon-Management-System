@@ -123,7 +123,7 @@ export default {
       }
     },
     onToggleCollapse(collapsed) {
-      this.$store.commit('setCollapased', !collapsed)
+      this.$store.commit('setExpand', !collapsed)
     }
   }
 }

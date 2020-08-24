@@ -10,7 +10,7 @@
 
     <div v-if="!isLoading">
       <Sidebar></Sidebar>
-      <div class="forms" v-bind:class="{ collapsed: collapase }">
+      <div class="forms" v-bind:class="{ expand: expand }">
         <div class="uk-margin uk-flex uk-flex-center">
           <input
             class="uk-input uk-form-width-medium"
@@ -166,7 +166,7 @@ export default {
         )
       },
 
-      collapase: state => state.collapased
+      expand: state => state.expand
     }),
 
     isSellectedAll() {
@@ -217,7 +217,7 @@ export default {
 .forms {
   padding-top: 10vh;
 }
-.collapsed {
+.expand {
   padding-left: 350px;
 }
 </style>
