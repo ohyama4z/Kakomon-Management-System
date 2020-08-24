@@ -214,6 +214,8 @@ export default {
 
 <style>
 @import url('https://use.fontawesome.com/releases/v5.6.1/css/all.css');
+</style>
+<style scoped>
 .forms {
   padding-top: 10vh;
 }

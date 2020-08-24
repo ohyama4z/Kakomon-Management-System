@@ -115,7 +115,6 @@ export default {
       // データツリーの末端ファイルの元となるフォルダをクリックしたときに処理を行う
       if (item.isSecondFromEnd && !item.expand) {
         const fileSha = item.child[0].data.sha
-        console.log(item)
         this.$store.dispatch('getImageDatas', fileSha)
       }
 

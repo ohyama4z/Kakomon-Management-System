@@ -1,87 +1,95 @@
 <template>
   <div>
-    <div></div>
-    <h1 class="uk-text-center@s">過去問アップロードフォーム</h1>
-
-    <div class="uk-margin uk-flex uk-flex-center">
-      <input
-        class="uk-input uk-form-width-medium"
-        type="text"
-        placeholder="ブランチ名を入力"
-        v-model="branchName"
-      />
-    </div>
-
-    <div class="uk-flex uk-flex-center uk-margin">
-      <div
-        class="drag-area uk-placeholder uk-text-center uk-form-width-large"
-        @dragover.prevent
-        @drop.prevent="dropFile"
-      >
-        <vk-icon icon="cloud-upload"></vk-icon>
-        <span class="uk-text-middle">ファイルをドラック&ドロップ</span>
-        <div uk-form-custom>
+    <Navbar></Navbar>
+    <div class="forms">
+      <div class="uk-margin uk-flex uk-flex-center">
+        <div class="uk-inline">
+          <vk-icon icon="git-branch" class="uk-form-icon" />
           <input
-            type="file"
-            accept="image/jpeg, image/png, image/jpg"
-            @change="dropFile"
-            multiple
+            class="uk-input uk-form-width-medium"
+            type="text"
+            placeholder="ブランチ名を入力"
+            v-model="branchName"
           />
         </div>
       </div>
-    </div>
 
-    <div
-      class="uk-text-center@s"
-      v-for="file in uploadedFiles"
-      v-bind:key="file.fileData.lastModified"
-    >
-      {{ file.fileData.name }}
-    </div>
+      <div class="uk-flex uk-flex-center uk-margin">
+        <div
+          class="drag-area uk-placeholder uk-text-center uk-form-width-large"
+          @dragover.prevent
+          @drop.prevent="dropFile"
+        >
+          <vk-icon icon="cloud-upload"></vk-icon>
+          <span class="uk-text-middle">ファイルをドラック&ドロップ</span>
+          <div uk-form-custom>
+            <input
+              type="file"
+              accept="image/jpeg, image/png, image/jpg"
+              @change="dropFile"
+              multiple
+            />
+          </div>
+        </div>
+      </div>
 
-    <div class="uk-text-center@s uk-margin" v-if="!branchName">
-      <div>ブランチ名を入力してください</div>
-    </div>
-
-    <div class="uk-flex uk-flex-center uk-margin">
-      <vk-button
-        type="primary"
-        class="uk-margin"
-        v-bind:disabled="uploadedFiles.length < 1 && !branchName"
-        v-on:click="uploadNewFile()"
-        >アップロード</vk-button
+      <div
+        class="uk-flex uk-flex-center uk-margin-small"
+        v-for="[filename, blobUri] in Object.entries(uploadedFiles)"
+        v-bind:key="blobUri"
       >
+        <vk-iconnav>
+          {{ filename }}
+          <vk-iconnav-item
+            @click="trashFile(filename)"
+            icon="trash"
+          ></vk-iconnav-item>
+        </vk-iconnav>
+      </div>
+
+      <div class="uk-text-center@s uk-margin">
+        <div v-if="!branchName">ブランチ名を入力してください</div>
+        <div v-if="Object.keys(uploadedFiles).length < 1">
+          1つ以上ファイルを選択してください
+        </div>
+      </div>
+
+      <div class="uk-flex uk-flex-center uk-margin">
+        <vk-button
+          type="primary"
+          class="uk-margin"
+          v-bind:disabled="Object.keys(uploadedFiles).length < 1 || !branchName"
+          v-on:click="uploadNewFile()"
+          >アップロード</vk-button
+        >
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import { IconCloudUpload } from '@vuikit/icons'
 import { Button } from 'vuikit/lib/button'
 import { Icon } from 'vuikit/lib/icon'
-import netlifyIdentity from 'netlify-identity-widget'
+import { Iconnav, IconnavItem } from 'vuikit/lib/iconnav'
+import Navbar from '../components/Navbar'
 
 export default {
-  name: 'upload',
-  component: {
-    VkIconCloudpload: IconCloudUpload,
+  name: 'Upload',
+  components: {
     VkButton: Button,
-    VkIcon: Icon
+    VkIcon: Icon,
+    VkIconnav: Iconnav,
+    VkIconnavItem: IconnavItem,
+    Navbar
   },
 
   data() {
     return {
-      uploadedFiles: [],
-      branchName: null
+      uploadedFiles: {},
+      branchName: ''
     }
   },
   mounted() {
-    netlifyIdentity.on('logout', () => {
-      localStorage.setItem('lastPage', 'upload')
-      this.$store.commit('updateLastPage')
-      this.$router.push('/login')
-    })
-
     if (this.$store.state.currentUser == null) {
       localStorage.setItem('lastPage', 'upload')
       this.$store.commit('updateLastPage')
@@ -101,17 +109,32 @@ export default {
     },
 
     async uploadNewFile() {
-      await this.$store.dispatch('upload', this.uploadedFiles)
-      this.$store.state.files.forEach(file => {
-        console.log(file)
-      })
+      console.log({ files: this.uploadedFiles, branch: this.branchName })
     },
 
-    dropFile(event) {
-      const droppedFile = event.target.files || event.dataTransfer.files
-      const url = URL.createObjectURL(droppedFile[0])
-      this.uploadedFiles.push({ fileData: droppedFile[0], url })
+    dropFile() {
+      const droppedFiles = event.target.files || event.dataTransfer.files
+      console.log(droppedFiles)
+      Object.values(droppedFiles).map(file => {
+        const blobUri = URL.createObjectURL(file)
+        this.uploadedFiles = {
+          ...this.uploadedFiles,
+          [file.name]: blobUri
+        }
+      })
+      console.log(this.uploadedFiles)
+    },
+
+    trashFile(filename) {
+      const { [filename]: omit, ...newFilesObj } = this.uploadedFiles
+      this.uploadedFiles = newFilesObj
     }
   }
 }
 </script>
+
+<style scoped>
+.forms {
+  padding-top: 10vh;
+}
+</style>

@@ -50,7 +50,7 @@
         </vk-navbar-item>
       </vk-navbar-nav>
       <vk-navbar-nav slot="right">
-        <vk-navbar-item>
+        <vk-navbar-item v-if="isEdit">
           <div class="uk-inline">
             <vk-icon
               class="uk-form-icon uk-form-icon-flip"
@@ -131,6 +131,10 @@ export default {
       }
 
       return 'primary'
+    },
+
+    isEdit() {
+      return this.$route.path === '/edit'
     }
   },
 
