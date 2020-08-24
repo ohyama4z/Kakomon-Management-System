@@ -95,10 +95,6 @@ export default {
     }
   },
 
-  setCommitCsv: state => {
-    state.setCommitCsv.status = 'committed'
-  },
-
   setCollapased: (state, collapased) => {
     state.collapased = collapased
   }

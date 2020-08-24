@@ -163,12 +163,6 @@ describe('mutations.js', () => {
     ).toEqual(resultForSetContentMetaDataStatus.branches.status)
   })
 
-  it('setCommitCsv', () => {
-    const state = { setCommitCsv: { status: 'unrequested' } }
-    mutations.setCommitCsv(state)
-    expect(state.setCommitCsv.status).toEqual('committed')
-  })
-
   it('ユーザーがeditページを読み込んだ際のbranchの書き換え,commitsの書き換え,contentMetadatasの書き換えまでの一連の流れ', () => {
     state.currentBranch = 'master'
     const payloadForSetBranches = {

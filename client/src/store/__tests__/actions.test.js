@@ -24,7 +24,7 @@ jest.mock('node-fetch', () => jest.fn())
 const state = {
   currentUser: {
     token: {
-      access_token: 'token'
+      access_token: '12345'
     },
     email: 'ahoge@gmail.com'
   },
@@ -390,8 +390,15 @@ describe('action.js', () => {
 
   it('setCommitCsv', async () => {
     // const state
-    const commit = jest.fn()
+    // const commit = jest.fn()
     const branchName = 'cmstest'
+    const token = state.currentUser.token.access_token
+    const getMethod = 'GET'
+    const postMethod = 'POST'
+    const patchMethod = 'PATCH'
+    const headers = {
+      Authorization: `Bearer ${token}`
+    }
 
     // ref取得
     fetchMock.get(
@@ -410,7 +417,8 @@ describe('action.js', () => {
               'https://api.github.com/repos/satackey/test-preps/git/commits/58c821fea857ca1e270c3b34f5bc97db64c84fc9'
           }
         }
-      }
+      },
+      headers
     )
 
     const commitsHash = '58c821fea857ca1e270c3b34f5bc97db64c84fc9'
@@ -527,7 +535,8 @@ describe('action.js', () => {
           },
           files: []
         }
-      }
+      },
+      headers
     )
 
     // blobの作成
@@ -540,7 +549,8 @@ describe('action.js', () => {
           url:
             'https://api.github.com/repos/satackey/test-preps/git/blobs/8c187d7baccab1c2abf487e09051f0ee8cb04c18'
         }
-      }
+      },
+      headers
     )
 
     // treeの作成
@@ -636,7 +646,8 @@ describe('action.js', () => {
           }
         ],
         truncated: false
-      }
+      },
+      headers
     })
 
     // commitの作成
@@ -684,11 +695,12 @@ describe('action.js', () => {
             payload: null
           }
         }
-      }
+      },
+      headers
     )
 
     // refの更新
-    fetchMock.patch(
+    const refUpdate = fetchMock.patch(
       `http://localhost:8085/.netlify/git/github/git/refs/heads/${branchName}`,
       {
         status: 200,
@@ -704,10 +716,42 @@ describe('action.js', () => {
               'https://api.github.com/repos/satackey/test-preps/git/commits/1ce0d6ec02ff4a364245a4f435cdf9a7119507a4'
           }
         }
-      }
+      },
+      headers
     )
 
-    await actions.postCommitCsv({ state, commit }, branchName)
-    expect(commit).toHaveBeenNthCalledWith(1, 'setCommitCsv')
+    await actions.postCommitCsv({ state }, branchName)
+
+    // const data = await actions.postCommitCsv({ state }, branchName)
+    // console.log('ahobakabaka', data)
+    // fetchで呼ばれた引数が正しいか
+    // console.log('fetchmock', fetchMock)
+    // expect(fetchMock.done(6)).toBe(true)
+    // console.log(fetchMock.options(true))
+    // await actions.postCommitCsv({ state }, branchName)
+
+    console.log(fetchMock.calls(undefined, 'GET')[0][1].headers.Authorization)
+
+    const postAuth = 'Bearer 12345'
+
+    // const userName = 'ahoge'
+
+    expect(fetchMock.calls(undefined, 'GET')[0][1].headers.Authorization).toBe(postAuth)
+    expect(fetchMock.calls(undefined, 'GET')[1][1].headers.Authorization).toBe(postAuth)
+    expect(fetchMock.calls(undefined, 'POST')[0][1].headers.Authorization).toBe(postAuth)
+    expect(fetchMock.calls(undefined, 'POST')[1][1].headers.Authorization).toBe(postAuth)
+
+    // expect(fetchMock.calls(undefined, 'POST')[1][1].headers.Authorization).toBe(postAuth)
+
+    expect(fetchMock.calls(undefined, 'POST')[2][1].headers.Authorization).toBe(postAuth)
+    expect(fetchMock.calls(undefined, 'PATCH')[0][1].headers.Authorization).toBe(postAuth)
+
+    // return actions.postCommitCsv({state}, branchName)
+    //   .then(
+    //     expect(fetchMock.lastOptions().headers.Authorization).toEqual(postAuth)
+    //   );
+
+    // emailの変化が行われているか
+    // expect(userName).toEqual('ahoge')
   })
 })
