@@ -7,7 +7,7 @@
           href="https://github.com/asann3/Kakomon-Management-System/blob/master/client/manuals/README.md"
           target="_blank"
         >
-          <vk-navbar-logo>
+          <vk-navbar-logo class="uk-visible@m">
             KMS
           </vk-navbar-logo>
           <vk-navbar-item>
@@ -16,7 +16,7 @@
             </vk-iconnav>
           </vk-navbar-item>
         </a>
-        <vk-navbar-item>
+        <vk-navbar-item class="uk-visible@m">
           <vk-button
             class="custom-button"
             v-bind:type="uploadButtonType"
@@ -25,7 +25,7 @@
             アップロード
           </vk-button>
         </vk-navbar-item>
-        <vk-navbar-item>
+        <vk-navbar-item class="uk-visible@m">
           <vk-button
             class="custom-button"
             v-bind:type="editButtonType"
@@ -33,26 +33,46 @@
             >編集</vk-button
           >
         </vk-navbar-item>
+        <vk-navbar-item class="uk-hidden@m">
+          <vk-iconnav>
+            <vk-iconnav-item icon="cloud-upload" @click="toUpload" />
+          </vk-iconnav>
+        </vk-navbar-item>
+        <vk-navbar-item class="uk-hidden@m">
+          <vk-iconnav>
+            <vk-iconnav-item icon="file-edit" @click="toEdit" />
+          </vk-iconnav>
+        </vk-navbar-item>
+        <vk-navbar-item class="uk-hidden@m">
+          <vk-iconnav>
+            <vk-iconnav-item icon="sign-out" @click="logout" />
+          </vk-iconnav>
+        </vk-navbar-item>
       </vk-navbar-nav>
       <vk-navbar-nav slot="right">
         <vk-navbar-item>
-          <vk-icon icon="git-branch"></vk-icon>
-          <select
-            class="uk-select uk-form-width-medium"
-            v-model="selectedBranch"
-            @change="selectBranch"
-          >
-            <option disabled value="">ブランチを選択</option>
-            <option>master</option>
-            <option
-              v-for="(sha, branchName) in branches"
-              v-bind:key="sha"
-              v-show="branchName !== 'master'"
-              >{{ branchName }}</option
+          <div class="uk-inline">
+            <vk-icon
+              class="uk-form-icon uk-form-icon-flip"
+              icon="git-branch"
+            ></vk-icon>
+            <select
+              class="uk-select uk-form-width-medium"
+              v-model="selectedBranch"
+              @change="selectBranch"
             >
-          </select>
+              <option disabled value="">ブランチを選択</option>
+              <option>master</option>
+              <option
+                v-for="(sha, branchName) in branches"
+                v-bind:key="sha"
+                v-show="branchName !== 'master'"
+                >{{ branchName }}</option
+              >
+            </select>
+          </div>
         </vk-navbar-item>
-        <vk-navbar-item>
+        <vk-navbar-item class="uk-visible@m">
           <vk-button type="text" @click="logout"
             >ログアウト
             <vk-icon icon="sign-out"></vk-icon>
@@ -146,6 +166,9 @@ export default {
 }
 .help-logo {
   display: flex;
+}
+.uk-select:not([multiple]):not([size]) {
+  background-image: none;
 }
 
 a {
