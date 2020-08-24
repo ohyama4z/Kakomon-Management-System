@@ -54,13 +54,18 @@ const getters = {
 }
 
 const mutations = {
-  setCollapased: jest.fn()
+  setExpand: jest.fn()
+}
+
+const actions = {
+  getImageDatas: jest.fn()
 }
 
 const store = new Vuex.Store({
   state,
   getters,
-  mutations
+  mutations,
+  actions
 })
 
 describe('Sidebar.vue', () => {
@@ -80,32 +85,43 @@ describe('Sidebar.vue', () => {
       {
         header: true,
         title: `Branch : ${state.currentBranch}`,
-        icon: '',
         hiddenOnCollapse: true
       },
       {
         title: 'period1',
         icon,
+        isSecondFromEnd: false,
+        expand: false,
         child: [
           {
             title: 'subj1',
             icon,
+            isSecondFromEnd: false,
+            expand: false,
             child: [
               {
                 title: 'tool_type1',
                 icon,
+                isSecondFromEnd: false,
+                expand: false,
                 child: [
                   {
                     title: 'year1',
                     icon,
+                    isSecondFromEnd: false,
+                    expand: false,
                     child: [
                       {
                         title: 'content_type1',
                         icon,
+                        isSecondFromEnd: true,
+                        expand: false,
                         child: [
                           {
                             title: 'src1',
                             icon: 'fas fa-file',
+                            isSecondFromEnd: false,
+                            expand: false,
                             data: {
                               src: 'src1',
                               subj: 'subj1',
@@ -118,6 +134,8 @@ describe('Sidebar.vue', () => {
                           {
                             title: 'src2',
                             icon: 'fas fa-file',
+                            isSecondFromEnd: false,
+                            expand: false,
                             data: {
                               src: 'src2',
                               subj: 'subj1',
@@ -140,26 +158,38 @@ describe('Sidebar.vue', () => {
       {
         title: 'period3',
         icon,
+        isSecondFromEnd: false,
+        expand: false,
         child: [
           {
             title: 'subj3',
             icon,
+            isSecondFromEnd: false,
+            expand: false,
             child: [
               {
                 title: 'tool_type3',
                 icon,
+                isSecondFromEnd: false,
+                expand: false,
                 child: [
                   {
                     title: 'year3',
                     icon,
+                    isSecondFromEnd: false,
+                    expand: false,
                     child: [
                       {
                         title: 'content_type3',
                         icon,
+                        isSecondFromEnd: true,
+                        expand: false,
                         child: [
                           {
                             title: 'src3',
                             icon: 'fas fa-file',
+                            isSecondFromEnd: false,
+                            expand: false,
                             data: {
                               src: 'src3',
                               subj: 'subj3',
@@ -178,13 +208,6 @@ describe('Sidebar.vue', () => {
             ]
           }
         ]
-      },
-      {
-        props: {
-          collapse: {
-            default: true
-          }
-        }
       }
     ]
 
@@ -201,6 +224,32 @@ describe('Sidebar.vue', () => {
     const collapse = true
 
     wrapper.vm.onToggleCollapse(collapse)
-    expect(mutations.setCollapased).toHaveBeenCalled()
+    expect(mutations.setExpand).toHaveBeenCalled()
+  })
+
+  it('ファイルツリーの末端フォルダーを開くと画像表示のactionsが呼ばれる', () => {
+    const wrapper = shallowMount(Sidebar, {
+      store,
+      localVue
+    })
+
+    const item = {
+      title: '問題',
+      icon: 'fa fa-folder',
+      isSecondFromEnd: true,
+      expand: false,
+      child: [
+        {
+          title: 'file1',
+          data: { sha: 'sha' },
+          isSecondFromEnd: false,
+          expand: false
+        }
+      ]
+    }
+    const e = true
+
+    wrapper.vm.onItemClick(e, item)
+    expect(actions.getImageDatas).toHaveBeenCalled()
   })
 })

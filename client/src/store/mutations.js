@@ -99,7 +99,34 @@ export default {
     state.setCommitCSV.status = 'committed'
   },
 
-  setCollapased: (state, collapased) => {
-    state.collapased = collapased
+  setExpand: (state, expand) => {
+    state.expand = expand
+  },
+
+  setImageShas: (state, payload) => {
+    state.imageShas = {
+      ...state.imageShas,
+      [payload.commitSha]: {
+        ...state.imageShas[payload.commitSha],
+        [payload.directoryPath]: {
+          status: 'loaded',
+          data: payload.data
+        }
+      }
+    }
+  },
+
+  setImageData: (state, payload) => {
+    state.imageDatas = {
+      ...state.imageDatas,
+      [payload.sha]: {
+        status: 'loaded',
+        data: payload.blobUri
+      }
+    }
+  },
+
+  setDisplayedFiles: (state, filePaths) => {
+    state.displayedFiles = filePaths
   }
 }

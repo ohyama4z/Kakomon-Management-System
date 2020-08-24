@@ -52,10 +52,11 @@ export default {
         sha: commitSha,
         data: commitDataInLocalStorage
       })
-
-      Object.entries(commitDataInLocalStorage).map(async ([, sha]) => {
-        await dispatch('getContentMetadata', sha)
-      })
+      await Promise.all([
+        Object.entries(commitDataInLocalStorage).map(async ([, sha]) => {
+          await dispatch('getContentMetadata', sha)
+        })
+      ])
 
       return
     }
@@ -129,7 +130,7 @@ export default {
   },
 
   setCommitCSV: async ({ state, commit }, branchName) => {
-    console.log('asdfasdfasdfasdf', branchName)
+    // console.log('asdfasdfasdfasdf', branchName)
     // console.log(sendObj)
     const token = state.currentUser.token.access_token
     const getmethod = 'GET'
@@ -146,14 +147,14 @@ export default {
     console.log('username', userName)
 
     const editcsvobj = state.changedFiles
-    console.log(state)
-    console.log(editcsvobj)
+    // console.log(state)
+    // console.log(editcsvobj)
 
     // editedobject→csv
-    console.log(Object.values(editcsvobj))
+    // console.log(Object.values(editcsvobj))
     const objarray = Object.values(editcsvobj)
     const content = convertToCSV(objarray)
-    console.log('content', content)
+    // console.log('content', content)
 
     // //   console.log('refarr', resArr[0].sha) //filehash
 
@@ -163,9 +164,9 @@ export default {
       { getmethod, headers }
     )
     const parseref = await branchref.json()
-    console.log(parseref)
-    console.log(parseref.object)
-    console.log('branch毎のハッシュ', `${branchName}`, parseref.object.sha)
+    // console.log(parseref)
+    // console.log(parseref.object)
+    // console.log('branch毎のハッシュ', `${branchName}`, parseref.object.sha)
 
     // commitの取得
     const commithttpRes = await fetch(
@@ -173,7 +174,7 @@ export default {
       { getmethod, headers }
     )
     const commitres = await commithttpRes.json()
-    console.log(':p~', commitres)
+    // console.log(':p~', commitres)
     // console.log(':p~', commitres, sendObj)
 
     const postcontents = {
@@ -190,7 +191,7 @@ export default {
       { method: postmethod, headers, body: bodys }
     ) // { headerss: {'Content-Type': 'application/json'}}
     const refres = await refhttpRes.json()
-    console.log(':q~', refres)
+    // console.log(':q~', refres)
 
     // // const masmaster = await fetch('http://localhost:8085/.netlify/git/github/branches/master', {method: getmethod, headers})
     // // const masres = await masmaster.json()
@@ -216,10 +217,10 @@ export default {
       { method: postmethod, headers, body: treesbodys }
     )
     const branchres = await branchhttpRes.json()
-    console.log('branchesres', branchres)
-    console.log('check', refres.sha, branchres.sha, parseref.object.sha)
+    // console.log('branchesres', branchres)
+    // console.log('check', refres.sha, branchres.sha, parseref.object.sha)
     const date = moment().format('YYYY-MM-DDTHH:mm:ssZ')
-    console.log('time', date)
+    // console.log('time', date)
 
     const commitsbody = {
       message: date,
@@ -235,7 +236,7 @@ export default {
       tree: branchres.sha
     }
     const commitsbodys = JSON.stringify(commitsbody)
-    console.log(commitsbodys)
+    // console.log(commitsbodys)
 
     // commitの作成
     const createcommithttpres = await fetch(
@@ -243,7 +244,7 @@ export default {
       { method: postmethod, headers, body: commitsbodys }
     )
     const createcommitres = await createcommithttpres.json()
-    console.log('commithash', createcommitres.sha)
+    // console.log('commithash', createcommitres.sha)
 
     // refの更新
     const updatebody = {
@@ -269,6 +270,70 @@ export default {
       await netlifyIdentity.refresh()
     }
     commit('updateCurrentUser', user)
+  },
+
+  getImageShas: async ({ state, commit }, { commitSha, directoryPath }) => {
+    if (state.imageShas?.[commitSha]?.[directoryPath]?.status === 'loaded') {
+      return
+    }
+
+    const token = state.currentUser.token.access_token
+    const method = 'GET'
+    const headers = {
+      Authorization: `Bearer ${token}`
+    }
+
+    const httpRes = await fetch(
+      `http://localhost:8085/.netlify/git/github/contents/${directoryPath}?ref=${commitSha}`,
+      { method, headers }
+    )
+    const res = await httpRes.json()
+
+    const data = Object.fromEntries(res.map(file => [file.name, file.sha]))
+    commit('setImageShas', { commitSha, directoryPath, data })
+  },
+
+  getImageDatas: async ({ dispatch, state, commit }, fileSha) => {
+    const commitSha = state.branches.data[state.currentBranch]
+    const files = state.contentMetadatas[fileSha].data
+    const directoryPath = Object.keys(files)[0].substr(
+      0,
+      Object.keys(files)[0].lastIndexOf('/')
+    )
+
+    const filePaths = Object.keys(files)
+    commit('setDisplayedFiles', filePaths)
+    await dispatch('getImageShas', { commitSha, directoryPath })
+
+    console.log(state.imageShas[commitSha][directoryPath].data)
+
+    const filenames = Object.values(files).map(file => {
+      const path = file.src
+      return path.substr(path.lastIndexOf('/') + 1)
+    })
+
+    await Promise.all(
+      filenames.map(async filename => {
+        const sha = state.imageShas[commitSha][directoryPath].data[filename]
+        const token = state.currentUser.token.access_token
+        const method = 'GET'
+        const headers = {
+          Authorization: `Bearer ${token}`
+        }
+        const httpRes = await fetch(
+          `http://localhost:8085/.netlify/git/github/git/blobs/${sha}`,
+          { method, headers }
+        )
+        const res = await httpRes.json()
+
+        // Todo: image/ だけじゃなくpdfとかもあるので対応できるようにする
+        const imageType = filename.substr(filename.lastIndexOf('.') + 1)
+        const blob = toBlob(res.content, imageType)
+        const blobUri = URL.createObjectURL(blob)
+
+        commit('setImageData', { sha, blobUri })
+      })
+    )
   }
 }
 
@@ -304,7 +369,21 @@ export function convertCsvToObj(csv) {
         }, {})
     })
     .reduce((previous, current) => {
-      previous[current.src] = current
+      previous[current.src] = {
+        ...current,
+        sha: { status: 'unrequested', data: {} }
+      }
       return previous
     }, {})
+}
+
+function toBlob(base64, type) {
+  const bin = atob(base64.replace(/^.*,/, ''))
+  const buffer = new Uint8Array(bin.length)
+  for (let i = 0; i < bin.length; i++) {
+    buffer[i] = bin.charCodeAt(i)
+  }
+  // Blobを作成
+
+  return new Blob([buffer.buffer], { type })
 }
