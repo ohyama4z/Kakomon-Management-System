@@ -77,7 +77,8 @@ export default {
             title: key,
             icon: 'fas fa-file',
             data: file,
-            isSecondFromEnd: false
+            isSecondFromEnd: false,
+            expand: false
           }))
 
           return result
@@ -89,7 +90,8 @@ export default {
               title: key,
               icon,
               child: generateMenuStructure(value, num - 1),
-              isSecondFromEnd: num === 2 // 末端ファイルの元となるフォルダかを確かめる
+              isSecondFromEnd: num === 2, // 末端ファイルの元となるフォルダかを確かめる
+              expand: false
             }
           ]
         }, [])
@@ -111,16 +113,13 @@ export default {
   methods: {
     onItemClick(e, item) {
       // データツリーの末端ファイルの元となるフォルダをクリックしたときに処理を行う
-      if (item.isSecondFromEnd) {
-        // const selectedFiles = Object.fromEntries(
-        //   item.child.map(file => {
-        //     return [file.data.src, file.data]
-        //   })
-        // )
-
+      if (item.isSecondFromEnd && !item.expand) {
         const fileSha = item.child[0].data.sha
+        console.log(item)
         this.$store.dispatch('getImageDatas', fileSha)
       }
+
+      item.expand = !item.expand
     },
     onToggleCollapse(collapsed) {
       this.$store.commit('setExpand', !collapsed)

@@ -91,31 +91,37 @@ describe('Sidebar.vue', () => {
         title: 'period1',
         icon,
         isSecondFromEnd: false,
+        expand: false,
         child: [
           {
             title: 'subj1',
             icon,
             isSecondFromEnd: false,
+            expand: false,
             child: [
               {
                 title: 'tool_type1',
                 icon,
                 isSecondFromEnd: false,
+                expand: false,
                 child: [
                   {
                     title: 'year1',
                     icon,
                     isSecondFromEnd: false,
+                    expand: false,
                     child: [
                       {
                         title: 'content_type1',
                         icon,
                         isSecondFromEnd: true,
+                        expand: false,
                         child: [
                           {
                             title: 'src1',
                             icon: 'fas fa-file',
                             isSecondFromEnd: false,
+                            expand: false,
                             data: {
                               src: 'src1',
                               subj: 'subj1',
@@ -129,6 +135,7 @@ describe('Sidebar.vue', () => {
                             title: 'src2',
                             icon: 'fas fa-file',
                             isSecondFromEnd: false,
+                            expand: false,
                             data: {
                               src: 'src2',
                               subj: 'subj1',
@@ -152,31 +159,37 @@ describe('Sidebar.vue', () => {
         title: 'period3',
         icon,
         isSecondFromEnd: false,
+        expand: false,
         child: [
           {
             title: 'subj3',
             icon,
             isSecondFromEnd: false,
+            expand: false,
             child: [
               {
                 title: 'tool_type3',
                 icon,
                 isSecondFromEnd: false,
+                expand: false,
                 child: [
                   {
                     title: 'year3',
                     icon,
                     isSecondFromEnd: false,
+                    expand: false,
                     child: [
                       {
                         title: 'content_type3',
                         icon,
                         isSecondFromEnd: true,
+                        expand: false,
                         child: [
                           {
                             title: 'src3',
                             icon: 'fas fa-file',
                             isSecondFromEnd: false,
+                            expand: false,
                             data: {
                               src: 'src3',
                               subj: 'subj3',
@@ -214,7 +227,7 @@ describe('Sidebar.vue', () => {
     expect(mutations.setExpand).toHaveBeenCalled()
   })
 
-  it('ファイルツリーの末端フォルダーをクリックすると画像表示のactionsが呼ばれる', () => {
+  it('ファイルツリーの末端フォルダーを開くと画像表示のactionsが呼ばれる', () => {
     const wrapper = shallowMount(Sidebar, {
       store,
       localVue
@@ -224,11 +237,13 @@ describe('Sidebar.vue', () => {
       title: '問題',
       icon: 'fa fa-folder',
       isSecondFromEnd: true,
+      expand: false,
       child: [
         {
           title: 'file1',
           data: { sha: 'sha' },
-          isSecondFromEnd: false
+          isSecondFromEnd: false,
+          expand: false
         }
       ]
     }
