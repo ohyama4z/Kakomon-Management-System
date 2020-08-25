@@ -332,43 +332,59 @@ export default {
     )
   },
 
-  upload: async ({ dispatch }, payload) => {
-    const token = state.currentUser.token.access_token
-    const method = 'GET'
-    const headers = {
-      Authorization: `Bearer ${token}`
-    }
-    const httpRes = await fetch(
-      `http://localhost:8085/.netlify/git/github/git/refs/heads/master`,
-      { method, headers }
+  upload: async ({ state, dispatch }, payload) => {
+    const selectedBranch = Object.entries(state.branches.data).reduce(
+      (p, [branch, sha]) => {
+        if (branch === payload.branch) {
+          p = { branch: sha }
+        }
+        return p
+      },
+      { [payload.branch]: null }
     )
-    const res = await httpRes.json()
-    const masterSha = res.object.sha
 
-    // branchの作成
-    const body = JSON.stringify({
-      ref: `refs/heads/${payload.branch}`,
-      sha: `${masterSha}`
-    })
+    console.log(selectedBranch)
 
-    const newBranchHttpRes = await fetch(
-      `http://localhost:8085/.netlify/git/github/git/refs`,
-      {
-        method: 'POST',
-        headers,
-        body
+    // branchが既存でない場合新規作成する
+    if (selectedBranch[payload.branch] == null) {
+      const token = state.currentUser.token.access_token
+      const method = 'GET'
+      const headers = {
+        Authorization: `Bearer ${token}`
       }
-    )
-    const newBranchRes = await newBranchHttpRes.json()
+      const httpRes = await fetch(
+        `http://localhost:8085/.netlify/git/github/git/refs/heads/${payload.branch}`,
+        { method, headers }
+      )
+      const res = await httpRes.json()
+      const masterSha = res.object.sha
 
-    console.log({ newBranchRes })
+      // branchの作成
+      const body = JSON.stringify({
+        ref: `refs/heads/${payload.branch}`,
+        sha: `${masterSha}`
+      })
+
+      const newBranchHttpRes = await fetch(
+        `http://localhost:8085/.netlify/git/github/git/refs`,
+        {
+          method: 'POST',
+          headers,
+          body
+        }
+      )
+      const newBranchRes = await newBranchHttpRes.json()
+      selectedBranch[payload.branch] = newBranchRes?.object?.sha
+      console.log(selectedBranch, payload.branch, newBranchRes.object)
+    }
 
     const createCommitPayload = {
-      commitSha: newBranchRes.object.sha,
+      commitSha: selectedBranch[payload.branch],
       branch: payload.branch,
       files: payload.files,
       commitMessage: payload.commitMessage
     }
+
     dispatch('createCommit', createCommitPayload)
   },
 

@@ -3,26 +3,41 @@
     <Navbar></Navbar>
     <div class="forms">
       <div class="uk-margin uk-flex uk-flex-center">
-        <div class="uk-inline">
-          <vk-icon icon="git-branch" class="uk-form-icon" />
-          <input
-            class="uk-input uk-form-width-medium"
-            type="text"
-            placeholder="ブランチを検索"
-            v-model="branchName"
-            list="branchList"
-          />
-          <datalist id="branchList">
-            <option
-              v-for="(sha, branchName) in branches"
-              v-bind:key="sha"
-              v-show="branchName !== 'master'"
-              >{{ branchName }}</option
-            >
-          </datalist>
-        </div>
+        <vk-icon icon="git-branch"></vk-icon>
+        <span v-if="branchName"> : {{ branchName }}</span>
+        <span v-else> : 選択されていません</span>
       </div>
-
+      <div class="uk-margin uk-flex uk-flex-center">
+        <vk-button>ブランチを選択</vk-button>
+        <vk-drop mode="click" positon="bottom-justify">
+          <vk-card padding="small">
+            <div class="uk-flex uk-flex-column">
+              <div class="uk-margin-auto uk-inline">
+                <vk-icon icon="git-branch" class="uk-form-icon" />
+                <input
+                  class="uk-input uk-form-width-medium"
+                  type="text"
+                  placeholder="ブランチを新規作成"
+                  v-model="newBranch"
+                />
+                <vk-button size="small" type="primary">作成</vk-button>
+              </div>
+              <div class="uk-margin-top uk-flex uk-flex-column">
+                <hr />
+                <vk-button
+                  type="text"
+                  class="uk-inline"
+                  v-for="(sha, branchName) in branches"
+                  v-bind:key="sha"
+                  @click="selectExistedBranch(branchName)"
+                >
+                  {{ branchName }}
+                </vk-button>
+              </div>
+            </div>
+          </vk-card>
+        </vk-drop>
+      </div>
       <div class="uk-flex uk-flex-center uk-margin">
         <div
           class="drag-area uk-placeholder uk-text-center uk-form-width-large"
@@ -70,21 +85,20 @@
 
       <div class="uk-text-center@s uk-margin">
         <div v-if="!branchName">ブランチ名を入力してください</div>
-        <div v-if="branchName === 'master'">master branchは選択できません</div>
+        <div v-if="branchName === 'master'">
+          master branchは選択できません
+        </div>
         <div v-if="Object.keys(uploadedFiles).length < 1">
           1つ以上ファイルを選択してください
         </div>
+        <div v-if="!commitMessage">コミットメッセージを入力してください</div>
       </div>
 
       <div class="uk-flex uk-flex-center uk-margin">
         <vk-button
           type="primary"
           class="uk-margin"
-          v-bind:disabled="
-            Object.keys(uploadedFiles).length < 1 ||
-            !branchName ||
-            branchName === 'master'
-          "
+          v-bind:disabled="isDisabled"
           v-on:click="uploadNewFile()"
           >アップロード</vk-button
         >
@@ -97,6 +111,7 @@
 import { Button } from 'vuikit/lib/button'
 import { Icon } from 'vuikit/lib/icon'
 import { Iconnav, IconnavItem } from 'vuikit/lib/iconnav'
+import { Drop } from 'vuikit/lib/drop'
 import Navbar from '../components/Navbar'
 import { mapState } from 'vuex'
 
@@ -107,6 +122,7 @@ export default {
     VkIcon: Icon,
     VkIconnav: Iconnav,
     VkIconnavItem: IconnavItem,
+    VkDrop: Drop,
     Navbar
   },
 
@@ -131,7 +147,15 @@ export default {
         const { master, ...branches } = state.branches.data
         return branches
       }
-    })
+    }),
+    isDisabled() {
+      return (
+        Object.keys(this.uploadedFiles).length < 1 ||
+        !this.branchName ||
+        this.branchName === 'master' ||
+        !this.commitMessage
+      )
+    }
   },
   methods: {
     toEdit() {
@@ -170,6 +194,10 @@ export default {
     trashFile(filename) {
       const { [filename]: omit, ...newFilesObj } = this.uploadedFiles
       this.uploadedFiles = newFilesObj
+    },
+
+    selectExistedBranch(branchName) {
+      this.branchName = branchName
     }
   }
 }
