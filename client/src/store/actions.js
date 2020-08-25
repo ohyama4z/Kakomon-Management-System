@@ -224,6 +224,8 @@ export default {
       parents: [parseRef.object.sha],
       tree: treeRes.sha
     }
+    // console.log()
+    // const postCommitInfoBody = postCommitInfo
     const postCommitInfoBody = JSON.stringify(postCommitInfo)
     console.log(postCommitInfoBody)
 

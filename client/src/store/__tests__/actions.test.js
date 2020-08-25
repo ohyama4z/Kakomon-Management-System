@@ -393,9 +393,6 @@ describe('action.js', () => {
     // const commit = jest.fn()
     const branchName = 'cmstest'
     const token = state.currentUser.token.access_token
-    const getMethod = 'GET'
-    const postMethod = 'POST'
-    const patchMethod = 'PATCH'
     const headers = {
       Authorization: `Bearer ${token}`
     }
@@ -700,7 +697,7 @@ describe('action.js', () => {
     )
 
     // refの更新
-    const refUpdate = fetchMock.patch(
+    fetchMock.patch(
       `http://localhost:8085/.netlify/git/github/git/refs/heads/${branchName}`,
       {
         status: 200,
@@ -720,38 +717,33 @@ describe('action.js', () => {
       headers
     )
 
+    const postAuth = 'Bearer 12345'
+    const userName = 'ahoge'
+
     await actions.postCommitCsv({ state }, branchName)
 
-    // const data = await actions.postCommitCsv({ state }, branchName)
-    // console.log('ahobakabaka', data)
-    // fetchで呼ばれた引数が正しいか
-    // console.log('fetchmock', fetchMock)
     // expect(fetchMock.done(6)).toBe(true)
     // console.log(fetchMock.options(true))
-    // await actions.postCommitCsv({ state }, branchName)
 
     console.log(fetchMock.calls(undefined, 'GET')[0][1].headers.Authorization)
-
-    const postAuth = 'Bearer 12345'
-
-    // const userName = 'ahoge'
 
     expect(fetchMock.calls(undefined, 'GET')[0][1].headers.Authorization).toBe(postAuth)
     expect(fetchMock.calls(undefined, 'GET')[1][1].headers.Authorization).toBe(postAuth)
     expect(fetchMock.calls(undefined, 'POST')[0][1].headers.Authorization).toBe(postAuth)
     expect(fetchMock.calls(undefined, 'POST')[1][1].headers.Authorization).toBe(postAuth)
-
-    // expect(fetchMock.calls(undefined, 'POST')[1][1].headers.Authorization).toBe(postAuth)
-
     expect(fetchMock.calls(undefined, 'POST')[2][1].headers.Authorization).toBe(postAuth)
+
+    // stringfyを使うとbodyの中身がobjectを包含するstringになってしまう
+    // stringfyを使わないと422エラーが発生してしまう
+    // test側でjsonに戻す
+    // console.log(typeof(fetchMock.calls(undefined, 'POST')[2][1]).method)
+    // console.log(fetchMock.calls(undefined, 'POST')[2][1].body)
+    const parsedBody = JSON.parse(fetchMock.calls(undefined, 'POST')[2][1].body)
+
+    // console.log(parsedBody.author.name)
+    expect(parsedBody.author.name).toBe(userName)
+
     expect(fetchMock.calls(undefined, 'PATCH')[0][1].headers.Authorization).toBe(postAuth)
 
-    // return actions.postCommitCsv({state}, branchName)
-    //   .then(
-    //     expect(fetchMock.lastOptions().headers.Authorization).toEqual(postAuth)
-    //   );
-
-    // emailの変化が行われているか
-    // expect(userName).toEqual('ahoge')
   })
 })
