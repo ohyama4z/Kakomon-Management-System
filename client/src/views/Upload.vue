@@ -132,16 +132,17 @@ export default {
     },
 
     async uploadNewFile() {
-      console.log({ files: this.uploadedFiles, branch: this.branchName })
       await this.$store.dispatch('upload', {
         files: this.uploadedFiles,
         branch: this.branchName
       })
+      // 表面上のリロード
+      this.uploadedFiles = {}
+      this.branchName = ''
     },
 
     dropFile() {
       const droppedFiles = event.target.files || event.dataTransfer.files
-      console.log(droppedFiles)
       Object.values(droppedFiles).map(file => {
         const blobUri = URL.createObjectURL(file)
         this.uploadedFiles = {
@@ -149,7 +150,6 @@ export default {
           [file.name]: blobUri
         }
       })
-      console.log(this.uploadedFiles)
     },
 
     trashFile(filename) {
