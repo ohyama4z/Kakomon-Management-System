@@ -10,7 +10,7 @@
 
     <div v-if="!isLoading">
       <Sidebar></Sidebar>
-      <div class="forms" v-bind:class="{ collapsed: collapase }">
+      <div class="forms" v-bind:class="{ expand: expand }">
         <div class="uk-margin uk-flex uk-flex-center">
           <input
             class="uk-input uk-form-width-medium"
@@ -103,6 +103,7 @@
             >コミット</vk-button
           >
         </div>
+        <Preview></Preview>
       </div>
     </div>
   </div>
@@ -114,6 +115,7 @@ import { Button } from 'vuikit/lib/button'
 import { Spinner } from 'vuikit/lib/spinner'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
+import Preview from '../components/Preview'
 
 export default {
   name: 'Edit',
@@ -122,7 +124,8 @@ export default {
     VkSpinner: Spinner,
     VkButton: Button,
     Sidebar,
-    Navbar
+    Navbar,
+    Preview
   },
 
   data() {
@@ -163,7 +166,7 @@ export default {
         )
       },
 
-      collapase: state => state.collapased
+      expand: state => state.expand
     }),
 
     isSellectedAll() {
@@ -189,12 +192,6 @@ export default {
         this.$store.state.currentBranch
       )
     },
-    // trashFile(file) {
-    //   const index = this.selectedFiles.findIndex(
-    //     item => item.title === file.title
-    //   )
-    //   this.selectedFiles.splice(index, 1)
-    // },
 
     updateEditData() {
       // sendObjは1つのcsvfile
@@ -220,7 +217,7 @@ export default {
 .forms {
   padding-top: 10vh;
 }
-.collapsed {
+.expand {
   padding-left: 350px;
 }
 </style>

@@ -31,9 +31,11 @@ export default {
       return {}
     }
 
-    const loadedMetadatas = loadedContentMetadataShas.map(
-      sha => contentMetadatas[sha]?.data
-    )
+    const loadedMetadatas = loadedContentMetadataShas.flatMap(sha => {
+      return Object.entries(contentMetadatas[sha]?.data).map(([key, value]) => {
+        return { [key]: { ...value, sha } }
+      })
+    })
 
     const contentMetadatasBySource = loadedMetadatas.flatMap(loadedMetadata =>
       Object.entries(loadedMetadata)

@@ -4,7 +4,7 @@ export default {
   currentUser: netlifyIdentity.currentUser(),
   lastPage: '',
   currentBranch: '',
-  collapased: true,
+  expand: true,
 
   commits: {},
   contentMetadatas: {},
@@ -39,5 +39,9 @@ export default {
   branches: {
     status: 'unrequested',
     data: {}
-  }
+  },
+
+  imageDatas: {},
+  imageShas: {},
+  displayedFiles: []
 }

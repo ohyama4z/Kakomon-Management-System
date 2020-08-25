@@ -2,14 +2,16 @@ import mutations from '../mutations'
 const state = {
   lastPage: '',
   currentBranch: '',
-
+  expand: true,
   commits: {},
   contentMetadatas: {},
-
   branches: {
     status: 'unrequested',
     data: {}
-  }
+  },
+  imageShas: {},
+  imageDatas: {},
+  displayedFiles: []
 }
 
 describe('mutations.js', () => {
@@ -224,5 +226,80 @@ describe('mutations.js', () => {
 
     mutations.setContentMetadata(state, payloadForSetContentMetaData)
     expect(state.contentMetadatas).toEqual(resultForSetContentMetaData)
+  })
+
+  it('サイドバーを開閉した情報をstateに格納する', () => {
+    const expand = false
+    mutations.setExpand(state, expand)
+    expect(state.expand).toBe(false)
+  })
+
+  it('画像ファイルのshaの情報の書き換え', () => {
+    state.imageShas = {
+      commitSha1: {
+        dir1: {
+          status: 'loaded',
+          data: 'aaa'
+        }
+      }
+    }
+
+    const payload = {
+      commitSha: 'commitSha2',
+      directoryPath: 'dir2',
+      data: 'iii'
+    }
+
+    const result = {
+      commitSha1: {
+        dir1: {
+          status: 'loaded',
+          data: 'aaa'
+        }
+      },
+      commitSha2: {
+        dir2: {
+          data: 'iii',
+          status: 'loaded'
+        }
+      }
+    }
+
+    mutations.setImageShas(state, payload)
+    expect(state.imageShas).toEqual(result)
+  })
+
+  it('stateの画像ファイルの情報を更新', () => {
+    state.imageDatas = {
+      sha1: {
+        status: 'loaded',
+        data: 'aaa'
+      }
+    }
+
+    const payload = {
+      sha: 'sha2',
+      blobUri: 'blob'
+    }
+
+    const result = {
+      sha1: {
+        status: 'loaded',
+        data: 'aaa'
+      },
+      sha2: {
+        status: 'loaded',
+        data: 'blob'
+      }
+    }
+
+    mutations.setImageData(state, payload)
+    expect(state.imageDatas).toEqual(result)
+  })
+
+  it('選択したフォルダー内のファイルのパスをstateに格納', () => {
+    const filePaths = ['path1', 'path2', 'path3']
+    mutations.setDisplayedFiles(state, filePaths)
+    expect(state.displayedFiles).toBe(filePaths)
   })
 })

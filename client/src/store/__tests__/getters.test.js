@@ -56,16 +56,20 @@ describe('getters.js', () => {
 
     const result = {
       'file1-1.jpg': {
-        src: 'file1-1.jpg'
+        src: 'file1-1.jpg',
+        sha: 'fileSha1'
       },
       'file1-2.jpg': {
-        src: 'file1-2.jpg'
+        src: 'file1-2.jpg',
+        sha: 'fileSha1'
       },
       'file2-1.jpg': {
-        src: 'file2-1.jpg'
+        src: 'file2-1.jpg',
+        sha: 'fileSha2'
       },
       'file2-2.jpg': {
-        src: 'file2-2.jpg'
+        src: 'file2-2.jpg',
+        sha: 'fileSha2'
       }
     }
 

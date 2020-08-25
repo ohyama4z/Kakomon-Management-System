@@ -52,10 +52,11 @@ export default {
         sha: commitSha,
         data: commitDataInLocalStorage
       })
-
-      Object.entries(commitDataInLocalStorage).map(async ([, sha]) => {
-        await dispatch('getContentMetadata', sha)
-      })
+      await Promise.all([
+        Object.entries(commitDataInLocalStorage).map(async ([, sha]) => {
+          await dispatch('getContentMetadata', sha)
+        })
+      ])
 
       return
     }
@@ -212,7 +213,7 @@ export default {
     console.log('branchesres', treeRes)
     console.log('check', blobRes.sha, treeRes.sha, parseRef.object.sha)
     const date = moment().format('YYYY-MM-DDTHH:mm:ssZ')
-    console.log('time', date)
+    // console.log('time', date)
 
     const postCommitInfo = {
       message: date,
@@ -257,6 +258,70 @@ export default {
       await netlifyIdentity.refresh()
     }
     commit('updateCurrentUser', user)
+  },
+
+  getImageShas: async ({ state, commit }, { commitSha, directoryPath }) => {
+    if (state.imageShas?.[commitSha]?.[directoryPath]?.status === 'loaded') {
+      return
+    }
+
+    const token = state.currentUser.token.access_token
+    const method = 'GET'
+    const headers = {
+      Authorization: `Bearer ${token}`
+    }
+
+    const httpRes = await fetch(
+      `http://localhost:8085/.netlify/git/github/contents/${directoryPath}?ref=${commitSha}`,
+      { method, headers }
+    )
+    const res = await httpRes.json()
+
+    const data = Object.fromEntries(res.map(file => [file.name, file.sha]))
+    commit('setImageShas', { commitSha, directoryPath, data })
+  },
+
+  getImageDatas: async ({ dispatch, state, commit }, fileSha) => {
+    const commitSha = state.branches.data[state.currentBranch]
+    const files = state.contentMetadatas[fileSha].data
+    const directoryPath = Object.keys(files)[0].substr(
+      0,
+      Object.keys(files)[0].lastIndexOf('/')
+    )
+
+    const filePaths = Object.keys(files)
+    commit('setDisplayedFiles', filePaths)
+    await dispatch('getImageShas', { commitSha, directoryPath })
+
+    console.log(state.imageShas[commitSha][directoryPath].data)
+
+    const filenames = Object.values(files).map(file => {
+      const path = file.src
+      return path.substr(path.lastIndexOf('/') + 1)
+    })
+
+    await Promise.all(
+      filenames.map(async filename => {
+        const sha = state.imageShas[commitSha][directoryPath].data[filename]
+        const token = state.currentUser.token.access_token
+        const method = 'GET'
+        const headers = {
+          Authorization: `Bearer ${token}`
+        }
+        const httpRes = await fetch(
+          `http://localhost:8085/.netlify/git/github/git/blobs/${sha}`,
+          { method, headers }
+        )
+        const res = await httpRes.json()
+
+        // Todo: image/ だけじゃなくpdfとかもあるので対応できるようにする
+        const imageType = filename.substr(filename.lastIndexOf('.') + 1)
+        const blob = toBlob(res.content, imageType)
+        const blobUri = URL.createObjectURL(blob)
+
+        commit('setImageData', { sha, blobUri })
+      })
+    )
   }
 }
 
@@ -292,7 +357,21 @@ export function convertCsvToObj(csv) {
         }, {})
     })
     .reduce((previous, current) => {
-      previous[current.src] = current
+      previous[current.src] = {
+        ...current,
+        sha: { status: 'unrequested', data: {} }
+      }
       return previous
     }, {})
+}
+
+function toBlob(base64, type) {
+  const bin = atob(base64.replace(/^.*,/, ''))
+  const buffer = new Uint8Array(bin.length)
+  for (let i = 0; i < bin.length; i++) {
+    buffer[i] = bin.charCodeAt(i)
+  }
+  // Blobを作成
+
+  return new Blob([buffer.buffer], { type })
 }
