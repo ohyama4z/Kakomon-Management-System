@@ -56,6 +56,18 @@
         </vk-iconnav>
       </div>
 
+      <div class="uk-margin uk-flex uk-flex-center">
+        <div class="uk-inline">
+          <vk-icon icon="pencil" class="uk-form-icon" />
+          <input
+            class="uk-input uk-form-width-medium"
+            type="text"
+            placeholder="コミットメッセージ"
+            v-model="commitMessage"
+          />
+        </div>
+      </div>
+
       <div class="uk-text-center@s uk-margin">
         <div v-if="!branchName">ブランチ名を入力してください</div>
         <div v-if="branchName === 'master'">master branchは選択できません</div>
@@ -101,7 +113,8 @@ export default {
   data() {
     return {
       uploadedFiles: {},
-      branchName: ''
+      branchName: '',
+      commitMessage: ''
     }
   },
   async mounted() {
@@ -134,11 +147,13 @@ export default {
     async uploadNewFile() {
       await this.$store.dispatch('upload', {
         files: this.uploadedFiles,
-        branch: this.branchName
+        branch: this.branchName,
+        commitMessage: this.commitMessage
       })
-      // 表面上のリロード
+      // 表面上のリセット
       this.uploadedFiles = {}
       this.branchName = ''
+      this.commitMessage = ''
     },
 
     dropFile() {

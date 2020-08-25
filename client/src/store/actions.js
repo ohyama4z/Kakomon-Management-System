@@ -332,7 +332,7 @@ export default {
     )
   },
 
-  upload: async ({ commit, dispatch }, payload) => {
+  upload: async ({ dispatch }, payload) => {
     const token = state.currentUser.token.access_token
     const method = 'GET'
     const headers = {
@@ -366,12 +366,13 @@ export default {
     const createCommitPayload = {
       commitSha: newBranchRes.object.sha,
       branch: payload.branch,
-      files: payload.files
+      files: payload.files,
+      commitMessage: payload.commitMessage
     }
     dispatch('createCommit', createCommitPayload)
   },
 
-  createCommit: async ({ commit, dispatch }, payload) => {
+  createCommit: async ({ state }, payload) => {
     // https://int128.hatenablog.com/entry/2017/09/05/161641 詳しくはここ見ろ
     const token = state.currentUser.token.access_token
     const headers = {
@@ -434,11 +435,13 @@ export default {
     )
     const createTreeRes = await createTreeHttpRes.json()
 
+    const email = state.currentUser.email
+    const name = email.substr(0, email.lastIndexOf('@'))
     const createCommitBody = {
-      message: 'じえあｄｋｌさ；んふぇいあ',
+      message: payload.commitMessage,
       author: {
-        name: 'あほあほまぬけ',
-        email: 'ohyama4z000@gmail.com',
+        name,
+        email,
         date: moment().format('YYYY-MM-DDTHH:mm:ssZ')
       },
       parents: [payload.commitSha],
