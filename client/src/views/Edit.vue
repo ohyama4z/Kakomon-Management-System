@@ -99,7 +99,7 @@
           <vk-button
             type="primary"
             class="uk-margin"
-            v-on:click="setCommitCSV()"
+            v-on:click="postCommitCsv()"
             >コミット</vk-button
           >
         </div>
@@ -150,7 +150,7 @@ export default {
     await this.$store.dispatch('getBranches')
     await this.$store.dispatch('selectBranch', this.selectedBranch)
     this.getCommit()
-    this.setCommitCSV()
+    this.postCommitCsv()
   },
 
   computed: {
@@ -186,9 +186,9 @@ export default {
       const commitSha = this.$store.state.branches.data[this.selectedBranch]
       await this.$store.dispatch('getCommit', commitSha)
     },
-    async setCommitCSV() {
+    async postCommitCsv() {
       await this.$store.dispatch(
-        'setCommitCSV',
+        'postCommitCsv',
         this.$store.state.currentBranch
       )
     },
