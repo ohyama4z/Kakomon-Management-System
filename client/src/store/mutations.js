@@ -95,10 +95,6 @@ export default {
     }
   },
 
-  setCommitCSV: state => {
-    state.setCommitCSV.status = 'committed'
-  },
-
   setExpand: (state, expand) => {
     state.expand = expand
   },

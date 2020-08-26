@@ -36,10 +36,6 @@ export default {
     }
   },
 
-  setCommitCSV: {
-    status: 'unrequested'
-  },
-
   branches: {
     status: 'unrequested',
     data: {}

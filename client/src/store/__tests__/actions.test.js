@@ -4,7 +4,7 @@ import 'jest-fetch-mock'
 import 'jest-localstorage-mock'
 import netlifyIdentity from 'netlify-identity-widget'
 import Vuex from 'vuex'
-import actions, { convertCsvToObj, convertToCSV } from '../actions'
+import actions, { convertCsvToObj, convertObjToCsv } from '../actions'
 
 const localVue = createLocalVue()
 
@@ -24,7 +24,7 @@ jest.mock('node-fetch', () => jest.fn())
 const state = {
   currentUser: {
     token: {
-      access_token: 'token'
+      access_token: '12345'
     },
     email: 'ahoge@gmail.com'
   },
@@ -66,7 +66,7 @@ const state = {
     }
   },
 
-  setCommitCSV: {
+  setCommitCsv: {
     status: 'unrequested'
   },
 
@@ -394,14 +394,18 @@ describe('action.js', () => {
       `src,subj,tool_type,period,year,content_type,author,image_index,included_pages_num,fix_text\n` +
       `scanned/20180802_2年3紐。5組『倫理社会」前期定期試験1.jpg,倫理社会,テスト,前期定期,2018,,,,,\n` +
       `scanned/20180802_2年3紐。5組『倫理社会」前期定期試験2.jpg,,,,,,,,,`
-    // console.log(convertToCSV(objarr), result)
-    expect(convertToCSV(objarr)).toEqual(result)
+    console.log(convertObjToCsv(objarr), result)
+    expect(convertObjToCsv(objarr)).toEqual(result)
   })
 
-  it('setCommitCSV', async () => {
+  it('setCommitCsv', async () => {
     // const state
-    const commit = jest.fn()
+    // const commit = jest.fn()
     const branchName = 'cmstest'
+    const token = state.currentUser.token.access_token
+    const headers = {
+      Authorization: `Bearer ${token}`
+    }
 
     // ref取得
     fetchMock.get(
@@ -420,7 +424,8 @@ describe('action.js', () => {
               'https://api.github.com/repos/satackey/test-preps/git/commits/58c821fea857ca1e270c3b34f5bc97db64c84fc9'
           }
         }
-      }
+      },
+      headers
     )
 
     const commitsHash = '58c821fea857ca1e270c3b34f5bc97db64c84fc9'
@@ -537,7 +542,8 @@ describe('action.js', () => {
           },
           files: []
         }
-      }
+      },
+      headers
     )
 
     // blobの作成
@@ -550,7 +556,8 @@ describe('action.js', () => {
           url:
             'https://api.github.com/repos/satackey/test-preps/git/blobs/8c187d7baccab1c2abf487e09051f0ee8cb04c18'
         }
-      }
+      },
+      headers
     )
 
     // treeの作成
@@ -646,7 +653,8 @@ describe('action.js', () => {
           }
         ],
         truncated: false
-      }
+      },
+      headers
     })
 
     // commitの作成
@@ -694,7 +702,8 @@ describe('action.js', () => {
             payload: null
           }
         }
-      }
+      },
+      headers
     )
 
     // refの更新
@@ -714,11 +723,38 @@ describe('action.js', () => {
               'https://api.github.com/repos/satackey/test-preps/git/commits/1ce0d6ec02ff4a364245a4f435cdf9a7119507a4'
           }
         }
-      }
+      },
+      headers
     )
 
-    await actions.setCommitCSV({ state, commit }, branchName)
-    expect(commit).toHaveBeenNthCalledWith(1, 'setCommitCSV')
+    const postAuth = 'Bearer 12345'
+    const userName = 'ahoge'
+
+    await actions.postCommitCsv({ state }, branchName)
+
+    // expect(fetchMock.done(6)).toBe(true)
+    // console.log(fetchMock.options(true))
+
+    console.log(fetchMock.calls(undefined, 'GET')[0][1].headers.Authorization)
+
+    expect(fetchMock.calls(undefined, 'GET')[0][1].headers.Authorization).toBe(postAuth)
+    expect(fetchMock.calls(undefined, 'GET')[1][1].headers.Authorization).toBe(postAuth)
+    expect(fetchMock.calls(undefined, 'POST')[0][1].headers.Authorization).toBe(postAuth)
+    expect(fetchMock.calls(undefined, 'POST')[1][1].headers.Authorization).toBe(postAuth)
+    expect(fetchMock.calls(undefined, 'POST')[2][1].headers.Authorization).toBe(postAuth)
+
+    // stringfyを使うとbodyの中身がobjectを包含するstringになってしまう
+    // stringfyを使わないと422エラーが発生してしまう
+    // test側でjsonに戻す
+    // console.log(typeof(fetchMock.calls(undefined, 'POST')[2][1]).method)
+    // console.log(fetchMock.calls(undefined, 'POST')[2][1].body)
+    const parsedBody = JSON.parse(fetchMock.calls(undefined, 'POST')[2][1].body)
+
+    // console.log(parsedBody.author.name)
+    expect(parsedBody.author.name).toBe(userName)
+
+    expect(fetchMock.calls(undefined, 'PATCH')[0][1].headers.Authorization).toBe(postAuth)
+
   })
 
   it('画像ファイルのshaを取得する(キャッシュなし)', async () => {
