@@ -334,11 +334,11 @@ export function convertObjToCsv(arr) {
         ',' +
         arr[`${property}`].subj +
         ',' +
-        arr[`${property}`].year +
-        ',' +
         arr[`${property}`].tool_type +
         ',' +
         arr[`${property}`].period +
+        ',' +
+        arr[`${property}`].year +
         ',' +
         arr[`${property}`].content_type +
         ',' +

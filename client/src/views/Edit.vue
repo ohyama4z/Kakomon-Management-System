@@ -99,7 +99,7 @@
           <vk-button
             type="primary"
             class="uk-margin"
-            v-on:click="postCommitCsv()"
+            v-on:click="postCommitCsv"
             >コミット</vk-button
           >
         </div>
