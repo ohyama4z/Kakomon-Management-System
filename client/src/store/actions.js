@@ -301,8 +301,6 @@ export default {
     commit('setDisplayedFiles', filePaths)
     await dispatch('getImageShas', { commitSha, directoryPath })
 
-    console.log(state.imageShas[commitSha][directoryPath].data)
-
     const filenames = Object.values(files).map(file => {
       const path = file.src
       return path.substr(path.lastIndexOf('/') + 1)
@@ -332,59 +330,43 @@ export default {
     )
   },
 
-  upload: async ({ state, dispatch }, payload) => {
-    const selectedBranch = Object.entries(state.branches.data).reduce(
-      (p, [branch, sha]) => {
-        if (branch === payload.branch) {
-          p = { branch: sha }
-        }
-        return p
-      },
-      { [payload.branch]: null }
-    )
-
-    console.log(selectedBranch)
-
-    // branchが既存でない場合新規作成する
-    if (selectedBranch[payload.branch] == null) {
-      const token = state.currentUser.token.access_token
-      const method = 'GET'
-      const headers = {
-        Authorization: `Bearer ${token}`
-      }
-      const httpRes = await fetch(
-        `http://localhost:8085/.netlify/git/github/git/refs/heads/${payload.branch}`,
-        { method, headers }
-      )
-      const res = await httpRes.json()
-      const masterSha = res.object.sha
-
-      // branchの作成
-      const body = JSON.stringify({
-        ref: `refs/heads/${payload.branch}`,
-        sha: `${masterSha}`
-      })
-
-      const newBranchHttpRes = await fetch(
-        `http://localhost:8085/.netlify/git/github/git/refs`,
-        {
-          method: 'POST',
-          headers,
-          body
-        }
-      )
-      const newBranchRes = await newBranchHttpRes.json()
-      selectedBranch[payload.branch] = newBranchRes?.object?.sha
-      console.log(selectedBranch, payload.branch, newBranchRes.object)
+  createBranch: async ({ state, commit, dispatch }, branch) => {
+    commit('setBranchesStatus', { path: 'branches', status: 'loading' })
+    const token = state.currentUser.token.access_token
+    const method = 'GET'
+    const headers = {
+      Authorization: `Bearer ${token}`
     }
+    const httpRes = await fetch(
+      `http://localhost:8085/.netlify/git/github/git/refs/heads/master`,
+      { method, headers }
+    )
+    const res = await httpRes.json()
+    const masterSha = res.object.sha
 
+    // branchの作成
+    const body = JSON.stringify({
+      ref: `refs/heads/${branch}`,
+      sha: `${masterSha}`
+    })
+
+    await fetch(`http://localhost:8085/.netlify/git/github/git/refs`, {
+      method: 'POST',
+      headers,
+      body
+    })
+
+    console.log(`created new branch: ${branch}`)
+  },
+
+  upload: async ({ state, dispatch }, payload) => {
+    const commitSha = state.branches.data[payload.branch]
     const createCommitPayload = {
-      commitSha: selectedBranch[payload.branch],
+      commitSha: commitSha,
       branch: payload.branch,
       files: payload.files,
       commitMessage: payload.commitMessage
     }
-
     dispatch('createCommit', createCommitPayload)
   },
 
@@ -422,8 +404,6 @@ export default {
           }
         )
         const blobShaRes = await blobShaHttpRes.json()
-
-        console.log(blobShaRes)
 
         return { filename, sha: blobShaRes.sha }
       })

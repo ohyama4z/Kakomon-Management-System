@@ -142,6 +142,7 @@ export default {
   },
 
   async mounted() {
+    this.$store.dispatch('updateCurrentUser')
     if (this.$store.state.currentUser == null) {
       localStorage.setItem('lastPage', 'edit')
       this.$store.commit('updateLastPage')

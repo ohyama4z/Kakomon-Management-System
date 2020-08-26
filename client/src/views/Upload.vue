@@ -1,12 +1,20 @@
 <template>
   <div>
     <Navbar></Navbar>
-    <div class="forms">
+
+    <vk-spinner
+      class="uk-position-medium uk-position-center"
+      ratio="5"
+      v-if="isLoading"
+    ></vk-spinner>
+
+    <div class="forms" v-if="!isLoading">
       <div class="uk-margin uk-flex uk-flex-center">
         <vk-icon icon="git-branch"></vk-icon>
         <span v-if="branchName"> : {{ branchName }}</span>
         <span v-else> : 選択されていません</span>
       </div>
+
       <div class="uk-margin uk-flex uk-flex-center">
         <vk-button>ブランチを選択</vk-button>
         <vk-drop mode="click" positon="bottom-justify">
@@ -20,8 +28,18 @@
                   placeholder="ブランチを新規作成"
                   v-model="newBranch"
                 />
-                <vk-button size="small" type="primary">作成</vk-button>
+                <vk-button
+                  size="small"
+                  type="primary"
+                  :disabled="isNewBranch"
+                  @click="createBranch"
+                  >作成</vk-button
+                >
               </div>
+              <div class="uk-text-center@s" v-if="isExisted">
+                そのbranchはすでに存在します
+              </div>
+
               <div class="uk-margin-top uk-flex uk-flex-column">
                 <hr />
                 <vk-button
@@ -38,6 +56,7 @@
           </vk-card>
         </vk-drop>
       </div>
+
       <div class="uk-flex uk-flex-center uk-margin">
         <div
           class="drag-area uk-placeholder uk-text-center uk-form-width-large"
@@ -99,7 +118,7 @@
           type="primary"
           class="uk-margin"
           v-bind:disabled="isDisabled"
-          v-on:click="uploadNewFile()"
+          v-on:click="upload()"
           >アップロード</vk-button
         >
       </div>
@@ -130,10 +149,12 @@ export default {
     return {
       uploadedFiles: {},
       branchName: '',
-      commitMessage: ''
+      commitMessage: '',
+      newBranch: ''
     }
   },
   async mounted() {
+    this.$store.dispatch('updateCurrentUser')
     if (this.$store.state.currentUser == null) {
       localStorage.setItem('lastPage', 'upload')
       this.$store.commit('updateLastPage')
@@ -146,8 +167,17 @@ export default {
       branches: state => {
         const { master, ...branches } = state.branches.data
         return branches
+      },
+
+      isLoading: state => {
+        const checkLoading = status => {
+          return status === 'loading'
+        }
+
+        return checkLoading(state.branches.status)
       }
     }),
+
     isDisabled() {
       return (
         Object.keys(this.uploadedFiles).length < 1 ||
@@ -155,6 +185,21 @@ export default {
         this.branchName === 'master' ||
         !this.commitMessage
       )
+    },
+
+    isExisted() {
+      const isExieted = Object.keys(this.branches).reduce((p, branch) => {
+        // 大文字,小文字を区別せず判定
+        if (branch.toUpperCase() === this.newBranch.toUpperCase()) {
+          p = true
+        }
+        return p
+      }, false)
+      return isExieted
+    },
+
+    isNewBranch() {
+      return this.isExisted || !this.newBranch
     }
   },
   methods: {
@@ -168,7 +213,7 @@ export default {
       this.$router.push('/logout')
     },
 
-    async uploadNewFile() {
+    async upload() {
       await this.$store.dispatch('upload', {
         files: this.uploadedFiles,
         branch: this.branchName,
@@ -198,6 +243,15 @@ export default {
 
     selectExistedBranch(branchName) {
       this.branchName = branchName
+    },
+
+    async createBranch() {
+      await this.$store.dispatch('createBranch', this.newBranch)
+      await this.$store.dispatch('getBranches')
+      this.uploadedFiles = {}
+      this.branchName = ''
+      this.commitMessage = ''
+      this.newBranch = ''
     }
   }
 }
