@@ -326,12 +326,41 @@ export default {
 }
 
 export function convertObjToCsv(arr) {
-  const array = [Object.keys(arr[0])].concat(arr)
-  return array
-    .map(it => {
-      return Object.values(it).toString()
-    })
-    .join('\n')
+  const contents = []
+
+  for (const property in arr) {
+    contents.push(
+      arr[`${property}`].src +
+        ',' +
+        arr[`${property}`].subj +
+        ',' +
+        arr[`${property}`].year +
+        ',' +
+        arr[`${property}`].tool_type +
+        ',' +
+        arr[`${property}`].period +
+        ',' +
+        arr[`${property}`].content_type +
+        ',' +
+        arr[`${property}`].author +
+        ',' +
+        arr[`${property}`].image_index +
+        ',' +
+        arr[`${property}`].included_pages_num +
+        ',' +
+        arr[`${property}`].fix_text
+    )
+  }
+  const csvHeaders = `src,subj,tool_type,period,year,content_type,author,image_index,included_pages_num,fix_text\n`
+  const unionCsv = contents.join(`\n`)
+  const convertedCsvFile = csvHeaders + unionCsv
+  return convertedCsvFile
+  // const array = [Object.keys(arr[0])].concat(arr)
+  // return array
+  //   .map(it => {
+  //     return Object.values(it).toString()
+  //   })
+  //   .join('\n')
 }
 
 export function convertCsvToObj(csv) {

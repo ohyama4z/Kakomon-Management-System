@@ -737,11 +737,21 @@ describe('action.js', () => {
 
     console.log(fetchMock.calls(undefined, 'GET')[0][1].headers.Authorization)
 
-    expect(fetchMock.calls(undefined, 'GET')[0][1].headers.Authorization).toBe(postAuth)
-    expect(fetchMock.calls(undefined, 'GET')[1][1].headers.Authorization).toBe(postAuth)
-    expect(fetchMock.calls(undefined, 'POST')[0][1].headers.Authorization).toBe(postAuth)
-    expect(fetchMock.calls(undefined, 'POST')[1][1].headers.Authorization).toBe(postAuth)
-    expect(fetchMock.calls(undefined, 'POST')[2][1].headers.Authorization).toBe(postAuth)
+    expect(fetchMock.calls(undefined, 'GET')[0][1].headers.Authorization).toBe(
+      postAuth
+    )
+    expect(fetchMock.calls(undefined, 'GET')[1][1].headers.Authorization).toBe(
+      postAuth
+    )
+    expect(fetchMock.calls(undefined, 'POST')[0][1].headers.Authorization).toBe(
+      postAuth
+    )
+    expect(fetchMock.calls(undefined, 'POST')[1][1].headers.Authorization).toBe(
+      postAuth
+    )
+    expect(fetchMock.calls(undefined, 'POST')[2][1].headers.Authorization).toBe(
+      postAuth
+    )
 
     // stringfyを使うとbodyの中身がobjectを包含するstringになってしまう
     // stringfyを使わないと422エラーが発生してしまう
@@ -753,8 +763,9 @@ describe('action.js', () => {
     // console.log(parsedBody.author.name)
     expect(parsedBody.author.name).toBe(userName)
 
-    expect(fetchMock.calls(undefined, 'PATCH')[0][1].headers.Authorization).toBe(postAuth)
-
+    expect(
+      fetchMock.calls(undefined, 'PATCH')[0][1].headers.Authorization
+    ).toBe(postAuth)
   })
 
   it('画像ファイルのshaを取得する(キャッシュなし)', async () => {
