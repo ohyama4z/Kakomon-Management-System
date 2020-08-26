@@ -96,10 +96,7 @@
         </div>
 
         <div class="uk-flex uk-flex-center uk-margin">
-          <vk-button
-            type="primary"
-            class="uk-margin"
-            v-on:click="postCommitCsv"
+          <vk-button type="primary" class="uk-margin" v-on:click="postCommitCsv"
             >コミット</vk-button
           >
         </div>
