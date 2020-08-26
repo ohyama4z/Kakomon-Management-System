@@ -126,7 +126,6 @@ export default {
   },
 
   postCommitCsv: async ({ state }, branchName) => {
-    console.log('asdfasdfasdfasdf', branchName)
     const token = state.currentUser.token.access_token
     const getMethod = 'GET'
     const postMethod = 'POST'
@@ -137,19 +136,11 @@ export default {
     const userEmail = state.currentUser.email
     const userNameLength = userEmail.search('@')
     const userName = userEmail.slice(0, userNameLength)
-    console.log('username', userName)
 
     const editCsvObj = state.changedFiles
-    console.log(state)
-    console.log(editCsvObj)
 
-    // editedobject→csv
-    console.log(Object.values(editCsvObj))
     const objArray = Object.values(editCsvObj)
     const content = convertObjToCsv(objArray)
-    console.log('content', content)
-
-    // //   console.log('refarr', resArr[0].sha) //filehash
 
     // refの取得
     const refRes = await fetch(
@@ -157,8 +148,6 @@ export default {
       { method: getMethod, headers }
     )
     const parseRef = await refRes.json()
-    console.log(parseRef)
-    console.log('branch毎のハッシュ', `${branchName}`, parseRef.object.sha)
 
     // commitの取得
     const commitRes = await fetch(
@@ -166,11 +155,8 @@ export default {
       { method: getMethod, headers }
     )
     const commitres = await commitRes.json()
-    console.log(':p~', commitres)
 
     const postContents = {
-      // content: 'dGVzdCBjb21taXQ=',
-      // encoding: 'base64'
       content,
       encoding: 'utf-8'
     }
@@ -182,17 +168,13 @@ export default {
       { method: postMethod, headers, body: postContentsBody }
     )
     const blobRes = await createBlobRes.json()
-    console.log(':q~', blobRes)
 
-    // // const masmaster = await fetch('http://localhost:8085/.netlify/git/github/branches/master', {method: getMethod, headers})
-    // // const masres = await masmaster.json()
-    // console.log(commitres.sha, masres.commit.sha) 同じ値
     const fileInfo = {
       base_tree: commitres.commit.tree.sha,
       tree: [
         {
           path: 'test.csv',
-          mode: '100644', // 100644  100755 , 040000 160000  シンボリックリンクのパス120000
+          mode: '100644',
           type: 'blob',
           sha: blobRes.sha
         }
@@ -206,10 +188,7 @@ export default {
       { method: postMethod, headers, body: postFileInfoBody }
     )
     const treeRes = await createTreeRes.json()
-    console.log('branchesres', treeRes)
-    console.log('check', blobRes.sha, treeRes.sha, parseRef.object.sha)
     const date = moment().format('YYYY-MM-DDTHH:mm:ssZ')
-    // console.log('time', date)
 
     const postCommitInfo = {
       message: date,
@@ -221,10 +200,7 @@ export default {
       parents: [parseRef.object.sha],
       tree: treeRes.sha
     }
-    // console.log()
-    // const postCommitInfoBody = postCommitInfo
     const postCommitInfoBody = JSON.stringify(postCommitInfo)
-    console.log(postCommitInfoBody)
 
     // commitの作成
     const createCommitRes = await fetch(
@@ -232,7 +208,6 @@ export default {
       { method: postMethod, headers, body: postCommitInfoBody }
     )
     const createdCommitRes = await createCommitRes.json()
-    console.log('commithash', createdCommitRes.sha)
 
     // refの更新
     const updateRef = {
@@ -240,12 +215,10 @@ export default {
       force: false // 強制pushするか否
     }
     const updateRefs = JSON.stringify(updateRef)
-    const updateRefRes = await fetch(
+    await fetch(
       `http://localhost:8085/.netlify/git/github/git/refs/heads/${branchName}`,
       { method: patchMethod, headers, body: updateRefs }
     )
-    const updatedRefRes = await updateRefRes.json()
-    console.log('asdf', updatedRefRes)
   },
 
   updateCurrentUser: async ({ commit }) => {
