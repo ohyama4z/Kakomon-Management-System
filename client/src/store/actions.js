@@ -223,6 +223,7 @@ export default {
 
   updateCurrentUser: async ({ commit }) => {
     const user = netlifyIdentity.currentUser()
+    console.log(user)
     if (user != null && user.token.access_token == null) {
       await netlifyIdentity.refresh()
     }
@@ -291,7 +292,7 @@ export default {
     )
   },
 
-  createBranch: async ({ state, commit, dispatch }, branch) => {
+  createBranch: async ({ state, commit }, branch) => {
     commit('setBranchesStatus', { path: 'branches', status: 'loading' })
     const token = state.currentUser.token.access_token
     const method = 'GET'
@@ -328,7 +329,7 @@ export default {
       files: payload.files,
       commitMessage: payload.commitMessage
     }
-    dispatch('createCommit', createCommitPayload)
+    await dispatch('createCommit', createCommitPayload)
   },
 
   createCommit: async ({ state }, payload) => {
@@ -479,7 +480,8 @@ function toBlob(base64, type) {
   return new Blob([buffer.buffer], { type })
 }
 
-function readFileAsync(blob) {
+export function readFileAsync(blob) {
+  console.log(blob, blob.constructor.name)
   return new Promise(resolve => {
     const reader = new FileReader()
     reader.onload = () => {
