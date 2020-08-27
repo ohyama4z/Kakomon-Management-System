@@ -141,28 +141,24 @@ export default {
     const userEmail = state.currentUser.email
     const userNameLength = userEmail.search('@')
     const userName = userEmail.slice(0, userNameLength)
-    console.log('username', userName)
 
-    const editCsvObj = state.changedFiles
-    console.log(state)
-    console.log(editCsvObj)
+    const editedCsvObj = state.changedFiles
 
     // editedobject→csv
-    console.log(Object.values(editCsvObj))
-    const objArray = Object.values(editCsvObj)
+    console.log(Object.values(editedCsvObj))
+    const objArray = Object.values(editedCsvObj)
+
+    console.log('aho', editedCsvObj, objArray)
+
     const content = convertObjToCsv(objArray)
     console.log('content', content)
-
-    // //   console.log('refarr', resArr[0].sha) //filehash
-
+    console.log('content222', convertObjToCsv(editedCsvObj))
     // refの取得
     const refRes = await fetch(
       `http://localhost:8085/.netlify/git/github/git/refs/heads/${branchName}`,
       { method: getMethod, headers }
     )
     const parseRef = await refRes.json()
-    console.log(parseRef)
-    console.log('branch毎のハッシュ', `${branchName}`, parseRef.object.sha)
 
     // commitの取得
     const commitRes = await fetch(
@@ -173,12 +169,15 @@ export default {
     console.log(':p~', commitres)
 
     const postContents = {
-      // content: 'dGVzdCBjb21taXQ=',
-      // encoding: 'base64'
       content,
       encoding: 'utf-8'
     }
     const postContentsBody = JSON.stringify(postContents)
+
+    const postContentsBody2 = JSON.stringify({
+      content: 'testt',
+      encoding: 'utf-8'
+    })
 
     // blobの作成
     const createBlobRes = await fetch(
@@ -186,11 +185,13 @@ export default {
       { method: postMethod, headers, body: postContentsBody }
     )
     const blobRes = await createBlobRes.json()
-    console.log(':q~', blobRes)
 
-    // // const masmaster = await fetch('http://localhost:8085/.netlify/git/github/branches/master', {method: getMethod, headers})
-    // // const masres = await masmaster.json()
-    // console.log(commitres.sha, masres.commit.sha) 同じ値
+    const createBlobRes2 = await fetch(
+      `http://localhost:8085/.netlify/git/github/git/blobs?ref=${branchName}`,
+      { method: postMethod, headers, body: postContentsBody2 }
+    )
+    const blobRes2 = await createBlobRes2.json()
+
     const fileInfo = {
       base_tree: commitres.commit.tree.sha,
       tree: [
@@ -199,6 +200,12 @@ export default {
           mode: '100644', // 100644  100755 , 040000 160000  シンボリックリンクのパス120000
           type: 'blob',
           sha: blobRes.sha
+        },
+        {
+          path: 'metadatas/test2.csv',
+          mode: '100644',
+          type: 'blob',
+          sha: blobRes2.sha
         }
       ]
     }
@@ -210,10 +217,7 @@ export default {
       { method: postMethod, headers, body: postFileInfoBody }
     )
     const treeRes = await createTreeRes.json()
-    console.log('branchesres', treeRes)
-    console.log('check', blobRes.sha, treeRes.sha, parseRef.object.sha)
     const date = moment().format('YYYY-MM-DDTHH:mm:ssZ')
-    // console.log('time', date)
 
     const postCommitInfo = {
       message: date,
@@ -225,8 +229,6 @@ export default {
       parents: [parseRef.object.sha],
       tree: treeRes.sha
     }
-    // console.log()
-    // const postCommitInfoBody = postCommitInfo
     const postCommitInfoBody = JSON.stringify(postCommitInfo)
     console.log(postCommitInfoBody)
 
