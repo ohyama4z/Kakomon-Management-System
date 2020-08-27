@@ -206,16 +206,6 @@ export default {
     }
   },
   methods: {
-    toEdit() {
-      this.$router.push('edit')
-    },
-
-    logout() {
-      localStorage.setItem('lastPage', 'upload')
-      this.$store.commit('updateLastPage')
-      this.$router.push('/logout')
-    },
-
     async upload() {
       await this.$store.dispatch('upload', {
         files: this.uploadedFiles,
