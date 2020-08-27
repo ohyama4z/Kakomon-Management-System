@@ -223,7 +223,6 @@ export default {
 
   updateCurrentUser: async ({ commit }) => {
     const user = netlifyIdentity.currentUser()
-    console.log(user)
     if (user != null && user.token.access_token == null) {
       await netlifyIdentity.refresh()
     }
@@ -481,7 +480,6 @@ function toBlob(base64, type) {
 }
 
 export function readFileAsync(blob) {
-  console.log(blob, blob.constructor.name)
   return new Promise(resolve => {
     const reader = new FileReader()
     reader.onload = () => {

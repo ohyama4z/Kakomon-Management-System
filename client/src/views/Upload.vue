@@ -127,8 +127,10 @@
 </template>
 
 <script>
+import 'vuikit'
 import { Button } from 'vuikit/lib/button'
 import { Icon } from 'vuikit/lib/icon'
+import { Spinner } from 'vuikit/lib/spinner'
 import { Iconnav, IconnavItem } from 'vuikit/lib/iconnav'
 import { Drop } from 'vuikit/lib/drop'
 import Navbar from '../components/Navbar'
@@ -142,6 +144,7 @@ export default {
     VkIconnav: Iconnav,
     VkIconnavItem: IconnavItem,
     VkDrop: Drop,
+    VkSpinner: Spinner,
     Navbar
   },
 
