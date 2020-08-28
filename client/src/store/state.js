@@ -33,6 +33,18 @@ export default {
       image_index: '',
       included_pages_num: '',
       fix_text: ''
+    },
+    'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg': {
+      src: 'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg:',
+      subj: '算数',
+      tool_type: '勉強用',
+      period: '',
+      year: '',
+      content_type: '',
+      author: '',
+      image_index: '',
+      included_pages_num: '',
+      fix_text: ''
     }
   },
 

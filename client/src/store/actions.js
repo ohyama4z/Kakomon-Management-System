@@ -121,6 +121,8 @@ export default {
     const csvData = Buffer.from(res.content, 'base64').toString('utf8')
     const resultObj = convertCsvToObj(csvData)
 
+    console.log(state.commits.fileSha)
+
     commit('setContentMetadata', {
       sha: fileSha,
       data: resultObj
@@ -129,6 +131,7 @@ export default {
     localStorage.setItem(fileSha, JSON.stringify(resultObj))
   },
 
+  // state.currentBranchかbranchNameかどちらかに統一する
   postCommitCsv: async ({ state }, branchName) => {
     console.log('asdfasdfasdfasdf', branchName)
     const token = state.currentUser.token.access_token
@@ -143,6 +146,61 @@ export default {
     const userName = userEmail.slice(0, userNameLength)
 
     const editedCsvObj = state.changedFiles
+    console.log('branchname', branchName)
+    console.log('stateのなかみ', state.commits)
+    const commitSha = state.branches.data[state.currentBranch]
+    console.log('commitsha', commitSha)
+    // const csvFileName = 'study_2019_後期中間_英語iiB_oy.csv'
+    const csvSha = '02f495e08b05c5b5b71c90a9c7c0f906a818aa80'
+    // state.commits[commitSha].data[
+    //   csvFileName
+    //   // csvFileName changedfilesの要素としてもらう?
+    // ]
+    console.log('csvSha', csvSha)
+
+    // state.contentMetadatas.csvSha.data
+    console.log(
+      'obj',
+      state.contentMetadatas['02f495e08b05c5b5b71c90a9c7c0f906a818aa80'].data
+    )
+
+    const check = { a: 'a', b: 'b' }
+    check.a = 'b'
+    check.a = 'c'
+    check.b = 'j'
+    console.log(check)
+
+    const newContentMetadata = state.contentMetadatas[csvSha].data
+
+    const exchangeFileObj =
+      state.changedFiles[
+        'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg'
+      ]
+    console.log(exchangeFileObj)
+
+    console.log(
+      newContentMetadata[
+        'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg'
+      ],
+      exchangeFileObj
+    )
+
+    newContentMetadata[
+      'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg'
+    ] = exchangeFileObj
+
+    console.log(newContentMetadata)
+    console.log(
+      newContentMetadata[
+        'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg'
+      ]
+    )
+
+    // ↑にobjectが詰まっているのでchangedFilesと一致したobjectをchangedFilesのものに書き換えて保存
+    // いったんstateからコピーして書き換える
+    // .Objectで呼べるから正規表現は使わないでいける
+    // contentmetadatasを更新するかそのままか(contentmetadatasはpushした後更新されるのか否か) commitした後getcontentmetadataをdispatchする?
+    // 後は今まで通り
 
     // editedobject→csv
     console.log(Object.values(editedCsvObj))
@@ -191,7 +249,7 @@ export default {
       { method: postMethod, headers, body: postContentsBody2 }
     )
     const blobRes2 = await createBlobRes2.json()
-
+    console.log('commitresssss 7788fdc', commitres.commit.tree.sha)
     const fileInfo = {
       base_tree: commitres.commit.tree.sha,
       tree: [
