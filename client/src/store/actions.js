@@ -1,6 +1,6 @@
+import merge from 'deepmerge'
 import netlifyIdentity from 'netlify-identity-widget'
 import state from './state'
-const _ = require('lodash')
 
 const moment = require('moment')
 
@@ -175,7 +175,12 @@ export default {
     check.b = 'j'
     console.log(check)
 
-    const newContentMetadata = _.cloneDeep(state.contentMetadatas[csvSha].data)
+    const hoge = { a: 'a' }
+    const fuga = { a: 'b' }
+    const aho = merge(hoge, fuga)
+    console.log(hoge, fuga, aho)
+
+    const newContentMetadata = merge({}, state.contentMetadatas[csvSha].data)
     console.log('before', newContentMetadata)
     console.log(state.changedFiles)
     const exchangeFileObj =
@@ -191,9 +196,12 @@ export default {
       exchangeFileObj
     )
 
-    newContentMetadata[
-      'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg'
-    ] = _.cloneDeep(exchangeFileObj)
+    merge(
+      newContentMetadata[
+        'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg'
+      ],
+      exchangeFileObj
+    )
 
     console.log('after', newContentMetadata)
     console.log(
