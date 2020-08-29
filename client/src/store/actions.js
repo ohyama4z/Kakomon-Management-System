@@ -1,5 +1,6 @@
 import netlifyIdentity from 'netlify-identity-widget'
 import state from './state'
+const _ = require('lodash')
 
 const moment = require('moment')
 
@@ -145,7 +146,7 @@ export default {
     const userNameLength = userEmail.search('@')
     const userName = userEmail.slice(0, userNameLength)
 
-    const editedCsvObj = state.changedFiles
+    // const editedCsvObj = state.changedFiles
     console.log('branchname', branchName)
     console.log('stateのなかみ', state.commits)
     const commitSha = state.branches.data[state.currentBranch]
@@ -157,6 +158,10 @@ export default {
     //   // csvFileName changedfilesの要素としてもらう?
     // ]
     console.log('csvSha', csvSha)
+
+    console.log(
+      state.contentMetadatas['02f495e08b05c5b5b71c90a9c7c0f906a818aa80']
+    )
 
     // state.contentMetadatas.csvSha.data
     console.log(
@@ -170,8 +175,9 @@ export default {
     check.b = 'j'
     console.log(check)
 
-    const newContentMetadata = state.contentMetadatas[csvSha].data
-
+    const newContentMetadata = _.cloneDeep(state.contentMetadatas[csvSha].data)
+    console.log('before', newContentMetadata)
+    console.log(state.changedFiles)
     const exchangeFileObj =
       state.changedFiles[
         'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg'
@@ -187,14 +193,17 @@ export default {
 
     newContentMetadata[
       'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg'
-    ] = exchangeFileObj
+    ] = _.cloneDeep(exchangeFileObj)
 
-    console.log(newContentMetadata)
+    console.log('after', newContentMetadata)
     console.log(
       newContentMetadata[
         'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg'
       ]
     )
+
+    // console.log('比較', editedCsvObj, 'a', newContentMetadata, 'b', Object.values(newContentMetadata))
+    const editedCsvObj = newContentMetadata
 
     // ↑にobjectが詰まっているのでchangedFilesと一致したobjectをchangedFilesのものに書き換えて保存
     // いったんstateからコピーして書き換える
@@ -203,10 +212,13 @@ export default {
     // 後は今まで通り
 
     // editedobject→csv
+    console.log(editedCsvObj)
     console.log(Object.values(editedCsvObj))
     const objArray = Object.values(editedCsvObj)
 
     console.log('aho', editedCsvObj, objArray)
+
+    console.log('yahoo', objArray)
 
     const content = convertObjToCsv(objArray)
     console.log('content', content)
@@ -232,10 +244,10 @@ export default {
     }
     const postContentsBody = JSON.stringify(postContents)
 
-    const postContentsBody2 = JSON.stringify({
-      content: 'testt',
-      encoding: 'utf-8'
-    })
+    // const postContentsBody2 = JSON.stringify({
+    //   content: 'testt',
+    //   encoding: 'utf-8'
+    // })
 
     // blobの作成
     const createBlobRes = await fetch(
@@ -244,11 +256,11 @@ export default {
     )
     const blobRes = await createBlobRes.json()
 
-    const createBlobRes2 = await fetch(
-      `http://localhost:8085/.netlify/git/github/git/blobs?ref=${branchName}`,
-      { method: postMethod, headers, body: postContentsBody2 }
-    )
-    const blobRes2 = await createBlobRes2.json()
+    // const createBlobRes2 = await fetch(
+    //   `http://localhost:8085/.netlify/git/github/git/blobs?ref=${branchName}`,
+    //   { method: postMethod, headers, body: postContentsBody2 }
+    // )
+    // const blobRes2 = await createBlobRes2.json()
     console.log('commitresssss 7788fdc', commitres.commit.tree.sha)
     const fileInfo = {
       base_tree: commitres.commit.tree.sha,
@@ -258,13 +270,14 @@ export default {
           mode: '100644', // 100644  100755 , 040000 160000  シンボリックリンクのパス120000
           type: 'blob',
           sha: blobRes.sha
-        },
-        {
-          path: 'metadatas/test2.csv',
-          mode: '100644',
-          type: 'blob',
-          sha: blobRes2.sha
         }
+        // ,
+        // {
+        //   path: 'metadatas/test2.csv',
+        //   mode: '100644',
+        //   type: 'blob',
+        //   sha: blobRes2.sha
+        // }
       ]
     }
 
@@ -389,6 +402,7 @@ export function convertObjToCsv(arr) {
   const contents = []
 
   for (const property in arr) {
+    console.log('hogetarou', arr, arr[`${property}`])
     contents.push(
       arr[`${property}`].src +
         ',' +

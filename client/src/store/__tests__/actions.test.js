@@ -7,6 +7,7 @@ import Vuex from 'vuex'
 import actions, { convertCsvToObj, convertObjToCsv } from '../actions'
 
 const localVue = createLocalVue()
+const _ = require('lodash')
 
 localVue.use(Vuex)
 
@@ -56,6 +57,18 @@ const state = {
       src: 'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験2.jpg',
       subj: '',
       tool_type: '',
+      period: '',
+      year: '',
+      content_type: '',
+      author: '',
+      image_index: '',
+      included_pages_num: '',
+      fix_text: ''
+    },
+    'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg': {
+      src: 'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg:',
+      subj: '算数',
+      tool_type: '勉強用',
       period: '',
       year: '',
       content_type: '',
@@ -730,6 +743,44 @@ describe('action.js', () => {
     const postAuth = 'Bearer 12345'
     const userName = 'ahoge'
 
+    const csvSha = '02f495e08b05c5b5b71c90a9c7c0f906a818aa80'
+    state.contentMetadatas = {
+      '02f495e08b05c5b5b71c90a9c7c0f906a818aa80': {
+        data: {
+          'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg': {
+            author: '',
+            content_type: '',
+            fix_text: '',
+            image_index: '',
+            included_pages_num: '',
+            period: '',
+            src: 'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg:',
+            subj: '算数',
+            tool_type: '勉強用',
+            year: ''
+          },
+          'tests/2018/テスト_2018_後期中間_論理回路i_問題002.jpg': {
+            author: '',
+            content_type: '問題',
+            fix_text: '',
+            image_index: '002',
+            included_pages_num: '1',
+            period: '後期中間',
+            src: 'tests/2018/テスト_2018_後期中間_論理回路i_問題002.jpg',
+            subj: '論理回路i',
+            tool_type: 'テスト',
+            year: '2018'
+          }
+        }
+      }
+      // '02f495e08b05c5b5b71c90a9c7c0f906a818aa81': { }
+    }
+
+    // console.log('hoge', json.parse(state.contentMetadatas))
+    const saveContentMetadatas = _.cloneDeep(
+      state.contentMetadatas[csvSha].data
+    )
+
     await actions.postCommitCsv({ state }, branchName)
 
     // expect(fetchMock.done(6)).toBe(true)
@@ -760,12 +811,19 @@ describe('action.js', () => {
     // console.log(fetchMock.calls(undefined, 'POST')[2][1].body)
     const parsedBody = JSON.parse(fetchMock.calls(undefined, 'POST')[2][1].body)
 
-    // console.log(parsedBody.author.name)
+    console.log(parsedBody)
     expect(parsedBody.author.name).toBe(userName)
 
     expect(
       fetchMock.calls(undefined, 'PATCH')[0][1].headers.Authorization
     ).toBe(postAuth)
+
+    // console.log(JSON.parse(state.contentMetadatas))
+    // hogeee = JSON.parse(state.contentMetadatas)
+    // console.log(hogeee['02f495e08b05c5b5b71c90a9c7c0f906a818aa80'])
+
+    // stateが変更されていないか
+    expect(state.contentMetadatas[csvSha].data).toEqual(saveContentMetadatas)
   })
 
   it('画像ファイルのshaを取得する(キャッシュなし)', async () => {
