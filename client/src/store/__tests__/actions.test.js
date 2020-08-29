@@ -412,9 +412,8 @@ describe('action.js', () => {
   })
 
   it('setCommitCsv', async () => {
-    // const state
-    // const commit = jest.fn()
-    const branchName = 'cmstest'
+    state.currentBranch = 'cmstest'
+    const branchName = state.currentBranch
     const token = state.currentUser.token.access_token
     const headers = {
       Authorization: `Bearer ${token}`
@@ -776,13 +775,9 @@ describe('action.js', () => {
       // '02f495e08b05c5b5b71c90a9c7c0f906a818aa81': { }
     }
 
-    // console.log('hoge', json.parse(state.contentMetadatas))
     const saveContentMetadatas = merge({}, state.contentMetadatas[csvSha].data)
 
-    await actions.postCommitCsv({ state }, branchName)
-
-    // expect(fetchMock.done(6)).toBe(true)
-    // console.log(fetchMock.options(true))
+    await actions.postCommitCsv({ state })
 
     console.log(fetchMock.calls(undefined, 'GET')[0][1].headers.Authorization)
 
@@ -802,14 +797,7 @@ describe('action.js', () => {
       postAuth
     )
 
-    // stringfyを使うとbodyの中身がobjectを包含するstringになってしまう
-    // stringfyを使わないと422エラーが発生してしまう
-    // test側でjsonに戻す
-    // console.log(typeof(fetchMock.calls(undefined, 'POST')[2][1]).method)
-    // console.log(fetchMock.calls(undefined, 'POST')[2][1].body)
     const parsedBody = JSON.parse(fetchMock.calls(undefined, 'POST')[2][1].body)
-
-    console.log(parsedBody)
     expect(parsedBody.author.name).toBe(userName)
 
     expect(

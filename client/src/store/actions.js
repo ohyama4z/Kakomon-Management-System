@@ -132,8 +132,7 @@ export default {
     localStorage.setItem(fileSha, JSON.stringify(resultObj))
   },
 
-  // state.currentBranchかbranchNameかどちらかに統一する
-  postCommitCsv: async ({ state }, branchName) => {
+  postCommitCsv: async ({ state }) => {
     const token = state.currentUser.token.access_token
     const getMethod = 'GET'
     const postMethod = 'POST'
@@ -144,39 +143,22 @@ export default {
     const userEmail = state.currentUser.email
     const userNameLength = userEmail.search('@')
     const userName = userEmail.slice(0, userNameLength)
+    const branchName = state.currentBranch
 
-    // const editedCsvObj = state.changedFiles
-    console.log('branchname', branchName)
     const commitSha = state.branches.data[state.currentBranch]
     console.log('commitsha', commitSha)
-    // const csvFileName = 'study_2019_後期中間_英語iiB_oy.csv'
+    const objName = 'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg'
     const csvSha = '02f495e08b05c5b5b71c90a9c7c0f906a818aa80'
     // state.commits[commitSha].data[
     //   csvFileName
     //   // csvFileName changedfilesの要素としてもらう?
     // ]
 
-    // state.contentMetadatas.csvSha.data
     const newContentMetadata = merge({}, state.contentMetadatas[csvSha].data)
-    const exchangeFileObj =
-      state.changedFiles[
-        'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg'
-      ]
-
-    merge(
-      newContentMetadata[
-        'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg'
-      ],
-      exchangeFileObj
-    )
+    const exchangeFileObj = state.changedFiles[objName]
+    merge(newContentMetadata[objName], exchangeFileObj)
 
     const editedCsvObj = newContentMetadata
-
-    // ↑にobjectが詰まっているのでchangedFilesと一致したobjectをchangedFilesのものに書き換えて保存
-    // いったんstateからコピーして書き換える
-    // .Objectで呼べるから正規表現は使わないでいける
-    // contentmetadatasを更新するかそのままか(contentmetadatasはpushした後更新されるのか否か) commitした後getcontentmetadataをdispatchする?
-    // 後は今まで通り
 
     // editedobject→csv
     console.log(editedCsvObj)
@@ -205,11 +187,6 @@ export default {
     }
     const postContentsBody = JSON.stringify(postContents)
 
-    // const postContentsBody2 = JSON.stringify({
-    //   content: 'testt',
-    //   encoding: 'utf-8'
-    // })
-
     // blobの作成
     const createBlobRes = await fetch(
       `http://localhost:8085/.netlify/git/github/git/blobs?ref=${branchName}`,
@@ -217,27 +194,15 @@ export default {
     )
     const blobRes = await createBlobRes.json()
 
-    // const createBlobRes2 = await fetch(
-    //   `http://localhost:8085/.netlify/git/github/git/blobs?ref=${branchName}`,
-    //   { method: postMethod, headers, body: postContentsBody2 }
-    // )
-    // const blobRes2 = await createBlobRes2.json()
     const fileInfo = {
       base_tree: commitres.commit.tree.sha,
       tree: [
         {
           path: 'test.csv',
-          mode: '100644', // 100644  100755 , 040000 160000  シンボリックリンクのパス120000
+          mode: '100644',
           type: 'blob',
           sha: blobRes.sha
         }
-        // ,
-        // {
-        //   path: 'metadatas/test2.csv',
-        //   mode: '100644',
-        //   type: 'blob',
-        //   sha: blobRes2.sha
-        // }
       ]
     }
 
@@ -363,25 +328,25 @@ export function convertObjToCsv(arr) {
 
   for (const property in arr) {
     contents.push(
-      arr[`${property}`].src +
+      arr[property].src +
         ',' +
-        arr[`${property}`].subj +
+        arr[property].subj +
         ',' +
-        arr[`${property}`].tool_type +
+        arr[property].tool_type +
         ',' +
-        arr[`${property}`].period +
+        arr[property].period +
         ',' +
-        arr[`${property}`].year +
+        arr[property].year +
         ',' +
-        arr[`${property}`].content_type +
+        arr[property].content_type +
         ',' +
-        arr[`${property}`].author +
+        arr[property].author +
         ',' +
-        arr[`${property}`].image_index +
+        arr[property].image_index +
         ',' +
-        arr[`${property}`].included_pages_num +
+        arr[property].included_pages_num +
         ',' +
-        arr[`${property}`].fix_text
+        arr[property].fix_text
     )
   }
   const csvHeaders = `src,subj,tool_type,period,year,content_type,author,image_index,included_pages_num,fix_text\n`
