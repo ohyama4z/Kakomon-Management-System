@@ -99,8 +99,7 @@
     "collectCoverage": false,
     "collectCoverageFrom": [
       "**/*.{js,vue}",
-      "!**/mytest.js",
-      "!**/mytest.vue",
+      "!**/mytest.*",
       "!**/node_modules/**"
     ],
     "setupFiles": [
