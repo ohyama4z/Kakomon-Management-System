@@ -186,8 +186,7 @@ export default {
     },
     async postCommitCsv() {
       await this.$store.dispatch(
-        'postCommitCsv',
-        this.$store.state.currentBranch
+        'postCommitCsv'
       )
     },
 
