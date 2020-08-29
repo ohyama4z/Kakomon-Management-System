@@ -92,7 +92,7 @@ const store = new Vuex.Store({
   actions
 })
 
-describe('action.js', () => {
+describe('actions.js', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     localStorage.clear()
@@ -129,6 +129,11 @@ describe('action.js', () => {
       store
     })
 
+    const token = state.currentUser.token.access_token
+    const headers = {
+      Authorization: `Bearer ${token}`
+    }
+
     fetchMock.get('http://localhost:8085/.netlify/git/github/branches', {
       status: 200,
       body: [
@@ -144,7 +149,8 @@ describe('action.js', () => {
             sha: 'sha2'
           }
         }
-      ]
+      ],
+      headers
     })
 
     const commit = jest.fn()
@@ -158,7 +164,12 @@ describe('action.js', () => {
       path: 'branches',
       status: 'loading'
     })
+
+    const auth = 'Bearer 12345'
     expect(commit).toHaveBeenNthCalledWith(2, 'setBranches', { branches })
+    expect(fetchMock.calls(undefined, 'GET')[0][1].headers.Authorization).toBe(
+      auth
+    )
   })
 
   it('コミットごとのファイルの状態を取得する(キャシュを使用しない場合)', async () => {
@@ -166,6 +177,11 @@ describe('action.js', () => {
       localVue,
       store
     })
+
+    const token = state.currentUser.token.access_token
+    const headers = {
+      Authorization: `Bearer ${token}`
+    }
 
     fetchMock.get(
       'http://localhost:8085/.netlify/git/github/contents/metadatas?ref=commitSha',
@@ -180,7 +196,8 @@ describe('action.js', () => {
             name: 'file2.csv',
             sha: 'sha2'
           }
-        ]
+        ],
+        headers
       }
     )
 
@@ -196,6 +213,7 @@ describe('action.js', () => {
       sha: commitSha,
       data: commitData
     }
+    const auth = 'Bearer 12345'
 
     await actions.getCommit({ dispatch, commit, state }, commitSha)
     expect(commit).toHaveBeenNthCalledWith(
@@ -207,6 +225,9 @@ describe('action.js', () => {
     expect(dispatch).toHaveBeenCalled()
     expect(commit).toHaveBeenNthCalledWith(2, 'setCommit', payloadForSetCommit)
     expect(localStorage.setItem).toHaveBeenCalled()
+    expect(fetchMock.calls(undefined, 'GET')[0][1].headers.Authorization).toBe(
+      auth
+    )
   })
 
   it('コミットごとのファイルの状態を取得する(localStorageのキャッシュを使用)', async () => {
@@ -294,6 +315,11 @@ describe('action.js', () => {
       store
     })
 
+    const token = state.currentUser.token.access_token
+    const headers = {
+      Authorization: `Bearer ${token}`
+    }
+
     fetchMock.get(
       'http://localhost:8085/.netlify/git/github/git/blobs/fileSha',
       {
@@ -301,7 +327,8 @@ describe('action.js', () => {
         body: {
           content: 'content1',
           sha: 'sha1'
-        }
+        },
+        headers
       }
     )
 
@@ -311,6 +338,7 @@ describe('action.js', () => {
       sha: fileSha,
       data: {}
     }
+    const auth = 'Bearer 12345'
 
     await actions.getContentMetadata({ commit, state }, fileSha)
     expect(commit).toHaveBeenNthCalledWith(1, 'setContentMetadataStatus', {
@@ -319,6 +347,9 @@ describe('action.js', () => {
     })
     expect(commit).toHaveBeenNthCalledWith(2, 'setContentMetadata', payload)
     expect(localStorage.setItem).toHaveBeenCalled()
+    expect(fetchMock.calls(undefined, 'GET')[0][1].headers.Authorization).toBe(
+      auth
+    )
   })
 
   it('ファイルごとのshaからファイル情報を取得する(localStorageのキャッシュを使用する)', async () => {
@@ -805,6 +836,11 @@ describe('action.js', () => {
   })
 
   it('画像ファイルのshaを取得する(キャッシュなし)', async () => {
+    const token = state.currentUser.token.access_token
+    const headers = {
+      Authorization: `Bearer ${token}`
+    }
+
     fetchMock.get(
       `http://localhost:8085/.netlify/git/github/contents/dir?ref=sha`,
       {
@@ -812,7 +848,8 @@ describe('action.js', () => {
         body: [
           { name: 'file1.jpg', sha: 'imageSha1' },
           { name: 'file2.jpg', sha: 'imageSha2' }
-        ]
+        ],
+        headers
       }
     )
 
@@ -833,9 +870,13 @@ describe('action.js', () => {
         'file2.jpg': 'imageSha2'
       }
     }
+    const auth = 'Bearer 12345'
 
     await actions.getImageShas({ state, commit }, { directoryPath, commitSha })
     expect(commit).toHaveBeenCalledWith('setImageShas', payload)
+    expect(fetchMock.calls(undefined, 'GET')[0][1].headers.Authorization).toBe(
+      auth
+    )
   })
 
   it('画像ファイルのshaを取得する(stateキャッシュあり)', async () => {
@@ -867,6 +908,11 @@ describe('action.js', () => {
   })
 
   it('ファイルのshaから画像データを取得する', async () => {
+    const token = state.currentUser.token.access_token
+    const headers = {
+      Authorization: `Bearer ${token}`
+    }
+
     state.currentBranch = 'master'
     state.branches = {
       status: 'loaded',
@@ -896,13 +942,15 @@ describe('action.js', () => {
       status: 200,
       body: {
         content: '1b64'
-      }
+      },
+      headers
     })
     fetchMock.get(`http://localhost:8085/.netlify/git/github/git/blobs/sha2`, {
       status: 200,
       body: {
         content: '2b64'
-      }
+      },
+      headers
     })
 
     shallowMount(actions, {
@@ -913,6 +961,8 @@ describe('action.js', () => {
     const commit = jest.fn()
     const dispatch = jest.fn()
     global.URL.createObjectURL = jest.fn()
+    const auth = 'Bearer 12345'
+
     await actions.getImageDatas({ dispatch, state, commit }, 'fileSha')
     expect(commit).toHaveBeenNthCalledWith(1, 'setDisplayedFiles', [
       'dir/file1',
@@ -923,5 +973,199 @@ describe('action.js', () => {
       directoryPath: 'dir'
     })
     expect(commit).toHaveBeenCalledTimes(3)
+    expect(fetchMock.calls(undefined, 'GET')[0][1].headers.Authorization).toBe(
+      auth
+    )
+    expect(fetchMock.calls(undefined, 'GET')[1][1].headers.Authorization).toBe(
+      auth
+    )
+  })
+
+  it('ブランチの新規作成', async () => {
+    const token = state.currentUser.token.access_token
+    const headers = {
+      Authorization: `Bearer ${token}`
+    }
+
+    fetchMock.get(
+      `http://localhost:8085/.netlify/git/github/git/refs/heads/master`,
+      {
+        status: 200,
+        body: {
+          object: {
+            sha: 'sha'
+          }
+        },
+        headers
+      }
+    )
+
+    fetchMock.post(`http://localhost:8085/.netlify/git/github/git/refs`, {
+      status: 201
+    })
+
+    shallowMount(actions, {
+      localVue,
+      store
+    })
+
+    const commit = jest.fn()
+    const branch = 'newBranch'
+    const auth = 'Bearer 12345'
+    const body = JSON.stringify({ ref: `refs/heads/newBranch`, sha: `sha` })
+
+    await actions.createBranch({ state, commit }, branch)
+    expect(commit).toHaveBeenCalledWith('setBranchesStatus', {
+      path: 'branches',
+      status: 'loading'
+    })
+    expect(fetchMock.calls(undefined, 'GET')[0][1].headers.Authorization).toBe(
+      auth
+    )
+    expect(fetchMock.calls(undefined, 'POST')[0][1].headers.Authorization).toBe(
+      auth
+    )
+    expect(fetchMock.calls(undefined, 'POST')[0][1].body).toEqual(body)
+  })
+
+  it('新しいファイルのアップロード', async () => {
+    state.branches = {
+      data: {
+        newBranch: 'commitSha'
+      }
+    }
+
+    shallowMount(actions, {
+      localVue,
+      store
+    })
+
+    const payload = {
+      branch: 'newBranch',
+      files: 'files',
+      commitMessage: 'commitMessage'
+    }
+    const dispatch = jest.fn()
+    const createCommitPayload = {
+      commitSha: 'commitSha',
+      branch: 'newBranch',
+      files: 'files',
+      commitMessage: 'commitMessage'
+    }
+
+    await actions.upload({ state, dispatch }, payload)
+    expect(dispatch).toHaveBeenCalledWith('createCommit', createCommitPayload)
+  })
+
+  it('commitの作成', async () => {
+    const token = state.currentUser.token.access_token
+    const headers = {
+      Authorization: `Bearer ${token}`
+    }
+
+    fetchMock.get(
+      `http://localhost:8085/.netlify/git/github/git/commits/commitSha`,
+      {
+        status: 200,
+        body: {
+          tree: {
+            sha: 'baseTreeSha'
+          }
+        },
+        headers
+      }
+    )
+
+    global.FileReader = function () {
+      this.readAsDataURL = () => {
+        this.result = 'data:hoge;base64,fugofugo'
+        this.onload()
+      }
+    }
+    const blob = new Blob(['hello'], { type: 'text/plain' })
+    fetchMock.mock(
+      'blobUri',
+      {
+        body: blob
+      },
+      {
+        sendAsJson: false
+      }
+    )
+
+    fetchMock.post(
+      `http://localhost:8085/.netlify/git/github/git/blobs?ref=newBranch`,
+      {
+        status: 201,
+        body: { sha: 'blobSha' },
+        headers
+      }
+    )
+
+    fetchMock.post(`http://localhost:8085/.netlify/git/github/git/trees`, {
+      status: 200,
+      body: { sha: 'treeSha' },
+      headers
+    })
+
+    fetchMock.post(
+      `http://localhost:8085/.netlify/git/github/git/commits?ref=newBranch`,
+      {
+        status: 200,
+        body: { sha: 'commitSha' },
+        headers
+      }
+    )
+
+    fetchMock.patch(
+      `http://localhost:8085/.netlify/git/github/git/refs/heads/newBranch`,
+      { status: 200 }
+    )
+
+    shallowMount(actions, {
+      localVue,
+      store
+    })
+
+    const auth = 'Bearer 12345'
+    const payload = {
+      commitSha: 'commitSha',
+      branch: 'newBranch',
+      files: { filename: 'blobUri' },
+      commitMessage: 'commitMessage'
+    }
+
+    await actions.createCommit({ state }, payload)
+    expect(fetchMock.calls(undefined, 'GET')[0][1].headers.Authorization).toBe(
+      auth
+    )
+    expect(fetchMock.calls(undefined, 'POST')[0][1].headers.Authorization).toBe(
+      auth
+    )
+    expect(fetchMock.calls(undefined, 'POST')[1][1].headers.Authorization).toBe(
+      auth
+    )
+    expect(fetchMock.calls(undefined, 'POST')[2][1].headers.Authorization).toBe(
+      auth
+    )
+    expect(
+      fetchMock.calls(undefined, 'PATCH')[0][1].headers.Authorization
+    ).toBe(auth)
+  })
+
+  it('netlify-identityのユーザ情報の更新', async () => {
+    const commit = jest.fn()
+    netlifyIdentity.currentUser = jest.fn(() => ({
+      token: {
+        access_token: null
+      }
+    }))
+    netlifyIdentity.refresh = jest.fn()
+    const user = { token: { access_token: null } }
+
+    await actions.updateCurrentUser({ commit })
+    expect(netlifyIdentity.currentUser).toHaveBeenCalled()
+    expect(netlifyIdentity.refresh).toHaveBeenCalled()
+    expect(commit).toHaveBeenCalledWith('updateCurrentUser', user)
   })
 })

@@ -29,7 +29,6 @@ export default {
           const filename = filePath.substr(filePath.lastIndexOf('/') + 1)
           const imageSha =
             state.imageShas[commitSha]?.[directoryPath]?.data?.[filename]
-          console.log(state.imageDatas?.[imageSha]?.data)
           return state.imageDatas?.[imageSha]?.data
         })
       }

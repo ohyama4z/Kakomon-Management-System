@@ -64,7 +64,7 @@ const store = new Vuex.Store({
   actions
 })
 
-describe('Edit.vue', () => {
+describe('Navbar.vue', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })

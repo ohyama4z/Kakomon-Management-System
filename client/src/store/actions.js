@@ -1,14 +1,9 @@
 import merge from 'deepmerge'
+import moment from 'moment'
 import netlifyIdentity from 'netlify-identity-widget'
 import state from './state'
 
-const moment = require('moment')
-
 export default {
-  upload: async ({ commit }, newFile) => {
-    commit('upload', newFile)
-  },
-
   getBranches: async ({ commit, state }) => {
     commit('setBranchesStatus', { path: 'branches', status: 'loading' })
     const token = state.currentUser.token.access_token
@@ -230,11 +225,10 @@ export default {
       force: false // 強制pushするか否
     }
     const updateRefs = JSON.stringify(updateRef)
-    const updateRefRes = await fetch(
+    await fetch(
       `http://localhost:8085/.netlify/git/github/git/refs/heads/${branchName}`,
       { method: patchMethod, headers, body: updateRefs }
     )
-    await updateRefRes.json()
   },
 
   updateCurrentUser: async ({ commit }) => {
@@ -278,8 +272,6 @@ export default {
     commit('setDisplayedFiles', filePaths)
     await dispatch('getImageShas', { commitSha, directoryPath })
 
-    console.log(state.imageShas[commitSha][directoryPath].data)
-
     const filenames = Object.values(files).map(file => {
       const path = file.src
       return path.substr(path.lastIndexOf('/') + 1)
@@ -306,6 +298,142 @@ export default {
 
         commit('setImageData', { sha, blobUri })
       })
+    )
+  },
+
+  createBranch: async ({ state, commit }, branch) => {
+    commit('setBranchesStatus', { path: 'branches', status: 'loading' })
+    const token = state.currentUser.token.access_token
+    const method = 'GET'
+    const headers = {
+      Authorization: `Bearer ${token}`
+    }
+    const httpRes = await fetch(
+      `http://localhost:8085/.netlify/git/github/git/refs/heads/master`,
+      { method, headers }
+    )
+    const res = await httpRes.json()
+    const masterSha = res.object.sha
+
+    // branchの作成
+    const body = JSON.stringify({
+      ref: `refs/heads/${branch}`,
+      sha: `${masterSha}`
+    })
+
+    await fetch(`http://localhost:8085/.netlify/git/github/git/refs`, {
+      method: 'POST',
+      headers,
+      body
+    })
+
+    console.log(`created new branch: ${branch}`)
+  },
+
+  upload: async ({ state, dispatch }, payload) => {
+    const commitSha = state.branches.data[payload.branch]
+    const createCommitPayload = {
+      commitSha: commitSha,
+      branch: payload.branch,
+      files: payload.files,
+      commitMessage: payload.commitMessage
+    }
+    await dispatch('createCommit', createCommitPayload)
+  },
+
+  createCommit: async ({ state }, payload) => {
+    // https://int128.hatenablog.com/entry/2017/09/05/161641 詳しくはここ見ろ
+    const token = state.currentUser.token.access_token
+    const headers = {
+      Authorization: `Bearer ${token}`
+    }
+
+    const commitHttpRes = await fetch(
+      `http://localhost:8085/.netlify/git/github/git/commits/${payload.commitSha}`,
+      {
+        method: 'GET',
+        headers
+      }
+    )
+    const commitRes = await commitHttpRes.json()
+
+    const treeMetadatas = await Promise.all(
+      Object.entries(payload.files).map(async ([filename, blobUri]) => {
+        const httpBlob = await fetch(`${blobUri}`)
+        const blob = await httpBlob.blob()
+        const base64 = await readFileAsync(blob)
+
+        const blobShaHttpRes = await fetch(
+          `http://localhost:8085/.netlify/git/github/git/blobs?ref=${payload.branch}`,
+          {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+              content: base64,
+              encoding: 'base64'
+            })
+          }
+        )
+        const blobShaRes = await blobShaHttpRes.json()
+
+        return { filename, sha: blobShaRes.sha }
+      })
+    )
+
+    const tree = treeMetadatas.map(data => {
+      return {
+        path: `scanned/${data.filename}`,
+        mode: '100644',
+        type: 'blob',
+        sha: data.sha
+      }
+    })
+    const treeData = {
+      base_tree: commitRes.tree.sha,
+      tree: tree
+    }
+    const createTreeHttpRes = await fetch(
+      `http://localhost:8085/.netlify/git/github/git/trees`,
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(treeData)
+      }
+    )
+    const createTreeRes = await createTreeHttpRes.json()
+
+    const email = state.currentUser.email
+    const name = email.substr(0, email.lastIndexOf('@'))
+    const createCommitBody = {
+      message: payload.commitMessage,
+      author: {
+        name,
+        email,
+        date: moment().format('YYYY-MM-DDTHH:mm:ssZ')
+      },
+      parents: [payload.commitSha],
+      tree: createTreeRes.sha
+    }
+    const createCommitHttpRes = await fetch(
+      `http://localhost:8085/.netlify/git/github/git/commits?ref=${payload.branch}`,
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(createCommitBody)
+      }
+    )
+    const createCommitRes = await createCommitHttpRes.json()
+
+    await fetch(
+      `http://localhost:8085/.netlify/git/github/git/refs/heads/${payload.branch}`,
+      {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({
+          sha: createCommitRes.sha,
+          force: false
+        })
+      }
     )
   }
 }
@@ -382,4 +510,15 @@ function toBlob(base64, type) {
   // Blobを作成
 
   return new Blob([buffer.buffer], { type })
+}
+
+export function readFileAsync(blob) {
+  return new Promise(resolve => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      const base64 = reader.result.replace(/data:.*\/.*;base64,/, '')
+      resolve(base64)
+    }
+    reader.readAsDataURL(blob)
+  })
 }

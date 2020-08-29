@@ -139,6 +139,7 @@ export default {
   },
 
   async mounted() {
+    this.$store.dispatch('updateCurrentUser')
     if (this.$store.state.currentUser == null) {
       localStorage.setItem('lastPage', 'edit')
       this.$store.commit('updateLastPage')
@@ -211,6 +212,8 @@ export default {
 
 <style>
 @import url('https://use.fontawesome.com/releases/v5.6.1/css/all.css');
+</style>
+<style scoped>
 .forms {
   padding-top: 10vh;
 }
