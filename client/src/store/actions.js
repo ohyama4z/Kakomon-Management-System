@@ -1,7 +1,6 @@
+import moment from 'moment'
 import netlifyIdentity from 'netlify-identity-widget'
 import state from './state'
-
-const moment = require('moment')
 
 export default {
   getBranches: async ({ commit, state }) => {
