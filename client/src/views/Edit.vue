@@ -185,9 +185,7 @@ export default {
       await this.$store.dispatch('getCommit', commitSha)
     },
     async postCommitCsv() {
-      await this.$store.dispatch(
-        'postCommitCsv'
-      )
+      await this.$store.dispatch('postCommitCsv')
     },
 
     updateEditData() {
