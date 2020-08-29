@@ -1,4 +1,5 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
+import merge from 'deepmerge'
 import fetchMock from 'fetch-mock'
 import 'jest-fetch-mock'
 import 'jest-localstorage-mock'
