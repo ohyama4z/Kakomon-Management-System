@@ -5,7 +5,6 @@ export default {
 
   updateCurrentUser: (state, user) => {
     state.currentUser = user
-    console.log(user)
   },
 
   updateLastPage: state => {
