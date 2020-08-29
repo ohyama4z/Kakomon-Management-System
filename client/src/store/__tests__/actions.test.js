@@ -776,9 +776,7 @@ describe('action.js', () => {
     }
 
     // console.log('hoge', json.parse(state.contentMetadatas))
-    const saveContentMetadatas = _.cloneDeep(
-      state.contentMetadatas[csvSha].data
-    )
+    const saveContentMetadatas = merge({}, state.contentMetadatas[csvSha].data)
 
     await actions.postCommitCsv({ state }, branchName)
 
