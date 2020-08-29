@@ -134,7 +134,6 @@ export default {
 
   // state.currentBranchかbranchNameかどちらかに統一する
   postCommitCsv: async ({ state }, branchName) => {
-    console.log('asdfasdfasdfasdf', branchName)
     const token = state.currentUser.token.access_token
     const getMethod = 'GET'
     const postMethod = 'POST'
@@ -148,7 +147,6 @@ export default {
 
     // const editedCsvObj = state.changedFiles
     console.log('branchname', branchName)
-    console.log('stateのなかみ', state.commits)
     const commitSha = state.branches.data[state.currentBranch]
     console.log('commitsha', commitSha)
     // const csvFileName = 'study_2019_後期中間_英語iiB_oy.csv'
@@ -157,44 +155,13 @@ export default {
     //   csvFileName
     //   // csvFileName changedfilesの要素としてもらう?
     // ]
-    console.log('csvSha', csvSha)
-
-    console.log(
-      state.contentMetadatas['02f495e08b05c5b5b71c90a9c7c0f906a818aa80']
-    )
 
     // state.contentMetadatas.csvSha.data
-    console.log(
-      'obj',
-      state.contentMetadatas['02f495e08b05c5b5b71c90a9c7c0f906a818aa80'].data
-    )
-
-    const check = { a: 'a', b: 'b' }
-    check.a = 'b'
-    check.a = 'c'
-    check.b = 'j'
-    console.log(check)
-
-    const hoge = { a: 'a' }
-    const fuga = { a: 'b' }
-    const aho = merge(hoge, fuga)
-    console.log(hoge, fuga, aho)
-
     const newContentMetadata = merge({}, state.contentMetadatas[csvSha].data)
-    console.log('before', newContentMetadata)
-    console.log(state.changedFiles)
     const exchangeFileObj =
       state.changedFiles[
         'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg'
       ]
-    console.log(exchangeFileObj)
-
-    console.log(
-      newContentMetadata[
-        'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg'
-      ],
-      exchangeFileObj
-    )
 
     merge(
       newContentMetadata[
@@ -203,14 +170,6 @@ export default {
       exchangeFileObj
     )
 
-    console.log('after', newContentMetadata)
-    console.log(
-      newContentMetadata[
-        'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg'
-      ]
-    )
-
-    // console.log('比較', editedCsvObj, 'a', newContentMetadata, 'b', Object.values(newContentMetadata))
     const editedCsvObj = newContentMetadata
 
     // ↑にobjectが詰まっているのでchangedFilesと一致したobjectをchangedFilesのものに書き換えて保存
@@ -224,13 +183,7 @@ export default {
     console.log(Object.values(editedCsvObj))
     const objArray = Object.values(editedCsvObj)
 
-    console.log('aho', editedCsvObj, objArray)
-
-    console.log('yahoo', objArray)
-
     const content = convertObjToCsv(objArray)
-    console.log('content', content)
-    console.log('content222', convertObjToCsv(editedCsvObj))
     // refの取得
     const refRes = await fetch(
       `http://localhost:8085/.netlify/git/github/git/refs/heads/${branchName}`,
@@ -269,7 +222,6 @@ export default {
     //   { method: postMethod, headers, body: postContentsBody2 }
     // )
     // const blobRes2 = await createBlobRes2.json()
-    console.log('commitresssss 7788fdc', commitres.commit.tree.sha)
     const fileInfo = {
       base_tree: commitres.commit.tree.sha,
       tree: [
@@ -410,7 +362,6 @@ export function convertObjToCsv(arr) {
   const contents = []
 
   for (const property in arr) {
-    console.log('hogetarou', arr, arr[`${property}`])
     contents.push(
       arr[`${property}`].src +
         ',' +

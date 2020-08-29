@@ -7,7 +7,6 @@ import Vuex from 'vuex'
 import actions, { convertCsvToObj, convertObjToCsv } from '../actions'
 
 const localVue = createLocalVue()
-const _ = require('lodash')
 
 localVue.use(Vuex)
 
@@ -817,10 +816,6 @@ describe('action.js', () => {
     expect(
       fetchMock.calls(undefined, 'PATCH')[0][1].headers.Authorization
     ).toBe(postAuth)
-
-    // console.log(JSON.parse(state.contentMetadatas))
-    // hogeee = JSON.parse(state.contentMetadatas)
-    // console.log(hogeee['02f495e08b05c5b5b71c90a9c7c0f906a818aa80'])
 
     // stateが変更されていないか
     expect(state.contentMetadatas[csvSha].data).toEqual(saveContentMetadatas)
