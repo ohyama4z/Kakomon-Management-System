@@ -31,7 +31,7 @@
                 <vk-button
                   size="small"
                   type="primary"
-                  :disabled="isNewBranch"
+                  :disabled="!isNewBranch"
                   @click="createBranch"
                   >作成</vk-button
                 >
@@ -84,7 +84,7 @@
         <vk-iconnav>
           {{ filename }}
           <vk-iconnav-item
-            @click="trashFile(filename)"
+            @click="deleteFile(filename)"
             icon="trash"
           ></vk-iconnav-item>
         </vk-iconnav>
@@ -202,7 +202,7 @@ export default {
     },
 
     isNewBranch() {
-      return this.isExisted || !this.newBranch
+      return !this.isExisted && this.newBranch
     }
   },
   methods: {
@@ -218,7 +218,7 @@ export default {
       this.commitMessage = ''
     },
 
-    dropFile() {
+    dropFile(event) {
       const droppedFiles = event.target.files || event.dataTransfer.files
       Object.values(droppedFiles).map(file => {
         const blobUri = URL.createObjectURL(file)
@@ -229,7 +229,7 @@ export default {
       })
     },
 
-    trashFile(filename) {
+    deleteFile(filename) {
       const { [filename]: omit, ...newFilesObj } = this.uploadedFiles
       this.uploadedFiles = newFilesObj
     },
