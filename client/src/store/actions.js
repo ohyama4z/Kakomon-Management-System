@@ -122,8 +122,6 @@ export default {
     const csvData = Buffer.from(res.content, 'base64').toString('utf8')
     const resultObj = convertCsvToObj(csvData)
 
-    console.log(state.commits.fileSha)
-
     commit('setContentMetadata', {
       sha: fileSha,
       data: resultObj
@@ -145,14 +143,10 @@ export default {
     const userName = userEmail.slice(0, userNameLength)
     const branchName = state.currentBranch
 
-    const commitSha = state.branches.data[state.currentBranch]
-    console.log('commitsha', commitSha)
+    // const commitSha = state.branches.data[state.currentBranch]
+    // console.log('commitsha', commitSha)
     const objName = 'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg'
     const csvSha = '02f495e08b05c5b5b71c90a9c7c0f906a818aa80'
-    // state.commits[commitSha].data[
-    //   csvFileName
-    //   // csvFileName changedfilesの要素としてもらう?
-    // ]
 
     const newContentMetadata = merge({}, state.contentMetadatas[csvSha].data)
     const exchangeFileObj = state.changedFiles[objName]
@@ -161,10 +155,7 @@ export default {
     const editedCsvObj = newContentMetadata
 
     // editedobject→csv
-    console.log(editedCsvObj)
-    console.log(Object.values(editedCsvObj))
     const objArray = Object.values(editedCsvObj)
-
     const content = convertObjToCsv(objArray)
     // refの取得
     const refRes = await fetch(
@@ -179,7 +170,6 @@ export default {
       { method: getMethod, headers }
     )
     const commitres = await commitRes.json()
-    console.log(':p~', commitres)
 
     const postContents = {
       content,
@@ -226,7 +216,6 @@ export default {
       tree: treeRes.sha
     }
     const postCommitInfoBody = JSON.stringify(postCommitInfo)
-    console.log(postCommitInfoBody)
 
     // commitの作成
     const createCommitRes = await fetch(
@@ -234,7 +223,6 @@ export default {
       { method: postMethod, headers, body: postCommitInfoBody }
     )
     const createdCommitRes = await createCommitRes.json()
-    console.log('commithash', createdCommitRes.sha)
 
     // refの更新
     const updateRef = {
@@ -246,8 +234,7 @@ export default {
       `http://localhost:8085/.netlify/git/github/git/refs/heads/${branchName}`,
       { method: patchMethod, headers, body: updateRefs }
     )
-    const updatedRefRes = await updateRefRes.json()
-    console.log('asdf', updatedRefRes)
+    await updateRefRes.json()
   },
 
   updateCurrentUser: async ({ commit }) => {
@@ -353,12 +340,6 @@ export function convertObjToCsv(arr) {
   const unionCsv = contents.join(`\n`)
   const convertedCsvFile = csvHeaders + unionCsv
   return convertedCsvFile
-  // const array = [Object.keys(arr[0])].concat(arr)
-  // return array
-  //   .map(it => {
-  //     return Object.values(it).toString()
-  //   })
-  //   .join('\n')
 }
 
 export function convertCsvToObj(csv) {
