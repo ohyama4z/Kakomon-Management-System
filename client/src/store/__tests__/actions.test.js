@@ -5,7 +5,11 @@ import 'jest-fetch-mock'
 import 'jest-localstorage-mock'
 import netlifyIdentity from 'netlify-identity-widget'
 import Vuex from 'vuex'
-import actions, { convertCsvToObj, convertObjToCsv } from '../actions'
+import actions, {
+  convertCsvToObj,
+  convertObjToCsv,
+  getCsvBlobSha
+} from '../actions'
 
 const localVue = createLocalVue()
 
@@ -1167,5 +1171,38 @@ describe('actions.js', () => {
     expect(netlifyIdentity.currentUser).toHaveBeenCalled()
     expect(netlifyIdentity.refresh).toHaveBeenCalled()
     expect(commit).toHaveBeenCalledWith('updateCurrentUser', user)
+  })
+
+  it('upload時csvを生成し、blobを取得する', async () => {
+    const token = state.currentUser.token.access_token
+    const headers = {
+      Authorization: `Bearer ${token}`
+    }
+
+    fetchMock.post(
+      `http://localhost:8085/.netlify/git/github/git/blobs?ref=newBranch`,
+      {
+        status: 200,
+        body: { sha: 'sha' }
+      },
+      headers
+    )
+    const payload = {
+      commitMessage: 'commitMessage',
+      files: {
+        'A.jpg': 'blob1',
+        'C.jpg': 'blob2',
+        'B.jpg': 'blob3'
+      },
+      branch: 'newBranch'
+    }
+
+    expect(await getCsvBlobSha(state, payload)).toBe('sha')
+    expect(fetchMock.calls(undefined, 'POST')[0][1].headers.Authorization).toBe(
+      'Bearer 12345'
+    )
+    const postBody = JSON.parse(fetchMock.calls(undefined, 'POST')[0][1].body)
+    const csv = `src,subj,tool_type,period,year,content_type,author,image_index,included_pages_num,fix_text\nscanned/A.jpg,,,,,,,,,\nscanned/B.jpg,,,,,,,,,\nscanned/C.jpg,,,,,,,,,\n`
+    expect(postBody.content).toBe(csv)
   })
 })

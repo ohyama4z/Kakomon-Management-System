@@ -44,7 +44,7 @@
                 <hr />
                 <vk-button
                   type="text"
-                  class="uk-inline"
+                  class="uk-inline uk-margin-small"
                   v-for="(sha, branchName) in branches"
                   v-bind:key="sha"
                   @click="selectExistedBranch(branchName)"

@@ -355,6 +355,11 @@ export default {
     )
     const commitRes = await commitHttpRes.json()
 
+    const csvBlobSha = await getCsvBlobSha(state, {
+      files: payload.files,
+      branch: payload.branch
+    })
+
     const treeMetadatas = await Promise.all(
       Object.entries(payload.files).map(async ([filename, blobUri]) => {
         const httpBlob = await fetch(`${blobUri}`)
@@ -378,7 +383,7 @@ export default {
       })
     )
 
-    const tree = treeMetadatas.map(data => {
+    const imagesTree = treeMetadatas.map(data => {
       return {
         path: `scanned/${data.filename}`,
         mode: '100644',
@@ -386,6 +391,16 @@ export default {
         sha: data.sha
       }
     })
+    const day = moment().format('YYYY-MM-DD_HHmmss')
+    const csvTree = [
+      {
+        path: `metadatas/unassorted_${day}_${payload.commitMessage}.csv`,
+        mode: '100644',
+        type: 'blob',
+        sha: csvBlobSha
+      }
+    ]
+    const tree = [...imagesTree, ...csvTree]
     const treeData = {
       base_tree: commitRes.tree.sha,
       tree: tree
@@ -519,4 +534,34 @@ export function readFileAsync(blob) {
     }
     reader.readAsDataURL(blob)
   })
+}
+
+export async function getCsvBlobSha(state, payload) {
+  const headerRow = `src,subj,tool_type,period,year,content_type,author,image_index,included_pages_num,fix_text\n`
+  const sortedFiles = Object.keys(payload.files).sort()
+  const filesRows = sortedFiles.reduce((p, src) => {
+    p += `scanned/${src},,,,,,,,,\n`
+    return p
+  }, '')
+  const csv = headerRow + filesRows
+
+  const token = state.currentUser.token.access_token
+  const headers = {
+    Authorization: `Bearer ${token}`
+  }
+
+  const blobShaHttpRes = await fetch(
+    `http://localhost:8085/.netlify/git/github/git/blobs?ref=${payload.branch}`,
+    {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        content: csv,
+        encoding: 'utf-8'
+      })
+    }
+  )
+  const blobShaRes = await blobShaHttpRes.json()
+
+  return blobShaRes.sha
 }
