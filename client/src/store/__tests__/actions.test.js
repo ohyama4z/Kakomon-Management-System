@@ -12,6 +12,7 @@ import actions, {
 } from '../actions'
 
 const localVue = createLocalVue()
+const url = process.env.VUE_APP_URL
 
 localVue.use(Vuex)
 
@@ -138,7 +139,7 @@ describe('actions.js', () => {
       Authorization: `Bearer ${token}`
     }
 
-    fetchMock.get('http://localhost:8085/.netlify/git/github/branches', {
+    fetchMock.get(`${url}/github/branches`, {
       status: 200,
       body: [
         {
@@ -188,7 +189,7 @@ describe('actions.js', () => {
     }
 
     fetchMock.get(
-      'http://localhost:8085/.netlify/git/github/contents/metadatas?ref=commitSha',
+      `${url}/github/contents/metadatas?ref=commitSha`,
       {
         status: 200,
         body: [
@@ -325,7 +326,7 @@ describe('actions.js', () => {
     }
 
     fetchMock.get(
-      'http://localhost:8085/.netlify/git/github/git/blobs/fileSha',
+      `${url}/github/git/blobs/fileSha`,
       {
         status: 200,
         body: {
@@ -455,7 +456,7 @@ describe('actions.js', () => {
 
     // ref取得
     fetchMock.get(
-      `http://localhost:8085/.netlify/git/github/git/refs/heads/${branchName}`,
+      `${url}/github/git/refs/heads/${branchName}`,
       {
         status: 200,
         body: {
@@ -478,7 +479,7 @@ describe('actions.js', () => {
 
     // commitの取得
     fetchMock.get(
-      `http://localhost:8085/.netlify/git/github/commits/${commitsHash}`,
+      `${url}/github/commits/${commitsHash}`,
       {
         status: 200,
         body: {
@@ -594,7 +595,7 @@ describe('actions.js', () => {
 
     // blobの作成
     fetchMock.post(
-      `http://localhost:8085/.netlify/git/github/git/blobs?ref=${branchName}`,
+      `${url}/github/git/blobs?ref=${branchName}`,
       {
         status: 200,
         body: {
@@ -607,7 +608,7 @@ describe('actions.js', () => {
     )
 
     // treeの作成
-    fetchMock.post('http://localhost:8085/.netlify/git/github/git/trees', {
+    fetchMock.post(`${url}/github/git/trees`, {
       status: 200,
       body: {
         sha: '2192c7b798b4d4479e942f4d065780b44a04dbd6',
@@ -705,7 +706,7 @@ describe('actions.js', () => {
 
     // commitの作成
     fetchMock.post(
-      `http://localhost:8085/.netlify/git/github/git/commits?ref=${branchName}`,
+      `${url}/github/git/commits?ref=${branchName}`,
       {
         status: 200,
         body: {
@@ -754,7 +755,7 @@ describe('actions.js', () => {
 
     // refの更新
     fetchMock.patch(
-      `http://localhost:8085/.netlify/git/github/git/refs/heads/${branchName}`,
+      `${url}/github/git/refs/heads/${branchName}`,
       {
         status: 200,
         body: {
@@ -846,7 +847,7 @@ describe('actions.js', () => {
     }
 
     fetchMock.get(
-      `http://localhost:8085/.netlify/git/github/contents/dir?ref=sha`,
+      `${url}/github/contents/dir?ref=sha`,
       {
         status: 200,
         body: [
@@ -942,14 +943,14 @@ describe('actions.js', () => {
       }
     }
 
-    fetchMock.get(`http://localhost:8085/.netlify/git/github/git/blobs/sha1`, {
+    fetchMock.get(`${url}/github/git/blobs/sha1`, {
       status: 200,
       body: {
         content: '1b64'
       },
       headers
     })
-    fetchMock.get(`http://localhost:8085/.netlify/git/github/git/blobs/sha2`, {
+    fetchMock.get(`${url}/github/git/blobs/sha2`, {
       status: 200,
       body: {
         content: '2b64'
@@ -992,7 +993,7 @@ describe('actions.js', () => {
     }
 
     fetchMock.get(
-      `http://localhost:8085/.netlify/git/github/git/refs/heads/master`,
+      `${url}/github/git/refs/heads/master`,
       {
         status: 200,
         body: {
@@ -1004,7 +1005,7 @@ describe('actions.js', () => {
       }
     )
 
-    fetchMock.post(`http://localhost:8085/.netlify/git/github/git/refs`, {
+    fetchMock.post(`${url}/github/git/refs`, {
       status: 201
     })
 
@@ -1068,7 +1069,7 @@ describe('actions.js', () => {
     }
 
     fetchMock.get(
-      `http://localhost:8085/.netlify/git/github/git/commits/commitSha`,
+      `${url}/github/git/commits/commitSha`,
       {
         status: 200,
         body: {
@@ -1098,7 +1099,7 @@ describe('actions.js', () => {
     )
 
     fetchMock.post(
-      `http://localhost:8085/.netlify/git/github/git/blobs?ref=newBranch`,
+      `${url}/github/git/blobs?ref=newBranch`,
       {
         status: 201,
         body: { sha: 'blobSha' },
@@ -1106,14 +1107,14 @@ describe('actions.js', () => {
       }
     )
 
-    fetchMock.post(`http://localhost:8085/.netlify/git/github/git/trees`, {
+    fetchMock.post(`${url}/github/git/trees`, {
       status: 200,
       body: { sha: 'treeSha' },
       headers
     })
 
     fetchMock.post(
-      `http://localhost:8085/.netlify/git/github/git/commits?ref=newBranch`,
+      `${url}/github/git/commits?ref=newBranch`,
       {
         status: 200,
         body: { sha: 'commitSha' },
@@ -1122,7 +1123,7 @@ describe('actions.js', () => {
     )
 
     fetchMock.patch(
-      `http://localhost:8085/.netlify/git/github/git/refs/heads/newBranch`,
+      `${url}/github/git/refs/heads/newBranch`,
       { status: 200 }
     )
 
@@ -1180,7 +1181,7 @@ describe('actions.js', () => {
     }
 
     fetchMock.post(
-      `http://localhost:8085/.netlify/git/github/git/blobs?ref=newBranch`,
+      `${url}/github/git/blobs?ref=newBranch`,
       {
         status: 200,
         body: { sha: 'sha' }
