@@ -35,8 +35,8 @@ export default {
   getCommit: async ({ dispatch, commit, state }, commitSha) => {
     const commitDataInState = state.commits?.[commitSha]
     if (commitDataInState?.status === 'loaded') {
-      Object.entries(commitDataInState.data).map(async ([, sha]) => {
-        await dispatch('getContentMetadata', sha)
+      Object.entries(commitDataInState.data).map(async ([name, sha]) => {
+        await dispatch('getContentMetadata', { filename: name, fileSha: sha })
       })
 
       return
@@ -51,8 +51,8 @@ export default {
         data: commitDataInLocalStorage
       })
       await Promise.all([
-        Object.entries(commitDataInLocalStorage).map(async ([, sha]) => {
-          await dispatch('getContentMetadata', sha)
+        Object.entries(commitDataInLocalStorage).map(async ([name, sha]) => {
+          await dispatch('getContentMetadata', { filename: name, fileSha: sha })
         })
       ])
 
@@ -75,8 +75,8 @@ export default {
       res.map(file => [file.name, file.sha])
     )
 
-    Object.entries(commitData).map(async ([, sha]) => {
-      await dispatch('getContentMetadata', sha)
+    Object.entries(commitData).map(async ([name, sha]) => {
+      await dispatch('getContentMetadata', { filename: name, fileSha: sha })
     })
 
     commit('setCommit', {
@@ -87,18 +87,23 @@ export default {
     localStorage.setItem(`${commitSha}`, JSON.stringify(commitData))
   },
 
-  getContentMetadata: async ({ commit, state }, fileSha) => {
-    const fileDataInState = state.contentMetadatas?.[fileSha]
+  getContentMetadata: async ({ commit, state }, payload) => {
+    const fileDataInState = state.contentMetadatas?.[payload.fileSha]
     if (fileDataInState?.status === 'loaded') {
       return
     }
 
-    commit('setContentMetadataStatus', { sha: fileSha, status: 'loading' })
+    commit('setContentMetadataStatus', {
+      sha: payload.fileSha,
+      status: 'loading'
+    })
 
-    const fileDataInLocalStorage = JSON.parse(localStorage.getItem(fileSha))
+    const fileDataInLocalStorage = JSON.parse(
+      localStorage.getItem(payload.fileSha)
+    )
     if (fileDataInLocalStorage != null) {
       commit('setContentMetadata', {
-        sha: fileSha,
+        sha: payload.fileSha,
         data: fileDataInLocalStorage
       })
       return
@@ -110,21 +115,21 @@ export default {
       Authorization: `Bearer ${token}`
     }
 
-    const httpRes = await fetch(`${URL}/github/git/blobs/${fileSha}`, {
-      method: getMethod,
-      headers
-    })
+    const httpRes = await fetch(
+      `${URL}/github/git/blobs/${payload.fileSha}`,
+      { method: getMethod, headers }
+    )
     const res = await httpRes.json()
 
     const csvData = Buffer.from(res.content, 'base64').toString('utf8')
-    const resultObj = convertCsvToObj(csvData)
+    const resultObj = convertCsvToObj(csvData, payload.filename)
 
     commit('setContentMetadata', {
-      sha: fileSha,
+      sha: payload.fileSha,
       data: resultObj
     })
 
-    localStorage.setItem(fileSha, JSON.stringify(resultObj))
+    localStorage.setItem(payload.fileSha, JSON.stringify(resultObj))
   },
 
   postCommitCsv: async ({ state }) => {
@@ -481,7 +486,7 @@ export function convertObjToCsv(arr) {
   return convertedCsvFile
 }
 
-export function convertCsvToObj(csv) {
+export function convertCsvToObj(csv, filename) {
   // headerNames:CSV1行目の項目 :csvRows:項目に対する値
   const [headerNames, ...csvRows] = csv
     .split('\n')
@@ -494,11 +499,9 @@ export function convertCsvToObj(csv) {
     .map(r => {
       return headerNames
         .map((headerName, index) => {
-          // ヘッダーの空白文字を削除。keyとvalueに値をセット
           return { key: headerName.replace(/\s+/g, ''), value: r[index] }
         })
         .reduce((previous, current) => {
-          // {key: "物", value: "MacBook", メーカー: "apple", 値段: "3000"}を作成
           previous[current.key] = current.value
           return previous
         }, {})
@@ -506,7 +509,7 @@ export function convertCsvToObj(csv) {
     .reduce((previous, current) => {
       previous[current.src] = {
         ...current,
-        sha: { status: 'unrequested', data: {} }
+        csvFile: filename
       }
       return previous
     }, {})

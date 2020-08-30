@@ -110,22 +110,16 @@ describe('actions.js', () => {
         src: 'aho',
         name: 'TARO',
         birthday: '0616',
-        sha: {
-          status: 'unrequested',
-          data: {}
-        }
+        csvFile: 'hoge.csv'
       },
       a: {
         src: 'a',
         name: 'b',
         birthday: 'c',
-        sha: {
-          status: 'unrequested',
-          data: {}
-        }
+        csvFile: 'hoge.csv'
       }
     }
-    expect(convertCsvToObj(csv)).toEqual(result)
+    expect(convertCsvToObj(csv, 'hoge.csv')).toEqual(result)
   })
 
   it('ブランチの一覧を取得する', async () => {
@@ -344,8 +338,9 @@ describe('actions.js', () => {
       data: {}
     }
     const auth = 'Bearer 12345'
+    const filename = 'filename'
 
-    await actions.getContentMetadata({ commit, state }, fileSha)
+    await actions.getContentMetadata({ commit, state }, { fileSha, filename })
     expect(commit).toHaveBeenNthCalledWith(1, 'setContentMetadataStatus', {
       sha: fileSha,
       status: 'loading'
@@ -375,8 +370,9 @@ describe('actions.js', () => {
       sha: fileSha,
       data: JSON.parse(localStorage[fileSha])
     }
+    const filename = 'filename'
 
-    await actions.getContentMetadata({ commit, state }, fileSha)
+    await actions.getContentMetadata({ commit, state }, { fileSha, filename })
     expect(commit).toHaveBeenNthCalledWith(1, 'setContentMetadataStatus', {
       sha: fileSha,
       status: 'loading'
@@ -402,8 +398,9 @@ describe('actions.js', () => {
 
     const commit = jest.fn()
     const fileSha = 'fileSha'
+    const filename = 'filename'
 
-    await actions.getContentMetadata({ commit, state }, fileSha)
+    await actions.getContentMetadata({ commit, state }, { fileSha, filename })
     expect(commit).not.toHaveBeenCalledWith('setContentMetadataStatus', {
       sha: fileSha,
       status: 'loading'

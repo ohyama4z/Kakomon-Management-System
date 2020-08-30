@@ -148,7 +148,6 @@ export default {
     await this.$store.dispatch('getBranches')
     await this.$store.dispatch('selectBranch', this.selectedBranch)
     this.getCommit()
-    this.postCommitCsv()
   },
 
   computed: {
@@ -189,19 +188,15 @@ export default {
     },
 
     updateEditData() {
-      // sendObjは1つのcsvfile
-      const sendObj = {
-        selecteBranch: this.selectedBranch,
-        // selectedFiles: this.selectedFiles,
-        subject: this.subject,
+      const changedFiles = {
+        subj: this.subject,
         year: this.year,
-        toolType: this.toolType,
+        tool_type: this.toolType,
         period: this.period,
-        contentType: this.contentType,
+        content_type: this.contentType,
         author: this.author
       }
-
-      this.$store.dispatch('updateEditData', sendObj)
+      this.$store.commit('setChangedFiles', changedFiles)
     }
   }
 }
