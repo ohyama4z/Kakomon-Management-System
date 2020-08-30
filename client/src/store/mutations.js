@@ -123,5 +123,17 @@ export default {
 
   setDisplayedFiles: (state, filePaths) => {
     state.displayedFiles = filePaths
+  },
+
+  setChangedFilesBase: (state, files) => {
+    state.changedFiles = { ...files }
+  },
+
+  setChangedFiles: (state, files) => {
+    const changedFilesArr = Object.entries(
+      state.changedFiles
+    ).map(([filename, data]) => [filename, { ...data, ...files }])
+    const changedFiles = Object.fromEntries(changedFilesArr)
+    state.changedFiles = { ...changedFiles }
   }
 }
