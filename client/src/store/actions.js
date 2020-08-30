@@ -3,7 +3,7 @@ import moment from 'moment'
 import netlifyIdentity from 'netlify-identity-widget'
 import state from './state'
 
-const URL = process.env.VUE_APP_URL
+const url = process.env.VUE_APP_URL
 
 export default {
   getBranches: async ({ commit, state }) => {
@@ -13,7 +13,7 @@ export default {
     const headers = {
       Authorization: `Bearer ${token}`
     }
-    const httpRes = await fetch(`${URL}/github/branches`, {
+    const httpRes = await fetch(`${url}/github/branches`, {
       method: getMethod,
       headers
     })
@@ -66,7 +66,7 @@ export default {
     }
 
     const httpRes = await fetch(
-      `${URL}/github/contents/metadatas?ref=${commitSha}`,
+      `${url}/github/contents/metadatas?ref=${commitSha}`,
       { method: getMethod, headers }
     )
     const res = await httpRes.json()
@@ -116,7 +116,7 @@ export default {
     }
 
     const httpRes = await fetch(
-      `${URL}/github/git/blobs/${payload.fileSha}`,
+      `${url}/github/git/blobs/${payload.fileSha}`,
       { method: getMethod, headers }
     )
     const res = await httpRes.json()
@@ -158,7 +158,7 @@ export default {
     const objArray = Object.values(editedCsvObj)
     const content = convertObjToCsv(objArray)
     // refの取得
-    const refRes = await fetch(`${URL}/github/git/refs/heads/${branchName}`, {
+    const refRes = await fetch(`${url}/github/git/refs/heads/${branchName}`, {
       method: getMethod,
       headers
     })
@@ -166,7 +166,7 @@ export default {
 
     // commitの取得
     const commitRes = await fetch(
-      `${URL}/github/commits/${parseRef.object.sha}`,
+      `${url}/github/commits/${parseRef.object.sha}`,
       { method: getMethod, headers }
     )
     const commitres = await commitRes.json()
@@ -179,7 +179,7 @@ export default {
 
     // blobの作成
     const createBlobRes = await fetch(
-      `${URL}/github/git/blobs?ref=${branchName}`,
+      `${url}/github/git/blobs?ref=${branchName}`,
       { method: postMethod, headers, body: postContentsBody }
     )
     const blobRes = await createBlobRes.json()
@@ -198,7 +198,7 @@ export default {
 
     // treeの作成
     const postFileInfoBody = JSON.stringify(fileInfo)
-    const createTreeRes = await fetch(`${URL}/github/git/trees`, {
+    const createTreeRes = await fetch(`${url}/github/git/trees`, {
       method: postMethod,
       headers,
       body: postFileInfoBody
@@ -220,7 +220,7 @@ export default {
 
     // commitの作成
     const createCommitRes = await fetch(
-      `${URL}/github/git/commits?ref=${branchName}`,
+      `${url}/github/git/commits?ref=${branchName}`,
       { method: postMethod, headers, body: postCommitInfoBody }
     )
     const createdCommitRes = await createCommitRes.json()
@@ -231,7 +231,7 @@ export default {
       force: false // 強制pushするか否
     }
     const updateRefs = JSON.stringify(updateRef)
-    await fetch(`${URL}/github/git/refs/heads/${branchName}`, {
+    await fetch(`${url}/github/git/refs/heads/${branchName}`, {
       method: patchMethod,
       headers,
       body: updateRefs
@@ -258,7 +258,7 @@ export default {
     }
 
     const httpRes = await fetch(
-      `${URL}/github/contents/${directoryPath}?ref=${commitSha}`,
+      `${url}/github/contents/${directoryPath}?ref=${commitSha}`,
       { method, headers }
     )
     const res = await httpRes.json()
@@ -292,7 +292,7 @@ export default {
         const headers = {
           Authorization: `Bearer ${token}`
         }
-        const httpRes = await fetch(`${URL}/github/git/blobs/${sha}`, {
+        const httpRes = await fetch(`${url}/github/git/blobs/${sha}`, {
           method,
           headers
         })
@@ -315,7 +315,7 @@ export default {
     const headers = {
       Authorization: `Bearer ${token}`
     }
-    const httpRes = await fetch(`${URL}/github/git/refs/heads/master`, {
+    const httpRes = await fetch(`${url}/github/git/refs/heads/master`, {
       method,
       headers
     })
@@ -328,7 +328,7 @@ export default {
       sha: `${masterSha}`
     })
 
-    await fetch(`${URL}/github/git/refs`, {
+    await fetch(`${url}/github/git/refs`, {
       method: 'POST',
       headers,
       body
@@ -356,7 +356,7 @@ export default {
     }
 
     const commitHttpRes = await fetch(
-      `${URL}/github/git/commits/${payload.commitSha}`,
+      `${url}/github/git/commits/${payload.commitSha}`,
       {
         method: 'GET',
         headers
@@ -376,7 +376,7 @@ export default {
         const base64 = await readFileAsync(blob)
 
         const blobShaHttpRes = await fetch(
-          `${URL}/github/git/blobs?ref=${payload.branch}`,
+          `${url}/github/git/blobs?ref=${payload.branch}`,
           {
             method: 'POST',
             headers,
@@ -414,7 +414,7 @@ export default {
       base_tree: commitRes.tree.sha,
       tree: tree
     }
-    const createTreeHttpRes = await fetch(`${URL}/github/git/trees`, {
+    const createTreeHttpRes = await fetch(`${url}/github/git/trees`, {
       method: 'POST',
       headers,
       body: JSON.stringify(treeData)
@@ -434,7 +434,7 @@ export default {
       tree: createTreeRes.sha
     }
     const createCommitHttpRes = await fetch(
-      `${URL}/github/git/commits?ref=${payload.branch}`,
+      `${url}/github/git/commits?ref=${payload.branch}`,
       {
         method: 'POST',
         headers,
@@ -443,7 +443,7 @@ export default {
     )
     const createCommitRes = await createCommitHttpRes.json()
 
-    await fetch(`${URL}/github/git/refs/heads/${payload.branch}`, {
+    await fetch(`${url}/github/git/refs/heads/${payload.branch}`, {
       method: 'PATCH',
       headers,
       body: JSON.stringify({
@@ -552,7 +552,7 @@ export async function getCsvBlobSha(state, payload) {
   }
 
   const blobShaHttpRes = await fetch(
-    `${URL}/github/git/blobs?ref=${payload.branch}`,
+    `${url}/github/git/blobs?ref=${payload.branch}`,
     {
       method: 'POST',
       headers,
