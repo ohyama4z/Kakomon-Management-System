@@ -182,23 +182,20 @@ describe('actions.js', () => {
       Authorization: `Bearer ${token}`
     }
 
-    fetchMock.get(
-      `${url}/github/contents/metadatas?ref=commitSha`,
-      {
-        status: 200,
-        body: [
-          {
-            name: 'file1.csv',
-            sha: 'sha1'
-          },
-          {
-            name: 'file2.csv',
-            sha: 'sha2'
-          }
-        ],
-        headers
-      }
-    )
+    fetchMock.get(`${url}/github/contents/metadatas?ref=commitSha`, {
+      status: 200,
+      body: [
+        {
+          name: 'file1.csv',
+          sha: 'sha1'
+        },
+        {
+          name: 'file2.csv',
+          sha: 'sha2'
+        }
+      ],
+      headers
+    })
 
     const commitSha = 'commitSha'
     const dispatch = jest.fn()
@@ -319,17 +316,14 @@ describe('actions.js', () => {
       Authorization: `Bearer ${token}`
     }
 
-    fetchMock.get(
-      `${url}/github/git/blobs/fileSha`,
-      {
-        status: 200,
-        body: {
-          content: 'content1',
-          sha: 'sha1'
-        },
-        headers
-      }
-    )
+    fetchMock.get(`${url}/github/git/blobs/fileSha`, {
+      status: 200,
+      body: {
+        content: 'content1',
+        sha: 'sha1'
+      },
+      headers
+    })
 
     const commit = jest.fn()
     const fileSha = 'fileSha'
@@ -843,17 +837,14 @@ describe('actions.js', () => {
       Authorization: `Bearer ${token}`
     }
 
-    fetchMock.get(
-      `${url}/github/contents/dir?ref=sha`,
-      {
-        status: 200,
-        body: [
-          { name: 'file1.jpg', sha: 'imageSha1' },
-          { name: 'file2.jpg', sha: 'imageSha2' }
-        ],
-        headers
-      }
-    )
+    fetchMock.get(`${url}/github/contents/dir?ref=sha`, {
+      status: 200,
+      body: [
+        { name: 'file1.jpg', sha: 'imageSha1' },
+        { name: 'file2.jpg', sha: 'imageSha2' }
+      ],
+      headers
+    })
 
     shallowMount(actions, {
       localVue,
@@ -989,18 +980,15 @@ describe('actions.js', () => {
       Authorization: `Bearer ${token}`
     }
 
-    fetchMock.get(
-      `${url}/github/git/refs/heads/master`,
-      {
-        status: 200,
-        body: {
-          object: {
-            sha: 'sha'
-          }
-        },
-        headers
-      }
-    )
+    fetchMock.get(`${url}/github/git/refs/heads/master`, {
+      status: 200,
+      body: {
+        object: {
+          sha: 'sha'
+        }
+      },
+      headers
+    })
 
     fetchMock.post(`${url}/github/git/refs`, {
       status: 201
@@ -1065,18 +1053,15 @@ describe('actions.js', () => {
       Authorization: `Bearer ${token}`
     }
 
-    fetchMock.get(
-      `${url}/github/git/commits/commitSha`,
-      {
-        status: 200,
-        body: {
-          tree: {
-            sha: 'baseTreeSha'
-          }
-        },
-        headers
-      }
-    )
+    fetchMock.get(`${url}/github/git/commits/commitSha`, {
+      status: 200,
+      body: {
+        tree: {
+          sha: 'baseTreeSha'
+        }
+      },
+      headers
+    })
 
     global.FileReader = function () {
       this.readAsDataURL = () => {
@@ -1095,14 +1080,11 @@ describe('actions.js', () => {
       }
     )
 
-    fetchMock.post(
-      `${url}/github/git/blobs?ref=newBranch`,
-      {
-        status: 201,
-        body: { sha: 'blobSha' },
-        headers
-      }
-    )
+    fetchMock.post(`${url}/github/git/blobs?ref=newBranch`, {
+      status: 201,
+      body: { sha: 'blobSha' },
+      headers
+    })
 
     fetchMock.post(`${url}/github/git/trees`, {
       status: 200,
@@ -1110,19 +1092,13 @@ describe('actions.js', () => {
       headers
     })
 
-    fetchMock.post(
-      `${url}/github/git/commits?ref=newBranch`,
-      {
-        status: 200,
-        body: { sha: 'commitSha' },
-        headers
-      }
-    )
+    fetchMock.post(`${url}/github/git/commits?ref=newBranch`, {
+      status: 200,
+      body: { sha: 'commitSha' },
+      headers
+    })
 
-    fetchMock.patch(
-      `${url}/github/git/refs/heads/newBranch`,
-      { status: 200 }
-    )
+    fetchMock.patch(`${url}/github/git/refs/heads/newBranch`, { status: 200 })
 
     shallowMount(actions, {
       localVue,

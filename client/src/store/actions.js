@@ -115,10 +115,10 @@ export default {
       Authorization: `Bearer ${token}`
     }
 
-    const httpRes = await fetch(
-      `${url}/github/git/blobs/${payload.fileSha}`,
-      { method: getMethod, headers }
-    )
+    const httpRes = await fetch(`${url}/github/git/blobs/${payload.fileSha}`, {
+      method: getMethod,
+      headers
+    })
     const res = await httpRes.json()
 
     const csvData = Buffer.from(res.content, 'base64').toString('utf8')
