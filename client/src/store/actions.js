@@ -346,7 +346,7 @@ export default {
     )
     const commitRes = await commitHttpRes.json()
 
-    const csvBlobSha = await getCsvBlobSha({
+    const csvBlobSha = await getCsvBlobSha(state, {
       files: payload.files,
       branch: payload.branch
     })
@@ -504,8 +504,7 @@ export function readFileAsync(blob) {
   })
 }
 
-export async function getCsvBlobSha(payload) {
-  console.log(payload.files)
+export async function getCsvBlobSha(state, payload) {
   const headerRow = `src,subj,tool_type,period,year,content_type,author,image_index,included_pages_num,fix_text\n`
   const sortedFiles = Object.keys(payload.files).sort()
   const filesRows = sortedFiles.reduce((p, src) => {
