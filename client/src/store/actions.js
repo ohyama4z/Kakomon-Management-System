@@ -138,8 +138,6 @@ export default {
     const userName = userEmail.slice(0, userNameLength)
     const branchName = state.currentBranch
 
-    // const commitSha = state.branches.data[state.currentBranch]
-    // console.log('commitsha', commitSha)
     const objName = 'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg'
     const csvSha = '02f495e08b05c5b5b71c90a9c7c0f906a818aa80'
 
