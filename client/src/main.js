@@ -13,6 +13,8 @@ import getters from './store/getters'
 import mutations from './store/mutations'
 import state from './store/state'
 
+const initUrl = process.env.VUE_APP_INITURL
+
 Vue.use(Vuex)
 Vue.use(Vuikit)
 Vue.use(VuikitIcons)
@@ -21,7 +23,7 @@ Vue.use(VueSidebarMenu)
 Vue.config.productionTip = false
 
 netlifyIdentity.init({
-  APIUrl: 'http://localhost:8085/.netlify/identity'
+  APIUrl: `${initUrl}/.netlify/identity`
 })
 
 const store = new Vuex.Store({
