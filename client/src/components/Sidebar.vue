@@ -18,12 +18,6 @@ export default {
     SidebarMenu
   },
 
-  // data() {
-  //   return {
-  //     selectedFiles: []
-  //   }
-  // },
-
   computed: {
     ...mapGetters(['currentBranchMetadatas']),
 
@@ -116,6 +110,12 @@ export default {
       if (item.isSecondFromEnd && !item.expand) {
         const fileSha = item.child[0].data.sha
         this.$store.dispatch('getImageDatas', fileSha)
+        const changedFilesBase = Object.fromEntries(
+          item.child.map(file => {
+            return [file.data.src, file.data]
+          })
+        )
+        this.$store.commit('setChangedFilesBase', changedFilesBase)
       }
 
       item.expand = !item.expand

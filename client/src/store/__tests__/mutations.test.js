@@ -9,6 +9,7 @@ const state = {
     status: 'unrequested',
     data: {}
   },
+  changedFiles: {},
   imageShas: {},
   imageDatas: {},
   displayedFiles: []
@@ -301,5 +302,41 @@ describe('mutations.js', () => {
     const filePaths = ['path1', 'path2', 'path3']
     mutations.setDisplayedFiles(state, filePaths)
     expect(state.displayedFiles).toBe(filePaths)
+  })
+
+  it('画像選択時にstateにchangedFilesのもととなるオブジェクトを作る', () => {
+    state.changedFiles = {}
+    const payload = {
+      hoge: 'hoge',
+      fuga: 'fuga'
+    }
+
+    mutations.setChangedFilesBase(state, payload)
+    expect(state.changedFiles).toEqual(payload)
+  })
+
+  it('変更内容をstateに格納', () => {
+    state.changedFiles = {
+      'a.jpg': {},
+      'b.jpg': {}
+    }
+    const payload = {
+      subj: '2000',
+      aho: 'aho'
+    }
+
+    const result = {
+      'a.jpg': {
+        subj: '2000',
+        aho: 'aho'
+      },
+      'b.jpg': {
+        subj: '2000',
+        aho: 'aho'
+      }
+    }
+
+    mutations.setChangedFiles(state, payload)
+    expect(state.changedFiles).toEqual(result)
   })
 })
