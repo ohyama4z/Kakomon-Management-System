@@ -1,4 +1,5 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
+import merge from 'deepmerge'
 import fetchMock from 'fetch-mock'
 import 'jest-fetch-mock'
 import 'jest-localstorage-mock'
@@ -56,6 +57,18 @@ const state = {
       src: 'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験2.jpg',
       subj: '',
       tool_type: '',
+      period: '',
+      year: '',
+      content_type: '',
+      author: '',
+      image_index: '',
+      included_pages_num: '',
+      fix_text: ''
+    },
+    'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg': {
+      src: 'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg:',
+      subj: '算数',
+      tool_type: '勉強用',
       period: '',
       year: '',
       content_type: '',
@@ -429,9 +442,8 @@ describe('actions.js', () => {
   })
 
   it('setCommitCsv', async () => {
-    // const state
-    // const commit = jest.fn()
-    const branchName = 'cmstest'
+    state.currentBranch = 'cmstest'
+    const branchName = state.currentBranch
     const token = state.currentUser.token.access_token
     const headers = {
       Authorization: `Bearer ${token}`
@@ -760,7 +772,41 @@ describe('actions.js', () => {
     const postAuth = 'Bearer 12345'
     const userName = 'ahoge'
 
-    await actions.postCommitCsv({ state }, branchName)
+    const csvSha = '02f495e08b05c5b5b71c90a9c7c0f906a818aa80'
+    state.contentMetadatas = {
+      '02f495e08b05c5b5b71c90a9c7c0f906a818aa80': {
+        data: {
+          'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg': {
+            author: '',
+            content_type: '',
+            fix_text: '',
+            image_index: '',
+            included_pages_num: '',
+            period: '',
+            src: 'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg:',
+            subj: '算数',
+            tool_type: '勉強用',
+            year: ''
+          },
+          'tests/2018/テスト_2018_後期中間_論理回路i_問題002.jpg': {
+            author: '',
+            content_type: '問題',
+            fix_text: '',
+            image_index: '002',
+            included_pages_num: '1',
+            period: '後期中間',
+            src: 'tests/2018/テスト_2018_後期中間_論理回路i_問題002.jpg',
+            subj: '論理回路i',
+            tool_type: 'テスト',
+            year: '2018'
+          }
+        }
+      }
+    }
+
+    const saveContentMetadatas = merge({}, state.contentMetadatas[csvSha].data)
+
+    await actions.postCommitCsv({ state })
 
     expect(fetchMock.calls(undefined, 'GET')[0][1].headers.Authorization).toBe(
       postAuth
@@ -778,16 +824,15 @@ describe('actions.js', () => {
       postAuth
     )
 
-    // stringfyを使うとbodyの中身がobjectを包含するstringになってしまう
-    // stringfyを使わないと422エラーが発生してしまう
-    // test側でjsonに戻す
     const parsedBody = JSON.parse(fetchMock.calls(undefined, 'POST')[2][1].body)
-
     expect(parsedBody.author.name).toBe(userName)
 
     expect(
       fetchMock.calls(undefined, 'PATCH')[0][1].headers.Authorization
     ).toBe(postAuth)
+
+    // stateが変更されていないか
+    expect(state.contentMetadatas[csvSha].data).toEqual(saveContentMetadatas)
   })
 
   it('画像ファイルのshaを取得する(キャッシュなし)', async () => {

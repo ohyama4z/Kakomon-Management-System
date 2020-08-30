@@ -1,3 +1,4 @@
+import merge from 'deepmerge'
 import moment from 'moment'
 import netlifyIdentity from 'netlify-identity-widget'
 import state from './state'
@@ -124,7 +125,7 @@ export default {
     localStorage.setItem(fileSha, JSON.stringify(resultObj))
   },
 
-  postCommitCsv: async ({ state }, branchName) => {
+  postCommitCsv: async ({ state }) => {
     const token = state.currentUser.token.access_token
     const getMethod = 'GET'
     const postMethod = 'POST'
@@ -135,12 +136,20 @@ export default {
     const userEmail = state.currentUser.email
     const userNameLength = userEmail.search('@')
     const userName = userEmail.slice(0, userNameLength)
+    const branchName = state.currentBranch
 
-    const editCsvObj = state.changedFiles
+    const objName = 'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg'
+    const csvSha = '02f495e08b05c5b5b71c90a9c7c0f906a818aa80'
 
-    const objArray = Object.values(editCsvObj)
+    const newContentMetadata = merge({}, state.contentMetadatas[csvSha].data)
+    const exchangeFileObj = state.changedFiles[objName]
+    merge(newContentMetadata[objName], exchangeFileObj)
+
+    const editedCsvObj = newContentMetadata
+
+    // editedobject→csv
+    const objArray = Object.values(editedCsvObj)
     const content = convertObjToCsv(objArray)
-
     // refの取得
     const refRes = await fetch(
       `http://localhost:8085/.netlify/git/github/git/refs/heads/${branchName}`,
@@ -428,12 +437,35 @@ export default {
 }
 
 export function convertObjToCsv(arr) {
-  const array = [Object.keys(arr[0])].concat(arr)
-  return array
-    .map(it => {
-      return Object.values(it).toString()
-    })
-    .join('\n')
+  const contents = []
+
+  for (const property in arr) {
+    contents.push(
+      arr[property].src +
+        ',' +
+        arr[property].subj +
+        ',' +
+        arr[property].tool_type +
+        ',' +
+        arr[property].period +
+        ',' +
+        arr[property].year +
+        ',' +
+        arr[property].content_type +
+        ',' +
+        arr[property].author +
+        ',' +
+        arr[property].image_index +
+        ',' +
+        arr[property].included_pages_num +
+        ',' +
+        arr[property].fix_text
+    )
+  }
+  const csvHeaders = `src,subj,tool_type,period,year,content_type,author,image_index,included_pages_num,fix_text\n`
+  const unionCsv = contents.join(`\n`)
+  const convertedCsvFile = csvHeaders + unionCsv
+  return convertedCsvFile
 }
 
 export function convertCsvToObj(csv) {
