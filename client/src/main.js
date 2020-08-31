@@ -13,7 +13,7 @@ import getters from './store/getters'
 import mutations from './store/mutations'
 import state from './store/state'
 
-const initUrl = process.env.VUE_APP_INITURL
+const initUrl = process.env.VUE_APP_INIT_URL
 
 Vue.use(Vuex)
 Vue.use(Vuikit)

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Navbar></Navbar>
+    <Navbar v-on:before-logout="logout"></Navbar>
 
     <vk-spinner
       class="uk-position-medium uk-position-center"
@@ -159,7 +159,8 @@ export default {
 
         return (
           checkLoading(state.branches.status) ||
-          checkLoading(state.commits[state.currentBranch]?.status)
+          checkLoading(state.commits[state.currentBranch]?.status) ||
+          checkLoading(this.$store.getters.currentBranchMetadatas.status)
         )
       },
 
@@ -185,6 +186,11 @@ export default {
     },
     async postCommitCsv() {
       await this.$store.dispatch('postCommitCsv')
+    },
+
+    logout() {
+      localStorage.setItem('lastPage', 'edit')
+      this.$store.commit('updateLastPage')
     },
 
     updateEditData() {
