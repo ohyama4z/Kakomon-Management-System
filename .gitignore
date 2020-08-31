@@ -1,5 +1,5 @@
 mysql-data/
-.env
+/.env
 node_modules
 __pycache__
 coverage/
