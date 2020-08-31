@@ -13,13 +13,16 @@ describe('Root.vue', () => {
     router = new VueRouter()
   })
 
-  it('ハッシュ無しでページが読み込まれると/loginに遷移する', () => {
+  it('ハッシュ無しでページが読み込まれると/loginに遷移する', async () => {
+    await router.push({ path: '/' })
     const wrapper = shallowMount(Root, {
       localVue,
       router
     })
 
+    await flushPromises()
     expect(wrapper.vm.$route.path).toBe('/login')
+    expect(wrapper.vm.$route.hash).toEqual('')
   })
   it('ハッシュありでページが読み込まれるとハッシュ付きで/loginに遷移する', async () => {
     await router.push({ path: '/', hash: '#hoge' })
