@@ -5,11 +5,12 @@
 <script>
 export default {
   name: 'Root',
-  mounted() {
+  async mounted() {
     if (typeof this.$route.hash === 'string') {
-      this.$router.push({ path: '/login', hash: this.$route.hash })
+      await this.$router.push({ path: '/login', hash: this.$route.hash })
+      return
     }
-    this.$router.push('/login')
+    await this.$router.push('/login')
   }
 }
 </script>
