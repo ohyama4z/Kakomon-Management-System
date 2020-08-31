@@ -6,10 +6,10 @@
 export default {
   name: 'Root',
   mounted() {
-    if (typeof this.$route.hash === 'object') {
-      this.$router.push('/login')
+    if (typeof this.$route.hash === 'string') {
+      this.$router.push({ path: '/login', hash: this.$route.hash })
     }
-    this.$router.push({ path: '/login', hash: this.$route.hash })
+    this.$router.push('/login')
   }
 }
 </script>
