@@ -6,6 +6,7 @@ import VueRouter from 'vue-router'
 import Vuex from 'vuex'
 import { Button } from 'vuikit/lib/button'
 import { Spinner } from 'vuikit/lib/spinner'
+import Navbar from '../../components/Navbar'
 import Edit from '../Edit'
 
 const localVue = createLocalVue()
@@ -190,5 +191,22 @@ describe('Edit.vue', () => {
     commitButton.trigger('click')
     await new Promise(resolve => setTimeout(resolve, 5))
     expect(mutations.setChangedFiles).toHaveBeenCalled()
+  })
+
+  it('Navbarのログアウトが押されるとログアウトの処理を行う', async () => {
+    const stubs = {
+      VkButton: Button
+    }
+
+    const wrapper = shallowMount(Edit, {
+      store,
+      router,
+      localVue,
+      stubs
+    })
+    await flushPromises()
+    wrapper.findComponent(Navbar).vm.$emit('before-logout')
+    expect(localStorage.setItem).toHaveBeenCalledWith('lastPage', 'edit')
+    expect(mutations.updateLastPage).toHaveBeenCalled()
   })
 })

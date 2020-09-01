@@ -21,7 +21,7 @@ netlifyIdentity.on = jest.fn().mockImplementation((event, callback) => {
   }
 })
 
-describe('Login.vue', () => {
+describe('Logout.vue', () => {
   it('ページが読み込まれるとログアウトするactionが呼ばれ、/loginへ遷移する', () => {
     router.push('/logout')
     const actions = {

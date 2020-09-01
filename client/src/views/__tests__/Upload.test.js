@@ -10,6 +10,7 @@ import { Button } from 'vuikit/lib/button'
 import { Drop } from 'vuikit/lib/drop'
 import { Iconnav, IconnavItem } from 'vuikit/lib/iconnav'
 import { Spinner } from 'vuikit/lib/spinner'
+import Navbar from '../../components/Navbar'
 import Upload from '../Upload'
 
 const localVue = createLocalVue()
@@ -364,5 +365,22 @@ describe('Upload.vue', () => {
     await flushPromises()
 
     expect(actions.upload).toHaveBeenCalled()
+  })
+
+  it('Navbarのログアウトが押されるとログアウトの処理を行う', async () => {
+    const stubs = {
+      VkButton: Button
+    }
+
+    const wrapper = shallowMount(Upload, {
+      store,
+      router,
+      localVue,
+      stubs
+    })
+    await flushPromises()
+    wrapper.findComponent(Navbar).vm.$emit('before-logout')
+    expect(localStorage.setItem).toHaveBeenCalledWith('lastPage', 'upload')
+    expect(mutations.updateLastPage).toHaveBeenCalled()
   })
 })
