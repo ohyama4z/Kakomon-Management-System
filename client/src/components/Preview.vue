@@ -42,13 +42,14 @@ export default {
 
 <style scoped>
 .image {
-  border-top: solid #d1d1d1;
-  border-left: solid #d1d1d1;
-  border-right: solid #d1d1d1;
+  border-top: solid #f5f5f5;
+  border-left: solid #f5f5f5;
+  border-right: solid #f5f5f5;
 }
 .filename {
-  border-bottom: solid #d1d1d1;
-  border-left: solid #d1d1d1;
-  border-right: solid #d1d1d1;
+  border-bottom: solid #f5f5f5;
+  border-left: solid #f5f5f5;
+  border-right: solid #f5f5f5;
+  background-color: #f5f5f5;
 }
 </style>
