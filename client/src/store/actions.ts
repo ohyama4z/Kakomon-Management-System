@@ -38,7 +38,7 @@ const actions: Actions =  {
   getCommit: async ({ dispatch, commit, state }, commitSha) => {
     const commitDataInState = state.commits?.[commitSha]
     if (commitDataInState?.status === 'loaded') {
-      Object.entries(commitDataInState.data).map(async ([name, sha]) => {
+      (Object as any).entries(commitDataInState.data).map(async ([name, sha]: string) => {
         await dispatch('getContentMetadata', { filename: name, fileSha: sha })
       })
 
@@ -373,7 +373,7 @@ const actions: Actions =  {
     })
 
     const treeMetadatas = await Promise.all(
-      Object.entries(payload.files).map(async ([filename, blobUri]) => {
+      (Object as any).entries(payload.files).map(async ([filename, blobUri]: [string, string]) => {
         const httpBlob = await fetch(`${blobUri}`)
         const blob = await httpBlob.blob()
         const base64 = await readFileAsync(blob)
