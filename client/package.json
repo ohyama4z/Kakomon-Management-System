@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "test": "jest",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "test": "jest"
   },
   "dependencies": {
     "@vue/cli": "^4.5.4",
@@ -33,10 +33,13 @@
     "@babel/core": "^7.11.1",
     "@babel/preset-env": "^7.11.0",
     "@testing-library/jest-dom": "^5.11.3",
+    "@typescript-eslint/eslint-plugin": "^2.33.0",
+    "@typescript-eslint/parser": "^2.33.0",
     "@vue/cli-plugin-babel": "~4.4.0",
     "@vue/cli-plugin-eslint": "~4.4.0",
     "@vue/cli-plugin-typescript": "^4.5.4",
     "@vue/cli-service": "~4.4.0",
+    "@vue/eslint-config-typescript": "^5.0.2",
     "@vue/test-utils": "^1.0.3",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.1.0",
@@ -63,6 +66,7 @@
     "prettier-config-standard": "^1.0.1",
     "prettier-eslint": "^11.0.0",
     "regenerator-runtime": "^0.13.7",
+    "typescript": "~3.9.3",
     "vue-eslint-parser": "^7.1.0",
     "vue-jest": "^3.0.6",
     "vue-template-compiler": "^2.6.11",
@@ -75,13 +79,19 @@
     },
     "extends": [
       "plugin:vue/essential",
-      "eslint:recommended"
+      "eslint:recommended",
+      "@vue/typescript"
     ],
     "parserOptions": {
-      "parser": "babel-eslint"
+      "parser": "@typescript-eslint/parser"
     },
     "rules": {}
   },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ],
   "jest": {
     "moduleFileExtensions": [
       "js",
@@ -112,10 +122,5 @@
     "transformIgnorePatterns": [
       "/node_modules/(?!vuikit)"
     ]
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not dead"
-  ]
+  }
 }
