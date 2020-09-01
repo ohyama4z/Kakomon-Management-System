@@ -1,8 +1,8 @@
-export default {
-  // upload: (state, newFile) => {
-  //   state.files.push(newFile)
-  // },
+type Mutations = {
+  [key in string]: (state: any, payload: any) => any
+}
 
+export default {
   updateCurrentUser: (state, user) => {
     state.currentUser = user
   },
@@ -132,8 +132,8 @@ export default {
   setChangedFiles: (state, files) => {
     const changedFilesArr = Object.entries(
       state.changedFiles
-    ).map(([filename, data]) => [filename, { ...data, ...files }])
+    ).map(([filename, data]) => [filename, { ...data as object, ...files }])
     const changedFiles = Object.fromEntries(changedFilesArr)
     state.changedFiles = { ...changedFiles }
   }
-}
+} as Mutations

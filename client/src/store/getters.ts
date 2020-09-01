@@ -1,3 +1,7 @@
+type Getters = {
+  [key in string]: (state: any) => any
+}
+
 export default {
   currentBranchMetadatas: state => {
     const branch = state.currentBranch
@@ -45,4 +49,4 @@ export default {
 
     return { status: 'loaded', data: result }
   }
-}
+} as Getters

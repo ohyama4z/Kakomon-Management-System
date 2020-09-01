@@ -1,11 +1,14 @@
 import merge from 'deepmerge'
 import moment from 'moment'
 import netlifyIdentity from 'netlify-identity-widget'
-import state from './state'
 
 const url = process.env.VUE_APP_URL
 
-export default {
+type Actions = {
+  [key in string]: (vuex: { commit: any, state: any, dispatch: any }, payload: any) => any
+}
+
+const actions: Actions =  {
   getBranches: async ({ commit, state }) => {
     commit('setBranchesStatus', { path: 'branches', status: 'loading' })
     const token = state.currentUser.token.access_token
@@ -19,13 +22,13 @@ export default {
     })
     const res = await httpRes.json()
 
-    const branches = Object.fromEntries(
-      res.map(branch => [branch.name, branch.commit.sha])
+    const branches = (Object as any).fromEntries(
+      res.map((branch: any) => [branch.name, branch.commit.sha])
     )
     commit('setBranches', { branches })
   },
 
-  selectBranch: async ({ dispatch, commit }, branchName) => {
+  selectBranch: async ({ dispatch, commit, state }, branchName) => {
     commit('setCurrentBranch', branchName)
     await dispatch('getBranches')
     const commitSha = state.branches.data[branchName]
@@ -44,14 +47,14 @@ export default {
 
     commit('setCommitStatus', { sha: commitSha, status: 'loading' })
 
-    const commitDataInLocalStorage = JSON.parse(localStorage.getItem(commitSha))
+    const commitDataInLocalStorage = JSON.parse(localStorage.getItem(commitSha) as string)
     if (commitDataInLocalStorage != null) {
       commit('setCommit', {
         sha: commitSha,
         data: commitDataInLocalStorage
       })
       await Promise.all([
-        Object.entries(commitDataInLocalStorage).map(async ([name, sha]) => {
+        (Object as any).entries(commitDataInLocalStorage).map(async ([name, sha]: [string, string]) => {
           await dispatch('getContentMetadata', { filename: name, fileSha: sha })
         })
       ])
@@ -71,11 +74,11 @@ export default {
     )
     const res = await httpRes.json()
 
-    const commitData = Object.fromEntries(
-      res.map(file => [file.name, file.sha])
+    const commitData: any = (Object as any).fromEntries(
+      res.map((file: any) => [file.name, file.sha])
     )
 
-    Object.entries(commitData).map(async ([name, sha]) => {
+    ;(Object as any).entries(commitData).map(async ([name, sha]: [string, string]) => {
       await dispatch('getContentMetadata', { filename: name, fileSha: sha })
     })
 
@@ -99,7 +102,7 @@ export default {
     })
 
     const fileDataInLocalStorage = JSON.parse(
-      localStorage.getItem(payload.fileSha)
+      localStorage.getItem(payload.fileSha) as string
     )
     if (fileDataInLocalStorage != null) {
       commit('setContentMetadata', {
@@ -526,7 +529,7 @@ function toBlob(base64, type) {
   return new Blob([buffer.buffer], { type })
 }
 
-export function readFileAsync(blob) {
+export function readFileAsync(blob: any) {
   return new Promise(resolve => {
     const reader = new FileReader()
     reader.onload = () => {
@@ -537,7 +540,7 @@ export function readFileAsync(blob) {
   })
 }
 
-export async function getCsvBlobSha(state, payload) {
+export async function getCsvBlobSha(state: any, payload: any) {
   const headerRow = `src,subj,tool_type,period,year,content_type,author,image_index,included_pages_num,fix_text\n`
   const sortedFiles = Object.keys(payload.files).sort()
   const filesRows = sortedFiles.reduce((p, src) => {
@@ -566,3 +569,5 @@ export async function getCsvBlobSha(state, payload) {
 
   return blobShaRes.sha
 }
+
+export default actions

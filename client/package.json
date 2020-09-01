@@ -9,6 +9,11 @@
     "test": "jest"
   },
   "dependencies": {
+    "@types/deepmerge": "^2.2.0",
+    "@types/jest": "^26.0.12",
+    "@types/moment": "^2.13.0",
+    "@types/netlify-identity-widget": "^1.4.2",
+    "@types/node": "^14.6.2",
     "@vue/cli": "^4.5.4",
     "@vuikit/icons": "^0.8.1",
     "@vuikit/theme": "^0.8.1",

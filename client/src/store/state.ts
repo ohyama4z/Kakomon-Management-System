@@ -1,7 +1,5 @@
-import netlifyIdentity from 'netlify-identity-widget'
-
 export default {
-  currentUser: netlifyIdentity.currentUser(),
+  currentUser: null,
   lastPage: '',
   currentBranch: '',
   expand: true,
