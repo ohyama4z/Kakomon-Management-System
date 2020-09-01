@@ -11,96 +11,122 @@
     <div v-if="!isLoading">
       <Sidebar></Sidebar>
       <div class="forms" v-bind:class="{ expand: expand }">
-        <div class="uk-margin uk-flex uk-flex-center">
-          <input
-            class="uk-input uk-form-width-medium"
-            type="text"
-            placeholder="教科名を入力"
-            v-model="subject"
-          />
+        <div class="uk-flex uk-flex-center">
+          <vk-icon-button
+            icon="thumbnails"
+            @click="pushPreview"
+            class="uk-margin-right"
+            :class="{ pushed: isPreview }"
+          ></vk-icon-button>
+          <vk-icon-button
+            icon="list"
+            @click="pushList"
+            :class="{ pushed: isList }"
+          ></vk-icon-button>
         </div>
 
-        <div class="uk-margin uk-flex uk-flex-center">
-          <input
-            class="uk-input uk-form-width-medium"
-            type="number"
-            placeholder="年度を入力(西暦)"
-            v-model="year"
-          />
-        </div>
+        <div class="uk-margin-top" v-if="isList">
+          <div class="uk-margin uk-flex uk-flex-center">
+            <input
+              class="uk-input uk-form-width-medium"
+              type="text"
+              placeholder="教科名を入力"
+              v-model="subject"
+            />
+          </div>
 
-        <div class="uk-margin uk-flex uk-flex-center">
-          <select class="uk-select uk-form-width-medium" v-model="toolType">
-            <option disabled value="">用途を選択</option>
-            <option>勉強用</option>
-            <option>テスト</option>
-          </select>
-        </div>
+          <div class="uk-margin uk-flex uk-flex-center">
+            <input
+              class="uk-input uk-form-width-medium"
+              type="number"
+              placeholder="年度を入力(西暦)"
+              v-model="year"
+            />
+          </div>
 
-        <div class="uk-margin uk-flex uk-flex-center">
-          <select class="uk-select uk-form-width-medium" v-model="period">
-            <option disabled value="">テストの時期を選択</option>
-            <option>前期中間</option>
-            <option>前期定期</option>
-            <option>後期中間</option>
-            <option>後期定期</option>
-          </select>
-        </div>
+          <div class="uk-margin uk-flex uk-flex-center">
+            <select class="uk-select uk-form-width-medium" v-model="toolType">
+              <option disabled value="">用途を選択</option>
+              <option>勉強用</option>
+              <option>テスト</option>
+            </select>
+          </div>
 
-        <div
-          class="uk-margin uk-flex uk-flex-center"
-          v-if="toolType === 'テスト'"
-        >
-          <select class="uk-select uk-form-width-medium" v-model="contentType">
-            <option disabled value="">用紙の種類を選択</option>
-            <option>問題</option>
-            <option>解答なし答案用紙</option>
-            <option>学生解答</option>
-            <option>模範解答</option>
-          </select>
-        </div>
+          <div class="uk-margin uk-flex uk-flex-center">
+            <select class="uk-select uk-form-width-medium" v-model="period">
+              <option disabled value="">テストの時期を選択</option>
+              <option>前期中間</option>
+              <option>前期定期</option>
+              <option>後期中間</option>
+              <option>後期定期</option>
+            </select>
+          </div>
 
-        <div
-          class="uk-margin uk-flex uk-flex-center"
-          v-if="toolType === '勉強用'"
-        >
-          <select class="uk-select uk-form-width-medium" v-model="contentType">
-            <option disabled value="">用紙の種類を選択</option>
-            <option>ノート</option>
-            <option>まとめ</option>
-            <option>対策プリント</option>
-          </select>
-        </div>
-
-        <div class="uk-margin uk-flex uk-flex-center">
-          <input
-            class="uk-input uk-form-width-medium"
-            type="text"
-            placeholder="用紙作成者,担当教員"
-            v-model="author"
-          />
-        </div>
-
-        <div class="uk-text-center@s uk-margin" v-if="!isSellectedAll">
-          すべての項目を選択してください
-        </div>
-
-        <div class="uk-flex uk-flex-center uk-margin">
-          <vk-button
-            type="primary"
-            class="uk-margin"
-            v-bind:disabled="!isSellectedAll"
-            v-on:click="updateEditData"
-            >編集をコミット</vk-button
+          <div
+            class="uk-margin uk-flex uk-flex-center"
+            v-if="toolType === 'テスト'"
           >
-        </div>
+            <select
+              class="uk-select uk-form-width-medium"
+              v-model="contentType"
+            >
+              <option disabled value="">用紙の種類を選択</option>
+              <option>問題</option>
+              <option>解答なし答案用紙</option>
+              <option>学生解答</option>
+              <option>模範解答</option>
+            </select>
+          </div>
 
-        <div class="uk-flex uk-flex-center uk-margin">
-          <vk-button type="primary" class="uk-margin" v-on:click="postCommitCsv"
-            >コミット</vk-button
+          <div
+            class="uk-margin uk-flex uk-flex-center"
+            v-if="toolType === '勉強用'"
           >
+            <select
+              class="uk-select uk-form-width-medium"
+              v-model="contentType"
+            >
+              <option disabled value="">用紙の種類を選択</option>
+              <option>ノート</option>
+              <option>まとめ</option>
+              <option>対策プリント</option>
+            </select>
+          </div>
+
+          <div class="uk-margin uk-flex uk-flex-center">
+            <input
+              class="uk-input uk-form-width-medium"
+              type="text"
+              placeholder="用紙作成者,担当教員"
+              v-model="author"
+            />
+          </div>
+
+          <div class="uk-text-center@s uk-margin" v-if="!isSellectedAll">
+            すべての項目を選択してください
+          </div>
+
+          <div class="uk-flex uk-flex-center uk-margin">
+            <vk-button
+              type="primary"
+              class="uk-margin"
+              v-bind:disabled="!isSellectedAll"
+              v-on:click="updateEditData"
+              >編集をコミット</vk-button
+            >
+          </div>
+
+          <div class="uk-flex uk-flex-center uk-margin">
+            <vk-button
+              type="primary"
+              class="uk-margin"
+              v-on:click="postCommitCsv"
+              >コミット</vk-button
+            >
+          </div>
+          <List></List>
         </div>
-        <Preview></Preview>
+        <Preview v-if="isPreview"></Preview>
       </div>
     </div>
   </div>
@@ -113,6 +139,7 @@ import { Spinner } from 'vuikit/lib/spinner'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
 import Preview from '../components/Preview'
+import List from '../components/List'
 
 export default {
   name: 'Edit',
@@ -122,7 +149,8 @@ export default {
     VkButton: Button,
     Sidebar,
     Navbar,
-    Preview
+    Preview,
+    List
   },
 
   data() {
@@ -134,7 +162,9 @@ export default {
       contentType: '',
       author: '',
       selectedBranch: 'master',
-      editType: ''
+      editType: '',
+      isPreview: false,
+      isList: true
     }
   },
 
@@ -213,6 +243,16 @@ export default {
         author: this.author
       }
       this.$store.commit('setChangedFiles', changedFiles)
+    },
+
+    pushPreview() {
+      this.isPreview = true
+      this.isList = false
+    },
+
+    pushList() {
+      this.isPreview = false
+      this.isList = true
     }
   }
 }
@@ -227,5 +267,9 @@ export default {
 }
 .expand {
   padding-left: 350px;
+}
+.pushed {
+  color: white;
+  background-color: #39f;
 }
 </style>

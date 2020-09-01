@@ -7,7 +7,7 @@
           v-bind:key="image.blob"
           class="uk-flex uk-flex-center"
         >
-          <div v-if="image" class="uk-margin-top">
+          <div v-if="image.blob" class="uk-margin-top">
             <img :src="image.blob" class="image" width="700" />
             <div class="uk-text-center@s">↑ {{ image.filename }}</div>
           </div>
