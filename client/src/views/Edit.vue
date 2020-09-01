@@ -167,13 +167,13 @@ export default {
     }),
 
     isLoading() {
-      const checkLoading = status => {
-        return status === 'loading'
+      const checkNotLoaded = status => {
+        return status !== 'loaded'
       }
 
       return (
         this.isLoadingFiles ||
-        checkLoading(this.$store.getters.currentBranchMetadatas.status)
+        checkNotLoaded(this.$store.getters.currentBranchMetadatas.status)
       )
     },
 
