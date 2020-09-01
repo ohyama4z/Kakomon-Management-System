@@ -8,7 +8,10 @@
           class="uk-flex uk-flex-center"
         >
           <div v-if="image.blob" class="uk-margin-top">
-            <img :src="image.blob" class="image" width="700" />
+            <div class="uk-inline">
+              <img :src="image.blob" class="image" width="700" />
+              <div class="uk-position-top-right uk-overlay"></div>
+            </div>
             <div class="uk-text-center@s filename">{{ image.filename }}</div>
           </div>
           <vk-spinner raito="5" v-else />
