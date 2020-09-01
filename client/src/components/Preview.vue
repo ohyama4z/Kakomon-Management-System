@@ -4,10 +4,13 @@
       <template>
         <li
           v-for="image in images"
-          v-bind:key="image"
+          v-bind:key="image.blob"
           class="uk-flex uk-flex-center"
         >
-          <img :src="image" width="700" v-if="image" />
+          <div v-if="image" class="uk-margin-top">
+            <img :src="image.blob" class="image" width="700" />
+            <div class="uk-text-center@s">↑ {{ image.filename }}</div>
+          </div>
           <vk-spinner raito="5" v-else />
         </li>
       </template>
@@ -29,10 +32,16 @@ export default {
           const filename = filePath.substr(filePath.lastIndexOf('/') + 1)
           const imageSha =
             state.imageShas[commitSha]?.[directoryPath]?.data?.[filename]
-          return state.imageDatas?.[imageSha]?.data
+          return { blob: state.imageDatas?.[imageSha]?.data, filename }
         })
       }
     })
   }
 }
 </script>
+
+<style scoped>
+.image {
+  border: solid #d1d1d1;
+}
+</style>
