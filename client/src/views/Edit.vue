@@ -152,7 +152,7 @@ export default {
 
   computed: {
     ...mapState({
-      isLoading: state => {
+      isLoadingFiles: state => {
         const checkLoading = status => {
           return status === 'loading'
         }
@@ -160,12 +160,22 @@ export default {
         return (
           checkLoading(state.branches.status) ||
           checkLoading(state.commits[state.currentBranch]?.status)
-          // checkLoading(this.$store.getters.currentBranchMetadatas.status)
         )
       },
 
       expand: state => state.expand
     }),
+
+    isLoading() {
+      const checkLoading = status => {
+        return status === 'loading'
+      }
+
+      return (
+        this.isLoadingFiles ||
+        checkLoading(this.$store.getters.currentBranchMetadatas.status)
+      )
+    },
 
     isSellectedAll() {
       return (
