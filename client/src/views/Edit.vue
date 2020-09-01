@@ -159,8 +159,8 @@ export default {
 
         return (
           checkLoading(state.branches.status) ||
-          checkLoading(state.commits[state.currentBranch]?.status) ||
-          checkLoading(this.$store.getters.currentBranchMetadatas.status)
+          checkLoading(state.commits[state.currentBranch]?.status)
+          // checkLoading(this.$store.getters.currentBranchMetadatas.status)
         )
       },
 

@@ -255,7 +255,7 @@ describe('Upload.vue', () => {
       .findAllComponents(Button)
       .filter(w => w.text() === '作成')
       .at(0)
-    expect(wrapper.vm.isNewBranch).not.toBeFalsy()
+    expect(wrapper.vm.isNewBranch).toBeTruthy()
     createBranchButton.trigger('click')
     await flushPromises()
     expect(actions.createBranch).toHaveBeenCalled()
@@ -285,7 +285,7 @@ describe('Upload.vue', () => {
     wrapper.findAll('input').at(0).setValue('branch')
     await new Promise(resolve => setTimeout(resolve, 5))
     expect(wrapper.vm.newBranch).toBe('branch')
-    expect(wrapper.vm.isExisted).not.toBeFalsy()
+    expect(wrapper.vm.isExisted).toBeTruthy()
     expect(wrapper.vm.isNewBranch).toBeFalsy()
   })
 
@@ -313,7 +313,7 @@ describe('Upload.vue', () => {
     await flushPromises()
 
     // 初期状態ではボタンはdisabled
-    expect(wrapper.vm.isDisabled).not.toBeFalsy()
+    expect(wrapper.vm.isDisabled).toBeTruthy()
 
     // branchの選択
     wrapper.findAllComponents(Button).at(3).trigger('click')

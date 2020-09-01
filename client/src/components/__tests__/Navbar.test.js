@@ -136,7 +136,7 @@ describe('Navbar.vue', () => {
     expect(actions.selectBranch).toHaveBeenCalled()
   })
 
-  it('ログアウトを押すと/logoutに遷移する', () => {
+  it('ログアウトを押すと/logoutに遷移する', async () => {
     router.push(`/edit`)
     const wrapper = mount(Navbar, {
       store,
@@ -147,7 +147,7 @@ describe('Navbar.vue', () => {
     const logoutButtonWrapper = wrapper.findAllComponents(Button).at(2)
     expect(logoutButtonWrapper.text()).toBe(`ログアウト`)
     logoutButtonWrapper.trigger('click')
-    expect(wrapper.vm.$emit).toHaveBeenCalledWith('beforeLogout')
+    expect(wrapper.emitted('beforeLogout')).toBeTruthy()
     expect(wrapper.vm.$route.path).toBe('/logout')
   })
 })

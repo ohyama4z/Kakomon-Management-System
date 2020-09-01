@@ -187,7 +187,7 @@ describe('Edit.vue', () => {
     contentTypeInput.setValue('ノート')
     await new Promise(resolve => setTimeout(resolve, 5))
 
-    expect(wrapper.vm.isSellectedAll).not.toBeFalsy()
+    expect(wrapper.vm.isSellectedAll).toBeTruthy()
     commitButton.trigger('click')
     await new Promise(resolve => setTimeout(resolve, 5))
     expect(mutations.setChangedFiles).toHaveBeenCalled()

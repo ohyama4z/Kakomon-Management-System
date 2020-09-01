@@ -26,30 +26,33 @@ const state = {
 
 const getters = {
   currentBranchMetadatas: jest.fn(() => ({
-    src1: {
-      src: 'src1',
-      subj: 'subj1',
-      year: 'year1',
-      content_type: 'content_type1',
-      tool_type: 'tool_type1',
-      period: 'period1'
+    data: {
+      src1: {
+        src: 'src1',
+        subj: 'subj1',
+        year: 'year1',
+        content_type: 'content_type1',
+        tool_type: 'tool_type1',
+        period: 'period1'
+      },
+      src2: {
+        src: 'src2',
+        subj: 'subj1',
+        year: 'year1',
+        content_type: 'content_type1',
+        tool_type: 'tool_type1',
+        period: 'period1'
+      },
+      src3: {
+        src: 'src3',
+        subj: 'subj3',
+        year: 'year3',
+        content_type: 'content_type3',
+        tool_type: 'tool_type3',
+        period: 'period3'
+      }
     },
-    src2: {
-      src: 'src2',
-      subj: 'subj1',
-      year: 'year1',
-      content_type: 'content_type1',
-      tool_type: 'tool_type1',
-      period: 'period1'
-    },
-    src3: {
-      src: 'src3',
-      subj: 'subj3',
-      year: 'year3',
-      content_type: 'content_type3',
-      tool_type: 'tool_type3',
-      period: 'period3'
-    }
+    status: 'loaded'
   }))
 }
 

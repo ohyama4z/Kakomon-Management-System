@@ -9,7 +9,7 @@ export default {
       console.log(
         `branches is ${branches.status}, skip generating branch metadatas`
       )
-      return {}
+      return { status: 'loading', data: {} }
     }
 
     const commitSha = branches?.data?.[branch]
@@ -17,7 +17,7 @@ export default {
       console.log(
         `commits is ${commits[commitSha]?.status}, skip generating metadatas`
       )
-      return {}
+      return { status: 'loading', data: {} }
     }
 
     const loadedContentMetadataShas = Object.values(
@@ -28,7 +28,7 @@ export default {
       loadedContentMetadataShas.length !==
       Object.values(state.commits[commitSha].data).length
     ) {
-      return {}
+      return { status: 'loading', data: {} }
     }
 
     const loadedMetadatas = loadedContentMetadataShas.flatMap(sha => {
@@ -43,6 +43,6 @@ export default {
 
     const result = Object.fromEntries(contentMetadatasBySource)
 
-    return result
+    return { status: 'loaded', data: result }
   }
 }
