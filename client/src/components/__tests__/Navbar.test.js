@@ -147,7 +147,7 @@ describe('Navbar.vue', () => {
     const logoutButtonWrapper = wrapper.findAllComponents(Button).at(2)
     expect(logoutButtonWrapper.text()).toBe(`ログアウト`)
     logoutButtonWrapper.trigger('click')
-    expect(wrapper.emitted('beforeLogout')).toBeTruthy()
+    expect(wrapper.emitted('before-logout')).toBeTruthy()
     expect(wrapper.vm.$route.path).toBe('/logout')
   })
 })

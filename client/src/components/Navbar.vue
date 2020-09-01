@@ -148,7 +148,7 @@ export default {
     },
 
     logout() {
-      this.$emit('beforeLogout')
+      this.$emit('before-logout')
       this.$router.push('/logout')
     },
 
