@@ -148,11 +148,7 @@ export default {
     },
 
     logout() {
-      const path = this.$route.path.substr(
-        this.$route.path.lastIndexOf('.') + 1
-      )
-      localStorage.setItem('lastPage', path)
-      this.$store.commit('updateLastPage')
+      this.$emit('before-logout')
       this.$router.push('/logout')
     },
 

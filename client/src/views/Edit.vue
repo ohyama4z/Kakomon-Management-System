@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Navbar></Navbar>
+    <Navbar v-on:before-logout="logout"></Navbar>
 
     <vk-spinner
       class="uk-position-medium uk-position-center"
@@ -152,7 +152,7 @@ export default {
 
   computed: {
     ...mapState({
-      isLoading: state => {
+      isLoadingFiles: state => {
         const checkLoading = status => {
           return status === 'loading'
         }
@@ -165,6 +165,17 @@ export default {
 
       expand: state => state.expand
     }),
+
+    isLoading() {
+      const checkLoading = status => {
+        return status === 'loading'
+      }
+
+      return (
+        this.isLoadingFiles ||
+        checkLoading(this.$store.getters.currentBranchMetadatas.status)
+      )
+    },
 
     isSellectedAll() {
       return (
@@ -185,6 +196,11 @@ export default {
     },
     async postCommitCsv() {
       await this.$store.dispatch('postCommitCsv')
+    },
+
+    logout() {
+      localStorage.setItem('lastPage', 'edit')
+      this.$store.commit('updateLastPage')
     },
 
     updateEditData() {

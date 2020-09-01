@@ -6,6 +6,7 @@ import VueRouter from 'vue-router'
 import Vuex from 'vuex'
 import { Button } from 'vuikit/lib/button'
 import { Spinner } from 'vuikit/lib/spinner'
+import Navbar from '../../components/Navbar'
 import Edit from '../Edit'
 
 const localVue = createLocalVue()
@@ -19,7 +20,6 @@ describe('Edit.vue', () => {
   let getters
   let mutations
   let actions
-  let store
   let router
 
   beforeEach(() => {
@@ -53,16 +53,19 @@ describe('Edit.vue', () => {
     }
 
     getters = {
-      currentBranchMetadatas: jest.fn(() => ({
-        src1: {
-          src: 'src1',
-          subj: 'subj',
-          year: 'year',
-          content_type: 'content_type',
-          tool_type: 'tool_type',
-          period: 'period'
+      currentBranchMetadatas: () => ({
+        status: 'loaded',
+        data: {
+          src1: {
+            src: 'src1',
+            subj: 'subj',
+            year: 'year',
+            content_type: 'content_type',
+            tool_type: 'tool_type',
+            period: 'period'
+          }
         }
-      }))
+      })
     }
 
     mutations = {
@@ -76,18 +79,18 @@ describe('Edit.vue', () => {
       selectBranch: jest.fn(),
       getCommit: jest.fn()
     }
-
-    store = new Vuex.Store({
-      state,
-      getters,
-      mutations,
-      actions
-    })
     jest.clearAllMocks()
     localStorage.clear()
   })
 
   it('ページが読み込まれたときにbranchの取得,及びファイルの取得を行う', async () => {
+    const store = new Vuex.Store({
+      state,
+      getters,
+      mutations,
+      actions
+    })
+
     shallowMount(Edit, {
       store,
       router,
@@ -104,6 +107,12 @@ describe('Edit.vue', () => {
   it('ユーザ情報がstate上にない場合ログインページに遷移する', async () => {
     state.currentUser = null
 
+    const store = new Vuex.Store({
+      state,
+      getters,
+      mutations,
+      actions
+    })
     const wrapper = shallowMount(Edit, {
       store,
       router,
@@ -117,7 +126,7 @@ describe('Edit.vue', () => {
     expect(wrapper.vm.$route.path).toBe('/login')
   })
 
-  it('ブランチ一覧の取得中にはロード中表示にする', () => {
+  it('ブランチ一覧の取得中にはロード中表示にする', async () => {
     state.currentBranch = 'master'
     state.commits = {
       master: {
@@ -126,17 +135,25 @@ describe('Edit.vue', () => {
     }
     state.branches.status = 'loading'
 
+    const store = new Vuex.Store({
+      state,
+      getters,
+      mutations,
+      actions
+    })
     const wrapper = shallowMount(Edit, {
       store,
       router,
       localVue
     })
 
+    await flushPromises()
+    expect(wrapper.vm.isLoadingFiles).toBe(true)
     expect(wrapper.vm.isLoading).toBe(true)
     expect(wrapper.findComponent(Spinner).exists()).toBe(true)
   })
 
-  it('コミット情報の取得中にはロード中表示にする', () => {
+  it('コミット情報の取得中にはロード中表示にする', async () => {
     state.currentBranch = 'master'
     state.commits = {
       master: {
@@ -145,12 +162,52 @@ describe('Edit.vue', () => {
     }
     state.branches.status = 'loaded'
 
+    const store = new Vuex.Store({
+      state,
+      getters,
+      mutations,
+      actions
+    })
     const wrapper = shallowMount(Edit, {
       store,
       router,
       localVue
     })
 
+    await flushPromises()
+    expect(wrapper.vm.isLoadingFiles).toBe(true)
+    expect(wrapper.vm.isLoading).toBe(true)
+    expect(wrapper.findComponent(Spinner).exists()).toBe(true)
+  })
+
+  it('gettersでサイドバー情報が取れていない間はロード中表示にする', async () => {
+    getters.currentBranchMetadatas = () => ({
+      data: {},
+      status: 'loading'
+    })
+    state.currentBranch = 'master'
+    state.commits = {
+      master: {
+        status: 'loaded'
+      }
+    }
+    state.branches.status = 'loaded'
+
+    const store = new Vuex.Store({
+      state,
+      getters,
+      mutations,
+      actions
+    })
+
+    const wrapper = shallowMount(Edit, {
+      store,
+      router,
+      localVue
+    })
+
+    await flushPromises()
+    expect(wrapper.vm.isLoadingFiles).toBe(false)
     expect(wrapper.vm.isLoading).toBe(true)
     expect(wrapper.findComponent(Spinner).exists()).toBe(true)
   })
@@ -159,6 +216,12 @@ describe('Edit.vue', () => {
     const stubs = {
       VkButton: Button
     }
+    const store = new Vuex.Store({
+      state,
+      getters,
+      mutations,
+      actions
+    })
     const wrapper = shallowMount(Edit, {
       store,
       router,
@@ -186,9 +249,32 @@ describe('Edit.vue', () => {
     contentTypeInput.setValue('ノート')
     await new Promise(resolve => setTimeout(resolve, 5))
 
-    expect(wrapper.vm.isSellectedAll).not.toBeFalsy()
+    expect(wrapper.vm.isSellectedAll).toBeTruthy()
     commitButton.trigger('click')
     await new Promise(resolve => setTimeout(resolve, 5))
     expect(mutations.setChangedFiles).toHaveBeenCalled()
+  })
+
+  it('Navbarのログアウトが押されるとログアウトの処理を行う', async () => {
+    const stubs = {
+      VkButton: Button
+    }
+
+    const store = new Vuex.Store({
+      state,
+      getters,
+      mutations,
+      actions
+    })
+    const wrapper = shallowMount(Edit, {
+      store,
+      router,
+      localVue,
+      stubs
+    })
+    await flushPromises()
+    wrapper.findComponent(Navbar).vm.$emit('before-logout')
+    expect(localStorage.setItem).toHaveBeenCalledWith('lastPage', 'edit')
+    expect(mutations.updateLastPage).toHaveBeenCalled()
   })
 })

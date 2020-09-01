@@ -22,7 +22,7 @@ export default {
     ...mapGetters(['currentBranchMetadatas']),
 
     intermediateFiles() {
-      const files = Object.values(this.currentBranchMetadatas)
+      const files = Object.values(this.currentBranchMetadatas.data)
       const beforeMerge = files.map(file => {
         const {
           period,

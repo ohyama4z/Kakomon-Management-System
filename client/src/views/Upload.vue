@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Navbar></Navbar>
+    <Navbar v-on:before-logout="logout"></Navbar>
 
     <vk-spinner
       class="uk-position-medium uk-position-center"
@@ -236,6 +236,11 @@ export default {
 
     selectExistedBranch(branchName) {
       this.branchName = branchName
+    },
+
+    logout() {
+      localStorage.setItem('lastPage', 'upload')
+      this.$store.commit('updateLastPage')
     },
 
     async createBranch() {
