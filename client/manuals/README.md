@@ -17,7 +17,9 @@ KMS(過去問マネージメントシステム)は、現在 [Googleドライブ]
 ## KMSへのログイン
 KMSを使用するにはNetlify Identityへのログインが必要です。
 
-KMSのリンクにアクセスするとはじめにログイン画面に飛ばされる(はず)なので、Netlify Identityの
+KMSのリンクにアクセスするとはじめにログイン画面に飛ばされ下のようなログインモーダルが出ます。
+
+Netlify Identity,Google,Githubのいずれかのアカウントでログインしてください。
 
 
 <a id="upload"></a>
