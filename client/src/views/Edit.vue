@@ -25,7 +25,8 @@
           ></vk-icon-button>
         </div>
 
-        <div class="uk-margin-top" v-if="isList">
+        <div class="uk-margin-large-top" v-if="isList">
+          <List></List>
           <div class="uk-margin uk-flex uk-flex-center">
             <input
               class="uk-input uk-form-width-medium"
@@ -124,7 +125,6 @@
               >コミット</vk-button
             >
           </div>
-          <List></List>
         </div>
         <Preview v-if="isPreview"></Preview>
       </div>

@@ -9,7 +9,7 @@
         >
           <div v-if="image.blob" class="uk-margin-top">
             <img :src="image.blob" class="image" width="700" />
-            <div class="uk-text-center@s">↑ {{ image.filename }}</div>
+            <div class="uk-text-center@s filename">{{ image.filename }}</div>
           </div>
           <vk-spinner raito="5" v-else />
         </li>
@@ -42,6 +42,13 @@ export default {
 
 <style scoped>
 .image {
-  border: solid #d1d1d1;
+  border-top: solid #d1d1d1;
+  border-left: solid #d1d1d1;
+  border-right: solid #d1d1d1;
+}
+.filename {
+  border-bottom: solid #d1d1d1;
+  border-left: solid #d1d1d1;
+  border-right: solid #d1d1d1;
 }
 </style>
