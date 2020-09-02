@@ -11,12 +11,15 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+// @ts-ignore
 import { Spinner } from 'vuikit'
 import netlifyIdentity from 'netlify-identity-widget'
 
-export default {
-  conponent: {
+import Vue from 'vue'
+
+export default Vue.extend({
+  components: {
     VkSpinner: Spinner
   },
 
@@ -27,5 +30,5 @@ export default {
       this.$router.push('/login')
     })
   }
-}
+})
 </script>

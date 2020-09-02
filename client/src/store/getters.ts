@@ -1,8 +1,7 @@
-type Getters = {
-  [key in string]: (state: any) => any
-}
+import type { GetterTree } from 'vuex'
+import type { State } from './state'
 
-export default {
+const getters: GetterTree<State, any> = {
   currentBranchMetadatas: state => {
     const branch = state.currentBranch
     const branches = state.branches
@@ -37,7 +36,7 @@ export default {
 
     const loadedMetadatas = loadedContentMetadataShas.flatMap((sha: any) => {
       return Object.entries(contentMetadatas[sha]?.data).map(([key, value]) => {
-        return { [key]: { ...value as object, sha } }
+        return { [key]: { ...(value as object), sha } }
       })
     })
 
@@ -49,4 +48,6 @@ export default {
 
     return { status: 'loaded', data: result }
   }
-} as Getters
+}
+
+export default getters

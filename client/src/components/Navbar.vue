@@ -83,18 +83,27 @@
   </vk-sticky>
 </template>
 
-<script>
-import { mapState } from 'vuex'
+<script lang="ts">
+import { State } from '../store/state'
+// @ts-ignore
 import { Sticky } from 'vuikit/lib/sticky'
+// @ts-ignore
 import {
   NavbarFull,
   NavbarNav,
   NavbarItem,
   NavbarLogo
+  // @ts-ignore
 } from 'vuikit/lib/navbar'
+// @ts-ignore
 import { Button } from 'vuikit/lib/button'
+import Vue from 'vue'
 
-export default {
+interface Data {
+  selectedBranch: string
+}
+
+export default Vue.extend({
   name: 'Navbar',
   components: {
     VkSticky: Sticky,
@@ -112,11 +121,10 @@ export default {
   },
 
   computed: {
-    ...mapState({
-      branches: state => {
-        return state.branches.data
-      }
-    }),
+    branches() {
+      const state = this.$store.state as State
+      return state.branches.data
+    },
 
     uploadButtonType() {
       if (this.$route.path === '/upload') {
@@ -156,7 +164,7 @@ export default {
       await this.$store.dispatch('selectBranch', this.selectedBranch)
     }
   }
-}
+})
 </script>
 
 <style scoped>

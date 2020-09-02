@@ -106,15 +106,30 @@
   </div>
 </template>
 
-<script>
-import { mapState } from 'vuex'
+<script lang="ts">
+import { State } from '../store/state'
+// @ts-ignore
 import { Button } from 'vuikit/lib/button'
+// @ts-ignore
 import { Spinner } from 'vuikit/lib/spinner'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
 import Preview from '../components/Preview'
 
-export default {
+import Vue from 'vue'
+
+interface Data {
+  subject: string
+  year: string | null
+  toolType: string
+  period: string
+  contentType: string
+  author: string
+  selectedBranch: string
+  editType: string
+}
+
+export default Vue.extend({
   name: 'Edit',
 
   components: {
@@ -125,7 +140,7 @@ export default {
     Preview
   },
 
-  data() {
+  data(): Data {
     return {
       subject: '',
       year: null,
@@ -151,23 +166,25 @@ export default {
   },
 
   computed: {
-    ...mapState({
-      isLoadingFiles: state => {
-        const checkLoading = status => {
-          return status === 'loading'
-        }
+    isLoadingFiles() {
+      const state = this.$store.state as State
+      const checkLoading = (status: string) => {
+        return status === 'loading'
+      }
 
-        return (
-          checkLoading(state.branches.status) ||
-          checkLoading(state.commits[state.currentBranch]?.status)
-        )
-      },
+      return (
+        checkLoading(state.branches.status) ||
+        checkLoading(state.commits[state.currentBranch]?.status)
+      )
+    },
 
-      expand: state => state.expand
-    }),
+    expand() {
+      const state = this.$store.state as State
+      return state.expand
+    },
 
     isLoading() {
-      const checkLoading = status => {
+      const checkLoading = (status: string) => {
         return status === 'loading'
       }
 
@@ -215,7 +232,7 @@ export default {
       this.$store.commit('setChangedFiles', changedFiles)
     }
   }
-}
+})
 </script>
 
 <style>

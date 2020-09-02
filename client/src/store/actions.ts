@@ -1,17 +1,16 @@
 import merge from 'deepmerge'
 import moment from 'moment'
+// @ts-ignore
 import netlifyIdentity from 'netlify-identity-widget'
+import { ActionTree } from 'vuex'
+import { State } from './state'
 
 const url = process.env.VUE_APP_URL
 
-type Actions = {
-  [key in string]: (vuex: { commit: any, state: any, dispatch: any }, payload: any) => any
-}
-
-const actions: Actions =  {
+const actions: ActionTree<State, any> = {
   getBranches: async ({ commit, state }) => {
     commit('setBranchesStatus', { path: 'branches', status: 'loading' })
-    const token = state.currentUser.token.access_token
+    const token = state.currentUser!.token.access_token
     const getMethod = 'GET'
     const headers = {
       Authorization: `Bearer ${token}`
@@ -28,35 +27,44 @@ const actions: Actions =  {
     commit('setBranches', { branches })
   },
 
-  selectBranch: async ({ dispatch, commit, state }, branchName) => {
+  selectBranch: async ({ dispatch, commit, state }, branchName: string) => {
     commit('setCurrentBranch', branchName)
     await dispatch('getBranches')
     const commitSha = state.branches.data[branchName]
     await dispatch('getCommit', commitSha)
   },
 
-  getCommit: async ({ dispatch, commit, state }, commitSha) => {
+  getCommit: async ({ dispatch, commit, state }, commitSha: string) => {
     const commitDataInState = state.commits?.[commitSha]
     if (commitDataInState?.status === 'loaded') {
-      (Object as any).entries(commitDataInState.data).map(async ([name, sha]: string) => {
-        await dispatch('getContentMetadata', { filename: name, fileSha: sha })
-      })
+      ;(Object as any)
+        .entries(commitDataInState.data)
+        .map(async ([name, sha]: string) => {
+          await dispatch('getContentMetadata', { filename: name, fileSha: sha })
+        })
 
       return
     }
 
     commit('setCommitStatus', { sha: commitSha, status: 'loading' })
 
-    const commitDataInLocalStorage = JSON.parse(localStorage.getItem(commitSha) as string)
+    const commitDataInLocalStorage = JSON.parse(
+      localStorage.getItem(commitSha) as string
+    )
     if (commitDataInLocalStorage != null) {
       commit('setCommit', {
         sha: commitSha,
         data: commitDataInLocalStorage
       })
       await Promise.all([
-        (Object as any).entries(commitDataInLocalStorage).map(async ([name, sha]: [string, string]) => {
-          await dispatch('getContentMetadata', { filename: name, fileSha: sha })
-        })
+        (Object as any)
+          .entries(commitDataInLocalStorage)
+          .map(async ([name, sha]: [string, string]) => {
+            await dispatch('getContentMetadata', {
+              filename: name,
+              fileSha: sha
+            })
+          })
       ])
 
       return
@@ -78,9 +86,11 @@ const actions: Actions =  {
       res.map((file: any) => [file.name, file.sha])
     )
 
-    ;(Object as any).entries(commitData).map(async ([name, sha]: [string, string]) => {
-      await dispatch('getContentMetadata', { filename: name, fileSha: sha })
-    })
+    ;(Object as any)
+      .entries(commitData)
+      .map(async ([name, sha]: [string, string]) => {
+        await dispatch('getContentMetadata', { filename: name, fileSha: sha })
+      })
 
     commit('setCommit', {
       sha: commitSha,
@@ -373,26 +383,28 @@ const actions: Actions =  {
     })
 
     const treeMetadatas = await Promise.all(
-      (Object as any).entries(payload.files).map(async ([filename, blobUri]: [string, string]) => {
-        const httpBlob = await fetch(`${blobUri}`)
-        const blob = await httpBlob.blob()
-        const base64 = await readFileAsync(blob)
+      (Object as any)
+        .entries(payload.files)
+        .map(async ([filename, blobUri]: [string, string]) => {
+          const httpBlob = await fetch(`${blobUri}`)
+          const blob = await httpBlob.blob()
+          const base64 = await readFileAsync(blob)
 
-        const blobShaHttpRes = await fetch(
-          `${url}/github/git/blobs?ref=${payload.branch}`,
-          {
-            method: 'POST',
-            headers,
-            body: JSON.stringify({
-              content: base64,
-              encoding: 'base64'
-            })
-          }
-        )
-        const blobShaRes = await blobShaHttpRes.json()
+          const blobShaHttpRes = await fetch(
+            `${url}/github/git/blobs?ref=${payload.branch}`,
+            {
+              method: 'POST',
+              headers,
+              body: JSON.stringify({
+                content: base64,
+                encoding: 'base64'
+              })
+            }
+          )
+          const blobShaRes = await blobShaHttpRes.json()
 
-        return { filename, sha: blobShaRes.sha }
-      })
+          return { filename, sha: blobShaRes.sha }
+        })
     )
 
     const imagesTree = treeMetadatas.map(data => {
@@ -489,7 +501,7 @@ export function convertObjToCsv(arr) {
   return convertedCsvFile
 }
 
-export function convertCsvToObj(csv, filename) {
+export function convertCsvToObj(csv: string, filename: string) {
   // headerNames:CSV1行目の項目 :csvRows:項目に対する値
   const [headerNames, ...csvRows] = csv
     .split('\n')
@@ -518,7 +530,7 @@ export function convertCsvToObj(csv, filename) {
     }, {})
 }
 
-function toBlob(base64, type) {
+function toBlob(base64: string, type: string) {
   const bin = atob(base64.replace(/^.*,/, ''))
   const buffer = new Uint8Array(bin.length)
   for (let i = 0; i < bin.length; i++) {
@@ -540,7 +552,7 @@ export function readFileAsync(blob: any) {
   })
 }
 
-export async function getCsvBlobSha(state: any, payload: any) {
+export async function getCsvBlobSha(state: State, payload: any) {
   const headerRow = `src,subj,tool_type,period,year,content_type,author,image_index,included_pages_num,fix_text\n`
   const sortedFiles = Object.keys(payload.files).sort()
   const filesRows = sortedFiles.reduce((p, src) => {

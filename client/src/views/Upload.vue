@@ -126,17 +126,33 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import 'vuikit'
+// @ts-ignore
 import { Button } from 'vuikit/lib/button'
+// @ts-ignore
 import { Icon } from 'vuikit/lib/icon'
+// @ts-ignore
 import { Spinner } from 'vuikit/lib/spinner'
+// @ts-ignore
 import { Iconnav, IconnavItem } from 'vuikit/lib/iconnav'
+// @ts-ignore
 import { Drop } from 'vuikit/lib/drop'
-import Navbar from '../components/Navbar'
-import { mapState } from 'vuex'
+import Navbar from '../components/Navbar.vue'
 
-export default {
+import Vue from 'vue'
+import { State } from '../store/state'
+
+interface DataType {
+  uploadedFiles: {
+    [filename: string]: string
+  }
+  branchName: string
+  commitMessage: string
+  newBranch: string
+}
+
+export default Vue.extend({
   name: 'Upload',
   components: {
     VkButton: Button,
@@ -148,7 +164,7 @@ export default {
     Navbar
   },
 
-  data() {
+  data(): DataType {
     return {
       uploadedFiles: {},
       branchName: '',
@@ -156,32 +172,34 @@ export default {
       newBranch: ''
     }
   },
-  async mounted() {
+  mounted() {
     this.$store.dispatch('updateCurrentUser')
     if (this.$store.state.currentUser == null) {
       localStorage.setItem('lastPage', 'upload')
       this.$store.commit('updateLastPage')
       this.$router.push('/login')
     }
-    await this.$store.dispatch('getBranches')
+    this.$store.dispatch('getBranches')
   },
   computed: {
-    ...mapState({
-      branches: state => {
-        const { master, ...branches } = state.branches.data
-        return branches
-      },
+    branches(): any {
+      const state = this.$store.state as State
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { master: _, ...branches } = state.branches.data
+      return branches
+    },
 
-      isLoading: state => {
-        const checkLoading = status => {
-          return status === 'loading'
-        }
-
-        return checkLoading(state.branches.status)
+    isLoading(): boolean {
+      // const state = this.$store.state as State
+      const state = this.$state
+      const checkLoading = (status: typeof state.branches.status) => {
+        return status === 'loading'
       }
-    }),
 
-    isDisabled() {
+      return checkLoading(state.branches.status)
+    },
+
+    isDisabled(): boolean {
       return (
         Object.keys(this.uploadedFiles).length < 1 ||
         !this.branchName ||
@@ -190,7 +208,7 @@ export default {
       )
     },
 
-    isExisted() {
+    isExisted(): boolean {
       const isExieted = Object.keys(this.branches).reduce((p, branch) => {
         // 大文字,小文字を区別せず判定
         if (branch.toUpperCase() === this.newBranch.toUpperCase()) {
@@ -201,12 +219,12 @@ export default {
       return isExieted
     },
 
-    isNewBranch() {
+    isNewBranch(): boolean {
       return !this.isExisted && this.newBranch
     }
   },
   methods: {
-    async upload() {
+    async upload(): Promise<void> {
       await this.$store.dispatch('upload', {
         files: this.uploadedFiles,
         branch: this.branchName,
@@ -218,8 +236,8 @@ export default {
       this.commitMessage = ''
     },
 
-    dropFile(event) {
-      const droppedFiles = event.target.files || event.dataTransfer.files
+    dropFile(event): void {
+      const droppedFiles: any[] = event.target.files || event.dataTransfer.files
       Object.values(droppedFiles).map(file => {
         const blobUri = URL.createObjectURL(file)
         this.uploadedFiles = {
@@ -229,21 +247,22 @@ export default {
       })
     },
 
-    deleteFile(filename) {
-      const { [filename]: omit, ...newFilesObj } = this.uploadedFiles
+    deleteFile(filename: string): void {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [filename]: _, ...newFilesObj } = this.uploadedFiles
       this.uploadedFiles = newFilesObj
     },
 
-    selectExistedBranch(branchName) {
+    selectExistedBranch(branchName: string): void {
       this.branchName = branchName
     },
 
-    logout() {
+    logout(): void {
       localStorage.setItem('lastPage', 'upload')
       this.$store.commit('updateLastPage')
     },
 
-    async createBranch() {
+    async createBranch(): Promise<void> {
       await this.$store.dispatch('createBranch', this.newBranch)
       await this.$store.dispatch('getBranches')
       this.uploadedFiles = {}
@@ -252,7 +271,7 @@ export default {
       this.newBranch = ''
     }
   }
-}
+})
 </script>
 
 <style scoped>
