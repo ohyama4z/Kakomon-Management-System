@@ -100,12 +100,20 @@
   "jest": {
     "moduleFileExtensions": [
       "js",
+      "ts",
       "json",
       "vue"
     ],
     "transform": {
       ".*\\.(vue)$": "vue-jest",
-      "^.+\\.js$": "<rootDir>/node_modules/babel-jest"
+      "^.+\\.js$": "<rootDir>/node_modules/babel-jest",
+      "^.+\\.ts$": "ts-jest"
+    },
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "tsconfig.json",
+        "babelConfig": true
+      }
     },
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1"

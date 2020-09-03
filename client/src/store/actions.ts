@@ -7,7 +7,14 @@ import { State } from './state'
 
 const url = process.env.VUE_APP_URL
 
-const actions: ActionTree<State, any> = {
+interface CreateCommitPayload {
+  commitSha: string
+  branch: string
+  files: { [k: string]: string }
+  commitMessage: string
+}
+
+const actions: ActionTree<State, unknown> = {
   getBranches: async ({ commit, state }) => {
     commit('setBranchesStatus', { path: 'branches', status: 'loading' })
     const token = state.currentUser!.token.access_token
@@ -19,10 +26,14 @@ const actions: ActionTree<State, any> = {
       method: getMethod,
       headers
     })
-    const res = await httpRes.json()
+    interface Res {
+      name: string
+      commit: { sha: string }
+    }
+    const res = (await httpRes.json()) as Res[]
 
-    const branches = (Object as any).fromEntries(
-      res.map((branch: any) => [branch.name, branch.commit.sha])
+    const branches = Object.fromEntries(
+      res.map(branch => [branch.name, branch.commit.sha])
     )
     commit('setBranches', { branches })
   },
@@ -37,11 +48,11 @@ const actions: ActionTree<State, any> = {
   getCommit: async ({ dispatch, commit, state }, commitSha: string) => {
     const commitDataInState = state.commits?.[commitSha]
     if (commitDataInState?.status === 'loaded') {
-      ;(Object as any)
-        .entries(commitDataInState.data)
-        .map(async ([name, sha]: string) => {
+      Object.entries(commitDataInState.data).map(
+        async ([name, sha]: string[]) => {
           await dispatch('getContentMetadata', { filename: name, fileSha: sha })
-        })
+        }
+      )
 
       return
     }
@@ -50,21 +61,21 @@ const actions: ActionTree<State, any> = {
 
     const commitDataInLocalStorage = JSON.parse(
       localStorage.getItem(commitSha) as string
-    )
+    ) as { [k: string]: string }
     if (commitDataInLocalStorage != null) {
       commit('setCommit', {
         sha: commitSha,
         data: commitDataInLocalStorage
       })
       await Promise.all([
-        (Object as any)
-          .entries(commitDataInLocalStorage)
-          .map(async ([name, sha]: [string, string]) => {
+        Object.entries(commitDataInLocalStorage).map(
+          async ([name, sha]: [string, string]) => {
             await dispatch('getContentMetadata', {
               filename: name,
               fileSha: sha
             })
-          })
+          }
+        )
       ])
 
       return
@@ -85,15 +96,13 @@ const actions: ActionTree<State, any> = {
     )
     const res = await httpRes.json()
 
-    const commitData: any = (Object as any).fromEntries(
+    const commitData = Object.fromEntries(
       res.map((file: any) => [file.name, file.sha])
-    )
+    ) as { [k: string]: string }
 
-    ;(Object as any)
-      .entries(commitData)
-      .map(async ([name, sha]: [string, string]) => {
-        await dispatch('getContentMetadata', { filename: name, fileSha: sha })
-      })
+    Object.entries(commitData).map(async ([name, sha]: [string, string]) => {
+      await dispatch('getContentMetadata', { filename: name, fileSha: sha })
+    })
 
     commit('setCommit', {
       sha: commitSha,
@@ -140,7 +149,8 @@ const actions: ActionTree<State, any> = {
     })
     const res = await httpRes.json()
 
-    const csvData = Buffer.from(res.content, 'base64').toString('utf8')
+    // const csvData = Buffer.from(res.content, 'base64').toString('utf8')
+    const csvData = atob(res.content)
     const resultObj = convertCsvToObj(csvData, payload.filename)
 
     commit('setContentMetadata', {
@@ -382,7 +392,7 @@ const actions: ActionTree<State, any> = {
     await dispatch('createCommit', createCommitPayload)
   },
 
-  createCommit: async ({ state }, payload) => {
+  createCommit: async ({ state }, payload: CreateCommitPayload) => {
     // https://int128.hatenablog.com/entry/2017/09/05/161641 詳しくはここ見ろ
     if (state.currentUser == null) {
       throw new Error('state.currentUser == null')
@@ -407,9 +417,8 @@ const actions: ActionTree<State, any> = {
     })
 
     const treeMetadatas = await Promise.all(
-      (Object as any)
-        .entries(payload.files)
-        .map(async ([filename, blobUri]: [string, string]) => {
+      Object.entries(payload.files).map(
+        async ([filename, blobUri]: [string, string]) => {
           const httpBlob = await fetch(`${blobUri}`)
           const blob = await httpBlob.blob()
           const base64 = await readFileAsync(blob)
@@ -428,7 +437,8 @@ const actions: ActionTree<State, any> = {
           const blobShaRes = await blobShaHttpRes.json()
 
           return { filename, sha: blobShaRes.sha }
-        })
+        }
+      )
     )
 
     const imagesTree = treeMetadatas.map((data: any) => {
