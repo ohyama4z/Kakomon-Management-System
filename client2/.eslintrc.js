@@ -6,12 +6,12 @@ module.exports = {
     'jest/globals': true
   },
   extends: [
+    'prettier-standard',
     "plugin:vue/essential",
     "eslint:recommended",
     "@vue/typescript/recommended",
     "@vue/prettier",
-    "@vue/prettier/@typescript-eslint",
-    'prettier-standard'
+    "@vue/prettier/@typescript-eslint"
   ],
   globals: {
     Atomics: 'readonly',

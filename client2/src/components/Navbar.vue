@@ -114,26 +114,26 @@ export default Vue.extend({
     VkButton: Button
   },
 
-  data(): Data {
+  data() {
     return {
       selectedBranch: 'master'
     }
   },
 
   computed: {
-    branches(): any {
+    branches() {
       const state = this.$store.state as State
       return state.branches.data
     },
 
-    uploadButtonType(): string {
+    uploadButtonType() {
       if (this.$route.path === '/upload') {
         return ''
       }
 
       return 'primary'
     },
-    editButtonType(): string {
+    editButtonType() {
       if (this.$route.path === '/edit') {
         return ''
       }
@@ -141,26 +141,26 @@ export default Vue.extend({
       return 'primary'
     },
 
-    isEdit(): boolean {
+    isEdit() {
       return this.$route.path === '/edit'
     }
   },
 
   methods: {
-    toUpload(): void {
+    toUpload() {
       this.$router.push('/upload')
     },
 
-    toEdit(): void {
+    toEdit() {
       this.$router.push('/edit')
     },
 
-    logout(): void {
+    logout() {
       this.$emit('before-logout')
       this.$router.push('/logout')
     },
 
-    async selectBranch(): Promise<void> {
+    async selectBranch() {
       await this.$store.dispatch('selectBranch', this.selectedBranch)
     }
   }

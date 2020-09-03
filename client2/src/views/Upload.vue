@@ -191,7 +191,7 @@ export default Vue.extend({
 
     isLoading(): boolean {
       // const state = this.$store.state as State
-      const state = this.$store.state as State
+      const state = this.$state
       const checkLoading = (status: typeof state.branches.status) => {
         return status === 'loading'
       }
@@ -220,7 +220,7 @@ export default Vue.extend({
     },
 
     isNewBranch(): boolean {
-      return !this.isExisted && this.newBranch !== ''
+      return !this.isExisted && this.newBranch
     }
   },
   methods: {
@@ -236,7 +236,7 @@ export default Vue.extend({
       this.commitMessage = ''
     },
 
-    dropFile(event: any): void {
+    dropFile(event): void {
       const droppedFiles: any[] = event.target.files || event.dataTransfer.files
       Object.values(droppedFiles).map(file => {
         const blobUri = URL.createObjectURL(file)

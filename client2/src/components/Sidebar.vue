@@ -13,6 +13,7 @@ import { mapGetters } from 'vuex'
 import { SidebarMenu } from 'vue-sidebar-menu'
 
 import Vue from 'vue'
+import getters from '../store/getters'
 export default Vue.extend({
   name: 'Sidebar',
   components: {
@@ -22,7 +23,7 @@ export default Vue.extend({
   computed: {
     ...mapGetters(['currentBranchMetadatas']),
 
-    intermediateFiles(): any {
+    intermediateFiles() {
       const files = Object.values(this.currentBranchMetadatas.data)
       const beforeMerge = files.map((file: any) => {
         const {
@@ -33,7 +34,7 @@ export default Vue.extend({
           year,
           // eslint-disable-next-line camelcase
           content_type
-        }: any = Object.fromEntries(
+        } = Object.fromEntries(
           Object.entries(file).map(([key, value]) => [
             key,
             value === '' ? '不明' : value
@@ -61,7 +62,7 @@ export default Vue.extend({
       return result
     },
 
-    menuStructure(): any {
+    menuStructure() {
       const icon = 'fa fa-folder'
       const result = generateMenuStructure(this.intermediateFiles, 6)
       return result
@@ -109,13 +110,13 @@ export default Vue.extend({
   },
 
   methods: {
-    onItemClick(e: any, item: any): void {
+    onItemClick(e: any, item: any) {
       // データツリーの末端ファイルの元となるフォルダをクリックしたときに処理を行う
       if (item.isSecondFromEnd && !item.expand) {
         const fileSha = item.child[0].data.sha
         this.$store.dispatch('getImageDatas', fileSha)
         const changedFilesBase = Object.fromEntries(
-          item.child.map((file: any) => {
+          item.child.map(file => {
             return [file.data.src, file.data]
           })
         )
@@ -124,7 +125,7 @@ export default Vue.extend({
 
       item.expand = !item.expand
     },
-    onToggleCollapse(collapsed: boolean): void {
+    onToggleCollapse(collapsed: boolean) {
       this.$store.commit('setExpand', !collapsed)
     }
   }

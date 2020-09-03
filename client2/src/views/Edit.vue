@@ -140,7 +140,7 @@ export default Vue.extend({
     Preview
   },
 
-  data(): Data {
+  data() {
     return {
       subject: '',
       year: null,
@@ -153,16 +153,18 @@ export default Vue.extend({
     }
   },
 
-  async mounted() {
+  mounted(): void {
     this.$store.dispatch('updateCurrentUser')
     if (this.$store.state.currentUser == null) {
       localStorage.setItem('lastPage', 'edit')
       this.$store.commit('updateLastPage')
       this.$router.push('/login')
     }
-    await this.$store.dispatch('getBranches')
-    await this.$store.dispatch('selectBranch', this.selectedBranch)
-    this.getCommit()
+    this.$store.dispatch('getBranches').then(async () => {
+
+      await this.$store.dispatch('selectBranch', this.selectedBranch)
+      this.getCommit()
+    })
   },
 
   computed: {
@@ -183,7 +185,7 @@ export default Vue.extend({
       return state.expand
     },
 
-    isLoading(): boolean {
+    isLoading():boolean {
       const checkLoading = (status: string) => {
         return status === 'loading'
       }
@@ -196,12 +198,12 @@ export default Vue.extend({
 
     isSellectedAll(): boolean {
       return (
-        !!this.subject &&
-        !!this.year &&
-        !!this.toolType &&
-        !!this.period &&
-        !!this.contentType &&
-        !!this.author
+        this.subject &&
+        this.year &&
+        this.toolType &&
+        this.period &&
+        this.contentType &&
+        this.author
       )
     }
   },

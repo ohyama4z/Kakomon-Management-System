@@ -1,28 +1,60 @@
 import Vue from "vue";
 import VueRouter, { RouteConfig } from "vue-router";
-import Home from "../views/Home.vue";
+import App from '../App.vue';
+import Edit from '../views/Edit';
+import Login from '../views/Login';
+import Logout from '../views/Logout';
+import mytest from '../views/mytest';
+import Root from '../views/Root';
+import Upload from '../views/Upload';
 
 Vue.use(VueRouter);
 
 const routes: Array<RouteConfig> = [
   {
-    path: "/",
-    name: "Home",
-    component: Home
+    path: '/',
+    name: 'Root',
+    component: Root
   },
   {
-    path: "/about",
-    name: "About",
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "about" */ "../views/About.vue")
+    path: '/app',
+    name: 'App',
+    component: App
+  },
+  {
+    path: '/edit',
+    name: 'edit',
+    component: Edit
+  },
+  {
+    path: '/upload',
+    name: 'upload',
+    component: Upload
+  },
+  {
+    path: '/mytest',
+    name: 'mytest',
+    component: mytest
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: Login
+  },
+  {
+    path: '/edit/:branchName/:fileType',
+    name: 'EditFileType',
+    component: Edit
+  },
+  {
+    path: '/logout',
+    name: 'logout',
+    component: Logout
   }
 ];
 
 const router = new VueRouter({
-  mode: "history",
+  mode: 'history',
   base: process.env.BASE_URL,
   routes
 });

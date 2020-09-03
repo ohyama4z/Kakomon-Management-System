@@ -70,9 +70,6 @@ const actions: ActionTree<State, any> = {
       return
     }
 
-    if (state.currentUser == null) {
-      throw new Error('state.currentUser == null')
-    }
     const token = state.currentUser.token.access_token
     const getMethod = 'GET'
     const headers = {
@@ -125,9 +122,6 @@ const actions: ActionTree<State, any> = {
       return
     }
 
-    if (state.currentUser == null) {
-      throw new Error('state.currentUser == null')
-    }
     const token = state.currentUser.token.access_token
     const getMethod = 'GET'
     const headers = {
@@ -152,9 +146,6 @@ const actions: ActionTree<State, any> = {
   },
 
   postCommitCsv: async ({ state }) => {
-    if (state.currentUser == null) {
-      throw new Error('state.currentUser == null')
-    }
     const token = state.currentUser.token.access_token
     const getMethod = 'GET'
     const postMethod = 'POST'
@@ -262,9 +253,7 @@ const actions: ActionTree<State, any> = {
 
   updateCurrentUser: async ({ commit }) => {
     const user = netlifyIdentity.currentUser()
-    // eslint-disable-next-line camelcase
-    if (user != null && user.token?.access_token == null) {
-      // @ts-ignore
+    if (user != null && user.token.access_token == null) {
       await netlifyIdentity.refresh()
     }
     commit('updateCurrentUser', user)
@@ -274,9 +263,7 @@ const actions: ActionTree<State, any> = {
     if (state.imageShas?.[commitSha]?.[directoryPath]?.status === 'loaded') {
       return
     }
-    if (state.currentUser == null) {
-      throw new Error('state.currentUser == null')
-    }
+
     const token = state.currentUser.token.access_token
     const method = 'GET'
     const headers = {
@@ -289,9 +276,7 @@ const actions: ActionTree<State, any> = {
     )
     const res = await httpRes.json()
 
-    const data = Object.fromEntries(
-      res.map((file: any) => [file.name, file.sha])
-    )
+    const data = Object.fromEntries(res.map(file => [file.name, file.sha]))
     commit('setImageShas', { commitSha, directoryPath, data })
   },
 
@@ -315,9 +300,6 @@ const actions: ActionTree<State, any> = {
     await Promise.all(
       filenames.map(async filename => {
         const sha = state.imageShas[commitSha][directoryPath].data[filename]
-        if (state.currentUser == null) {
-          throw new Error('state.currentUser == null')
-        }
         const token = state.currentUser.token.access_token
         const method = 'GET'
         const headers = {
@@ -341,9 +323,6 @@ const actions: ActionTree<State, any> = {
 
   createBranch: async ({ state, commit }, branch) => {
     commit('setBranchesStatus', { path: 'branches', status: 'loading' })
-    if (state.currentUser == null) {
-      throw new Error('state.currentUser == null')
-    }
     const token = state.currentUser.token.access_token
     const method = 'GET'
     const headers = {
@@ -384,9 +363,6 @@ const actions: ActionTree<State, any> = {
 
   createCommit: async ({ state }, payload) => {
     // https://int128.hatenablog.com/entry/2017/09/05/161641 詳しくはここ見ろ
-    if (state.currentUser == null) {
-      throw new Error('state.currentUser == null')
-    }
     const token = state.currentUser.token.access_token
     const headers = {
       Authorization: `Bearer ${token}`
@@ -431,7 +407,7 @@ const actions: ActionTree<State, any> = {
         })
     )
 
-    const imagesTree = treeMetadatas.map((data: any) => {
+    const imagesTree = treeMetadatas.map(data => {
       return {
         path: `scanned/${data.filename}`,
         mode: '100644',
@@ -493,7 +469,7 @@ const actions: ActionTree<State, any> = {
   }
 }
 
-export function convertObjToCsv(arr: any) {
+export function convertObjToCsv(arr) {
   const contents = []
 
   for (const property in arr) {
@@ -526,14 +502,6 @@ export function convertObjToCsv(arr: any) {
 }
 
 export function convertCsvToObj(csv: string, filename: string) {
-  interface PreObj {
-    [k: string]: string
-  }
-  interface ResultObj {
-    [src: string]: {
-      [k: string]: string
-    }
-  }
   // headerNames:CSV1行目の項目 :csvRows:項目に対する値
   const [headerNames, ...csvRows] = csv
     .split('\n')
@@ -548,12 +516,12 @@ export function convertCsvToObj(csv: string, filename: string) {
         .map((headerName, index) => {
           return { key: headerName.replace(/\s+/g, ''), value: r[index] }
         })
-        .reduce((previous: PreObj, current: PreObj) => {
+        .reduce((previous, current) => {
           previous[current.key] = current.value
           return previous
         }, {})
     })
-    .reduce((previous: ResultObj, current: PreObj) => {
+    .reduce((previous, current) => {
       previous[current.src] = {
         ...current,
         csvFile: filename
@@ -577,9 +545,6 @@ export function readFileAsync(blob: any) {
   return new Promise(resolve => {
     const reader = new FileReader()
     reader.onload = () => {
-      if (typeof reader.result !== 'string') {
-        throw new Error("typeof reader.result !== 'string'")
-      }
       const base64 = reader.result.replace(/data:.*\/.*;base64,/, '')
       resolve(base64)
     }
@@ -596,9 +561,6 @@ export async function getCsvBlobSha(state: State, payload: any) {
   }, '')
   const csv = headerRow + filesRows
 
-  if (state.currentUser == null) {
-    throw new Error('state.currentUser == null')
-  }
   const token = state.currentUser.token.access_token
   const headers = {
     Authorization: `Bearer ${token}`
