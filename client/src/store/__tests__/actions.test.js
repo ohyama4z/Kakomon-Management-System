@@ -301,6 +301,12 @@ describe('actions.js', () => {
       },
       headers
     })
+    const csv =
+      'src,subj,tool_type,period,year,content_type,author,image_index,included_pages_num,fix_text\n' +
+      'studies/aho.jpg,国語,勉強用,後期定期,2007,対策プリント,おれ,001,1,'
+    fetchMock.mock('text/plain;base64,content1', {
+      body: { csv }
+    })
 
     const commit = jest.fn()
     const fileSha = 'fileSha'
@@ -1125,7 +1131,7 @@ describe('actions.js', () => {
       branch: 'newBranch'
     }
 
-    expect(await getCsvBlobSha(state, payload)).toBe('sha')
+    expect(await getCsvBlobSha(token, payload)).toBe('sha')
     expect(fetchMock.calls(undefined, 'POST')[0][1].headers.Authorization).toBe(
       'Bearer 12345'
     )

@@ -61,21 +61,19 @@ const actions: ActionTree<Readonly<State>, unknown> = {
 
     const commitDataInLocalStorage = JSON.parse(
       localStorage.getItem(commitSha) as string
-    ) as { [k: string]: string }
+    ) as { [k: string]: string } | null
     if (commitDataInLocalStorage != null) {
       commit('setCommit', {
         sha: commitSha,
         data: commitDataInLocalStorage
       })
       await Promise.all([
-        Object.entries(commitDataInLocalStorage).map(
-          async ([name, sha]: [string, string]) => {
-            await dispatch('getContentMetadata', {
-              filename: name,
-              fileSha: sha
-            })
-          }
-        )
+        Object.entries(commitDataInLocalStorage).map(async ([name, sha]) => {
+          await dispatch('getContentMetadata', {
+            filename: name,
+            fileSha: sha
+          })
+        })
       ])
 
       return
@@ -104,7 +102,7 @@ const actions: ActionTree<Readonly<State>, unknown> = {
       res.map(file => [file.name, file.sha])
     ) as { [k: string]: string }
 
-    Object.entries(commitData).map(async ([name, sha]: [string, string]) => {
+    Object.entries(commitData).map(async ([name, sha]) => {
       await dispatch('getContentMetadata', { filename: name, fileSha: sha })
     })
 
@@ -129,7 +127,7 @@ const actions: ActionTree<Readonly<State>, unknown> = {
 
     const fileDataInLocalStorage = JSON.parse(
       localStorage.getItem(payload.fileSha) as string
-    )
+    ) as State['contentMetadatas']['']
     if (fileDataInLocalStorage != null) {
       commit('setContentMetadata', {
         sha: payload.fileSha,
