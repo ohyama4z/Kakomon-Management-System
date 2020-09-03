@@ -15,24 +15,26 @@
   </div>
 </template>
 
-<script>
-import { mapState } from 'vuex'
+<script lang="ts">
+import type { State } from '../store/state'
 
-export default {
+import Vue from 'vue'
+
+export default Vue.extend({
   name: 'Preview',
   computed: {
-    ...mapState({
-      images: state => {
-        const commitSha = state.branches.data[state.currentBranch]
-        return state.displayedFiles.map(filePath => {
-          const directoryPath = filePath.substr(0, filePath.lastIndexOf('/'))
-          const filename = filePath.substr(filePath.lastIndexOf('/') + 1)
-          const imageSha =
-            state.imageShas[commitSha]?.[directoryPath]?.data?.[filename]
-          return state.imageDatas?.[imageSha]?.data
-        })
-      }
-    })
+    images() {
+      const state = this.$store.state as State
+      const commitSha = state.branches.data[state.currentBranch]
+      return state.displayedFiles.map(filePath => {
+        const directoryPath = filePath.substr(0, filePath.lastIndexOf('/'))
+        const filename = filePath.substr(filePath.lastIndexOf('/') + 1)
+        const imageSha =
+          state.imageShas[commitSha]?.[directoryPath]?.data?.[filename]
+
+        return state.imageDatas?.[imageSha]?.data
+      })
+    }
   }
-}
+})
 </script>

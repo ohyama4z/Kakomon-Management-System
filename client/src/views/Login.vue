@@ -7,14 +7,13 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import netlifyIdentity from 'netlify-identity-widget'
-export default {
-  name: 'login',
-  data() {
-    return {}
-  },
 
+import Vue from 'vue'
+
+export default Vue.extend({
+  name: 'login',
   mounted() {
     this.$store.dispatch('updateCurrentUser')
 
@@ -36,5 +35,5 @@ export default {
     netlifyIdentity.close()
     next()
   }
-}
+})
 </script>

@@ -1,4 +1,7 @@
-export default {
+import type { GetterTree } from 'vuex'
+import type { State } from './state'
+
+const getters: GetterTree<Readonly<State>, unknown> = {
   currentBranchMetadatas: state => {
     const branch = state.currentBranch
     const branches = state.branches
@@ -22,7 +25,7 @@ export default {
 
     const loadedContentMetadataShas = Object.values(
       state.commits[commitSha].data
-    ).filter(sha => contentMetadatas[sha]?.status === 'loaded')
+    ).filter((sha: any) => contentMetadatas[sha]?.status === 'loaded')
 
     if (
       loadedContentMetadataShas.length !==
@@ -31,9 +34,9 @@ export default {
       return { status: 'loading', data: {} }
     }
 
-    const loadedMetadatas = loadedContentMetadataShas.flatMap(sha => {
+    const loadedMetadatas = loadedContentMetadataShas.flatMap((sha: any) => {
       return Object.entries(contentMetadatas[sha]?.data).map(([key, value]) => {
-        return { [key]: { ...value, sha } }
+        return { [key]: { ...(value as object), sha } }
       })
     })
 
@@ -46,3 +49,5 @@ export default {
     return { status: 'loaded', data: result }
   }
 }
+
+export default getters

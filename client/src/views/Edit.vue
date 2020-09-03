@@ -106,15 +106,31 @@
   </div>
 </template>
 
-<script>
-import { mapState } from 'vuex'
+<script lang="ts">
+import 'vuikit'
+import { State } from '../store/state'
+// @ts-ignore
 import { Button } from 'vuikit/lib/button'
+// @ts-ignore
 import { Spinner } from 'vuikit/lib/spinner'
-import Sidebar from '../components/Sidebar'
-import Navbar from '../components/Navbar'
-import Preview from '../components/Preview'
+import Sidebar from '../components/Sidebar.vue'
+import Navbar from '../components/Navbar.vue'
+import Preview from '../components/Preview.vue'
 
-export default {
+import Vue from 'vue'
+
+interface Data {
+  subject: string
+  year: string | null
+  toolType: string
+  period: string
+  contentType: string
+  author: string
+  selectedBranch: string
+  editType: string
+}
+
+export default Vue.extend({
   name: 'Edit',
 
   components: {
@@ -125,7 +141,7 @@ export default {
     Preview
   },
 
-  data() {
+  data(): Data {
     return {
       subject: '',
       year: null,
@@ -151,23 +167,25 @@ export default {
   },
 
   computed: {
-    ...mapState({
-      isLoadingFiles: state => {
-        const checkLoading = status => {
-          return status === 'loading'
-        }
+    isLoadingFiles(): boolean {
+      const state = this.$store.state as State
+      const checkLoading = (status: string) => {
+        return status === 'loading'
+      }
 
-        return (
-          checkLoading(state.branches.status) ||
-          checkLoading(state.commits[state.currentBranch]?.status)
-        )
-      },
+      return (
+        checkLoading(state.branches.status) ||
+        checkLoading(state.commits[state.currentBranch]?.status)
+      )
+    },
 
-      expand: state => state.expand
-    }),
+    expand(): boolean {
+      const state = this.$store.state as State
+      return state.expand
+    },
 
-    isLoading() {
-      const checkLoading = status => {
+    isLoading(): boolean {
+      const checkLoading = (status: string) => {
         return status === 'loading'
       }
 
@@ -177,33 +195,33 @@ export default {
       )
     },
 
-    isSellectedAll() {
+    isSellectedAll(): boolean {
       return (
-        this.subject &&
-        this.year &&
-        this.toolType &&
-        this.period &&
-        this.contentType &&
-        this.author
+        !!this.subject &&
+        !!this.year &&
+        !!this.toolType &&
+        !!this.period &&
+        !!this.contentType &&
+        !!this.author
       )
     }
   },
 
   methods: {
-    async getCommit() {
+    async getCommit(): Promise<void> {
       const commitSha = this.$store.state.branches.data[this.selectedBranch]
       await this.$store.dispatch('getCommit', commitSha)
     },
-    async postCommitCsv() {
+    async postCommitCsv(): Promise<void> {
       await this.$store.dispatch('postCommitCsv')
     },
 
-    logout() {
+    logout(): void {
       localStorage.setItem('lastPage', 'edit')
       this.$store.commit('updateLastPage')
     },
 
-    updateEditData() {
+    updateEditData(): void {
       const changedFiles = {
         subj: this.subject,
         year: this.year,
@@ -215,7 +233,7 @@ export default {
       this.$store.commit('setChangedFiles', changedFiles)
     }
   }
-}
+})
 </script>
 
 <style>

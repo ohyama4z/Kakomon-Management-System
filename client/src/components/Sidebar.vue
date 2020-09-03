@@ -7,12 +7,13 @@
   />
 </template>
 
-<script>
+<script lang="ts">
 import merge from 'deepmerge'
 import { mapGetters } from 'vuex'
 import { SidebarMenu } from 'vue-sidebar-menu'
 
-export default {
+import Vue from 'vue'
+export default Vue.extend({
   name: 'Sidebar',
   components: {
     SidebarMenu
@@ -21,9 +22,9 @@ export default {
   computed: {
     ...mapGetters(['currentBranchMetadatas']),
 
-    intermediateFiles() {
+    intermediateFiles(): any {
       const files = Object.values(this.currentBranchMetadatas.data)
-      const beforeMerge = files.map(file => {
+      const beforeMerge = files.map((file: any) => {
         const {
           period,
           subj,
@@ -32,7 +33,8 @@ export default {
           year,
           // eslint-disable-next-line camelcase
           content_type
-        } = Object.fromEntries(
+        }: // @ts-ignore
+        any = Object.fromEntries(
           Object.entries(file).map(([key, value]) => [
             key,
             value === '' ? '不明' : value
@@ -60,12 +62,12 @@ export default {
       return result
     },
 
-    menuStructure() {
+    menuStructure(): any {
       const icon = 'fa fa-folder'
       const result = generateMenuStructure(this.intermediateFiles, 6)
       return result
 
-      function generateMenuStructure(intermediate, num) {
+      function generateMenuStructure(intermediate: any, num: any): any {
         if (num === 1) {
           const result = Object.entries(intermediate).map(([key, file]) => ({
             title: key,
@@ -77,22 +79,25 @@ export default {
 
           return result
         }
-        return Object.entries(intermediate).reduce((previous, [key, value]) => {
-          return [
-            ...previous,
-            {
-              title: key,
-              icon,
-              child: generateMenuStructure(value, num - 1),
-              isSecondFromEnd: num === 2, // 末端ファイルの元となるフォルダかを確かめる
-              expand: false
-            }
-          ]
-        }, [])
+        return Object.entries(intermediate).reduce(
+          (previous: any, [key, value]: any) => {
+            return [
+              ...previous,
+              {
+                title: key,
+                icon,
+                child: generateMenuStructure(value, num - 1),
+                isSecondFromEnd: num === 2, // 末端ファイルの元となるフォルダかを確かめる
+                expand: false
+              }
+            ]
+          },
+          []
+        )
       }
     },
 
-    sidebarMenu() {
+    sidebarMenu(): any {
       const header = [
         {
           header: true,
@@ -105,13 +110,13 @@ export default {
   },
 
   methods: {
-    onItemClick(e, item) {
+    onItemClick(e: any, item: any): void {
       // データツリーの末端ファイルの元となるフォルダをクリックしたときに処理を行う
       if (item.isSecondFromEnd && !item.expand) {
         const fileSha = item.child[0].data.sha
         this.$store.dispatch('getImageDatas', fileSha)
         const changedFilesBase = Object.fromEntries(
-          item.child.map(file => {
+          item.child.map((file: any) => {
             return [file.data.src, file.data]
           })
         )
@@ -120,11 +125,11 @@ export default {
 
       item.expand = !item.expand
     },
-    onToggleCollapse(collapsed) {
+    onToggleCollapse(collapsed: boolean): void {
       this.$store.commit('setExpand', !collapsed)
     }
   }
-}
+})
 </script>
 
 <style>

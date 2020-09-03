@@ -3,12 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "test": "jest",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "test": "jest"
   },
   "dependencies": {
+    "@types/deepmerge": "^2.2.0",
+    "@types/jest": "^26.0.12",
+    "@types/moment": "^2.13.0",
+    "@types/netlify-identity-widget": "^1.4.2",
+    "@types/node": "^14.6.2",
+    "@vue/cli": "^4.5.4",
     "@vuikit/icons": "^0.8.1",
     "@vuikit/theme": "^0.8.1",
     "core-js": "^3.6.5",
@@ -32,15 +38,19 @@
     "@babel/core": "^7.11.1",
     "@babel/preset-env": "^7.11.0",
     "@testing-library/jest-dom": "^5.11.3",
+    "@typescript-eslint/eslint-plugin": "^2.34.0",
+    "@typescript-eslint/parser": "^2.34.0",
     "@vue/cli-plugin-babel": "~4.4.0",
     "@vue/cli-plugin-eslint": "~4.4.0",
+    "@vue/cli-plugin-typescript": "^4.5.4",
     "@vue/cli-service": "~4.4.0",
+    "@vue/eslint-config-typescript": "^5.0.2",
     "@vue/test-utils": "^1.0.3",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.1.0",
     "babel-jest": "^23.4.2",
     "babel-loader": "^8.1.0",
-    "eslint": "^7.7.0",
+    "eslint": "^7.8.1",
     "eslint-config-prettier": "^6.11.0",
     "eslint-config-prettier-standard": "^3.0.1",
     "eslint-config-standard": "^14.1.1",
@@ -61,6 +71,8 @@
     "prettier-config-standard": "^1.0.1",
     "prettier-eslint": "^11.0.0",
     "regenerator-runtime": "^0.13.7",
+    "ts-jest": "^26.3.0",
+    "typescript": "^3.9.7",
     "vue-eslint-parser": "^7.1.0",
     "vue-jest": "^3.0.6",
     "vue-template-compiler": "^2.6.11",
@@ -73,22 +85,36 @@
     },
     "extends": [
       "plugin:vue/essential",
-      "eslint:recommended"
+      "eslint:recommended",
+      "@vue/typescript"
     ],
     "parserOptions": {
-      "parser": "babel-eslint"
+      "parser": "@typescript-eslint/parser"
     },
     "rules": {}
   },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ],
   "jest": {
     "moduleFileExtensions": [
       "js",
+      "ts",
       "json",
       "vue"
     ],
     "transform": {
       ".*\\.(vue)$": "vue-jest",
-      "^.+\\.js$": "<rootDir>/node_modules/babel-jest"
+      "^.+\\.js$": "<rootDir>/node_modules/babel-jest",
+      "^.+\\.ts$": "ts-jest"
+    },
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "tsconfig.json",
+        "babelConfig": true
+      }
     },
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1"
@@ -110,10 +136,5 @@
     "transformIgnorePatterns": [
       "/node_modules/(?!vuikit)"
     ]
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not dead"
-  ]
+  }
 }
