@@ -14,7 +14,7 @@ interface CreateCommitPayload {
   commitMessage: string
 }
 
-const actions: ActionTree<State, unknown> = {
+const actions: ActionTree<Readonly<State>, unknown> = {
   getBranches: async ({ commit, state }) => {
     commit('setBranchesStatus', { path: 'branches', status: 'loading' })
     const token = state.currentUser!.token.access_token
@@ -156,8 +156,8 @@ const actions: ActionTree<State, unknown> = {
     }
     const res = (await httpRes.json()) as Res
 
-    // const csvData = Buffer.from(res.content, 'base64').toString('utf8')
-    const csvData = atob(res.content)
+    const csvHttpRes = await fetch(`data:text/plain;base64,${res.content}`)
+    const csvData = await csvHttpRes.text()
     const resultObj = convertCsvToObj(csvData, payload.filename)
 
     commit('setContentMetadata', {
@@ -446,7 +446,7 @@ const actions: ActionTree<State, unknown> = {
     }
     const commitRes = (await commitHttpRes.json()) as CommitRes
 
-    const csvBlobSha = await getCsvBlobSha(state, {
+    const csvBlobSha = await getCsvBlobSha(token, {
       files: payload.files,
       branch: payload.branch
     })
@@ -547,8 +547,10 @@ const actions: ActionTree<State, unknown> = {
   }
 }
 
-export function convertObjToCsv(arr: any) {
-  const contents = []
+export function convertObjToCsv(
+  arr: Readonly<State['contentMetadatas']['']['data'][''][]>
+) {
+  const contents: string[] = []
 
   for (const property in arr) {
     contents.push(
@@ -627,7 +629,7 @@ function toBlob(base64: string, type: string) {
   return new Blob([buffer.buffer], { type })
 }
 
-export function readFileAsync(blob: any) {
+export function readFileAsync(blob: Blob) {
   return new Promise(resolve => {
     const reader = new FileReader()
     reader.onload = () => {
@@ -641,7 +643,11 @@ export function readFileAsync(blob: any) {
   })
 }
 
-export async function getCsvBlobSha(state: State, payload: any) {
+interface Payload {
+  files: { [k: string]: unknown }
+  branch: string
+}
+export async function getCsvBlobSha(token: string, payload: Readonly<Payload>) {
   const headerRow = `src,subj,tool_type,period,year,content_type,author,image_index,included_pages_num,fix_text\n`
   const sortedFiles = Object.keys(payload.files).sort()
   const filesRows = sortedFiles.reduce((p, src) => {
@@ -650,10 +656,6 @@ export async function getCsvBlobSha(state: State, payload: any) {
   }, '')
   const csv = headerRow + filesRows
 
-  if (state.currentUser == null) {
-    throw new Error('state.currentUser == null')
-  }
-  const token = state.currentUser.token.access_token
   const headers = {
     Authorization: `Bearer ${token}`
   }

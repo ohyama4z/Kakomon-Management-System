@@ -1,7 +1,7 @@
 import type { GetterTree } from 'vuex'
 import type { State } from './state'
 
-const getters: GetterTree<State, any> = {
+const getters: GetterTree<Readonly<State>, unknown> = {
   currentBranchMetadatas: state => {
     const branch = state.currentBranch
     const branches = state.branches
