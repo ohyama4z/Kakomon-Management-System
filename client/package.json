@@ -71,6 +71,7 @@
     "prettier-config-standard": "^1.0.1",
     "prettier-eslint": "^11.0.0",
     "regenerator-runtime": "^0.13.7",
+    "ts-jest": "^26.3.0",
     "typescript": "^3.9.7",
     "vue-eslint-parser": "^7.1.0",
     "vue-jest": "^3.0.6",
