@@ -548,12 +548,12 @@ export function convertCsvToObj(csv: string, filename: string) {
         .map((headerName, index) => {
           return { key: headerName.replace(/\s+/g, ''), value: r[index] }
         })
-        .reduce((previous: PreObj, current: PreObj) => {
+        .reduce((previous: PreObj, current) => {
           previous[current.key] = current.value
           return previous
         }, {})
     })
-    .reduce((previous: ResultObj, current: PreObj) => {
+    .reduce((previous: ResultObj, current) => {
       previous[current.src] = {
         ...current,
         csvFile: filename

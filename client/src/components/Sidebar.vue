@@ -33,7 +33,8 @@ export default Vue.extend({
           year,
           // eslint-disable-next-line camelcase
           content_type
-        }: any = Object.fromEntries(
+        }: // @ts-ignore
+        any = Object.fromEntries(
           Object.entries(file).map(([key, value]) => [
             key,
             value === '' ? '不明' : value

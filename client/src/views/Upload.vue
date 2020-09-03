@@ -127,7 +127,6 @@
 </template>
 
 <script lang="ts">
-import 'vuikit'
 // @ts-ignore
 import { Button } from 'vuikit/lib/button'
 // @ts-ignore

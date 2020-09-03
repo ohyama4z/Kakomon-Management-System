@@ -107,14 +107,15 @@
 </template>
 
 <script lang="ts">
+import 'vuikit'
 import { State } from '../store/state'
 // @ts-ignore
 import { Button } from 'vuikit/lib/button'
 // @ts-ignore
 import { Spinner } from 'vuikit/lib/spinner'
-import Sidebar from '../components/Sidebar'
-import Navbar from '../components/Navbar'
-import Preview from '../components/Preview'
+import Sidebar from '../components/Sidebar.vue'
+import Navbar from '../components/Navbar.vue'
+import Preview from '../components/Preview.vue'
 
 import Vue from 'vue'
 
