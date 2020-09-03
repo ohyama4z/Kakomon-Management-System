@@ -94,10 +94,14 @@ const actions: ActionTree<State, unknown> = {
       `${url}/github/contents/metadatas?ref=${commitSha}`,
       { method: getMethod, headers }
     )
-    const res = await httpRes.json()
+    interface Res {
+      name: string
+      sha: string
+    }
+    const res = (await httpRes.json()) as Res[]
 
     const commitData = Object.fromEntries(
-      res.map((file: any) => [file.name, file.sha])
+      res.map(file => [file.name, file.sha])
     ) as { [k: string]: string }
 
     Object.entries(commitData).map(async ([name, sha]: [string, string]) => {
@@ -147,7 +151,10 @@ const actions: ActionTree<State, unknown> = {
       method: getMethod,
       headers
     })
-    const res = await httpRes.json()
+    interface Res {
+      content: string
+    }
+    const res = (await httpRes.json()) as Res
 
     // const csvData = Buffer.from(res.content, 'base64').toString('utf8')
     const csvData = atob(res.content)
@@ -194,14 +201,22 @@ const actions: ActionTree<State, unknown> = {
       method: getMethod,
       headers
     })
-    const parseRef = await refRes.json()
+    interface ParseRef {
+      object: { sha: string }
+    }
+    const parseRef = (await refRes.json()) as ParseRef
 
     // commitの取得
     const commitRes = await fetch(
       `${url}/github/commits/${parseRef.object.sha}`,
       { method: getMethod, headers }
     )
-    const commitres = await commitRes.json()
+    interface CommitRes {
+      commit: {
+        tree: { sha: string }
+      }
+    }
+    const commitres = (await commitRes.json()) as CommitRes
 
     const postContents = {
       content,
@@ -214,7 +229,10 @@ const actions: ActionTree<State, unknown> = {
       `${url}/github/git/blobs?ref=${branchName}`,
       { method: postMethod, headers, body: postContentsBody }
     )
-    const blobRes = await createBlobRes.json()
+    interface BlobRes {
+      sha: string
+    }
+    const blobRes = (await createBlobRes.json()) as BlobRes
     console.log('check', blobRes)
     const fileInfo = {
       base_tree: commitres.commit.tree.sha,
@@ -235,7 +253,10 @@ const actions: ActionTree<State, unknown> = {
       headers,
       body: postFileInfoBody
     })
-    const treeRes = await createTreeRes.json()
+    interface TreeRes {
+      sha: string
+    }
+    const treeRes = (await createTreeRes.json()) as TreeRes
     const date = moment().format('YYYY-MM-DDTHH:mm:ssZ')
 
     const postCommitInfo = {
@@ -255,7 +276,10 @@ const actions: ActionTree<State, unknown> = {
       `${url}/github/git/commits?ref=${branchName}`,
       { method: postMethod, headers, body: postCommitInfoBody }
     )
-    const createdCommitRes = await createCommitRes.json()
+    interface CreateCommitRes {
+      sha: string
+    }
+    const createdCommitRes = (await createCommitRes.json()) as CreateCommitRes
 
     // refの更新
     const updateRef = {
@@ -297,11 +321,13 @@ const actions: ActionTree<State, unknown> = {
       `${url}/github/contents/${directoryPath}?ref=${commitSha}`,
       { method, headers }
     )
-    const res = await httpRes.json()
+    interface Res {
+      name: string
+      sha: string
+    }
+    const res = (await httpRes.json()) as Res[]
 
-    const data = Object.fromEntries(
-      res.map((file: any) => [file.name, file.sha])
-    )
+    const data = Object.fromEntries(res.map(file => [file.name, file.sha]))
     commit('setImageShas', { commitSha, directoryPath, data })
   },
 
@@ -337,7 +363,10 @@ const actions: ActionTree<State, unknown> = {
           method,
           headers
         })
-        const res = await httpRes.json()
+        interface Res {
+          content: string
+        }
+        const res = (await httpRes.json()) as Res
 
         // Todo: image/ だけじゃなくpdfとかもあるので対応できるようにする
         const imageType = filename.substr(filename.lastIndexOf('.') + 1)
@@ -363,7 +392,10 @@ const actions: ActionTree<State, unknown> = {
       method,
       headers
     })
-    const res = await httpRes.json()
+    interface Res {
+      object: { sha: string }
+    }
+    const res = (await httpRes.json()) as Res
     const masterSha = res.object.sha
 
     // branchの作成
@@ -409,7 +441,10 @@ const actions: ActionTree<State, unknown> = {
         headers
       }
     )
-    const commitRes = await commitHttpRes.json()
+    interface CommitRes {
+      tree: { sha: string }
+    }
+    const commitRes = (await commitHttpRes.json()) as CommitRes
 
     const csvBlobSha = await getCsvBlobSha(state, {
       files: payload.files,
@@ -434,14 +469,17 @@ const actions: ActionTree<State, unknown> = {
               })
             }
           )
-          const blobShaRes = await blobShaHttpRes.json()
+          interface BlobShaRes {
+            sha: string
+          }
+          const blobShaRes = (await blobShaHttpRes.json()) as BlobShaRes
 
           return { filename, sha: blobShaRes.sha }
         }
       )
     )
 
-    const imagesTree = treeMetadatas.map((data: any) => {
+    const imagesTree = treeMetadatas.map(data => {
       return {
         path: `scanned/${data.filename}`,
         mode: '100644',
@@ -468,7 +506,10 @@ const actions: ActionTree<State, unknown> = {
       headers,
       body: JSON.stringify(treeData)
     })
-    const createTreeRes = await createTreeHttpRes.json()
+    interface CreateTreeRes {
+      sha: string
+    }
+    const createTreeRes = (await createTreeHttpRes.json()) as CreateTreeRes
 
     const email = state.currentUser.email
     const name = email.substr(0, email.lastIndexOf('@'))
@@ -490,7 +531,10 @@ const actions: ActionTree<State, unknown> = {
         body: JSON.stringify(createCommitBody)
       }
     )
-    const createCommitRes = await createCommitHttpRes.json()
+    interface CreateCommitRes {
+      sha: string
+    }
+    const createCommitRes = (await createCommitHttpRes.json()) as CreateCommitRes
 
     await fetch(`${url}/github/git/refs/heads/${payload.branch}`, {
       method: 'PATCH',
@@ -625,7 +669,10 @@ export async function getCsvBlobSha(state: State, payload: any) {
       })
     }
   )
-  const blobShaRes = await blobShaHttpRes.json()
+  interface BlobShaRes {
+    sha: string
+  }
+  const blobShaRes = (await blobShaHttpRes.json()) as BlobShaRes
 
   return blobShaRes.sha
 }
