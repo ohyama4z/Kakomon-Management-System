@@ -1,4 +1,4 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils'
+import { createLocalVue } from '@vue/test-utils'
 import merge from 'deepmerge'
 import fetchMock from 'fetch-mock'
 import 'jest-fetch-mock'
@@ -16,18 +16,11 @@ const url = process.env.VUE_APP_URL
 
 localVue.use(Vuex)
 
+jest.mock('node-fetch', () => jest.fn())
 // netlifyIdentityの関数を使えるようにする
 jest.mock('netlify-identity-widget')
-netlifyIdentity.open = jest.fn()
-netlifyIdentity.on = jest.fn().mockImplementation((event, callback) => {
-  if (event === 'login') {
-    callback()
-  }
-})
 
-jest.mock('node-fetch', () => jest.fn())
-
-const state = {
+const defaultState = {
   currentUser: {
     token: {
       access_token: '12345'
@@ -92,13 +85,16 @@ const state = {
   imageDatas: {}
 }
 
-const store = new Vuex.Store({
-  state,
-  actions
-})
-
 describe('actions.js', () => {
   beforeEach(() => {
+    fetchMock.resetBehavior()
+    netlifyIdentity.open = jest.fn()
+    netlifyIdentity.on = jest.fn().mockImplementation((event, callback) => {
+      if (event === 'login') {
+        callback()
+      }
+    })
+
     jest.clearAllMocks()
     localStorage.clear()
     fetchMock.restore()
@@ -123,11 +119,7 @@ describe('actions.js', () => {
   })
 
   it('ブランチの一覧を取得する', async () => {
-    shallowMount(actions, {
-      localVue,
-      store
-    })
-
+    const state = JSON.parse(JSON.stringify(defaultState))
     const token = state.currentUser.token.access_token
     const headers = {
       Authorization: `Bearer ${token}`
@@ -172,10 +164,7 @@ describe('actions.js', () => {
   })
 
   it('コミットごとのファイルの状態を取得する(キャシュを使用しない場合)', async () => {
-    shallowMount(actions, {
-      localVue,
-      store
-    })
+    const state = JSON.parse(JSON.stringify(defaultState))
 
     const token = state.currentUser.token.access_token
     const headers = {
@@ -227,10 +216,7 @@ describe('actions.js', () => {
   })
 
   it('コミットごとのファイルの状態を取得する(localStorageのキャッシュを使用)', async () => {
-    shallowMount(actions, {
-      localVue,
-      store
-    })
+    const state = JSON.parse(JSON.stringify(defaultState))
 
     const commitSha = 'commitSha'
     const dispatch = jest.fn()
@@ -258,10 +244,7 @@ describe('actions.js', () => {
   })
 
   it('コミットごとのファイルの状態を取得する(stateのキャッシュを使用)', async () => {
-    shallowMount(actions, {
-      localVue,
-      store
-    })
+    const state = JSON.parse(JSON.stringify(defaultState))
 
     const commitSha = 'commitSha'
     const dispatch = jest.fn()
@@ -288,10 +271,7 @@ describe('actions.js', () => {
   })
 
   it('branchを選択した際にbranchの情報、コミット情報を取得するactionを走らせる', async () => {
-    shallowMount(actions, {
-      localVue,
-      store
-    })
+    const state = JSON.parse(JSON.stringify(defaultState))
     state.branches = {
       status: 'loaded',
       data: { master: 'sha1' }
@@ -300,16 +280,13 @@ describe('actions.js', () => {
     const commit = jest.fn()
     const branchName = 'master'
 
-    await actions.selectBranch({ dispatch, commit }, branchName)
+    await actions.selectBranch({ dispatch, commit, state }, branchName)
     expect(commit).toHaveBeenCalledWith('setCurrentBranch', branchName)
     expect(dispatch).toHaveBeenCalledTimes(2)
   })
 
   it('ファイルごとのshaからファイル情報を取得する(キャシュを使用しない場合)', async () => {
-    shallowMount(actions, {
-      localVue,
-      store
-    })
+    const state = JSON.parse(JSON.stringify(defaultState))
 
     const token = state.currentUser.token.access_token
     const headers = {
@@ -323,6 +300,12 @@ describe('actions.js', () => {
         sha: 'sha1'
       },
       headers
+    })
+    const csv =
+      'src,subj,tool_type,period,year,content_type,author,image_index,included_pages_num,fix_text\n' +
+      'studies/aho.jpg,国語,勉強用,後期定期,2007,対策プリント,おれ,001,1,'
+    fetchMock.mock('text/plain;base64,content1', {
+      body: { csv }
     })
 
     const commit = jest.fn()
@@ -347,10 +330,7 @@ describe('actions.js', () => {
   })
 
   it('ファイルごとのshaからファイル情報を取得する(localStorageのキャッシュを使用する)', async () => {
-    shallowMount(actions, {
-      localVue,
-      store
-    })
+    const state = JSON.parse(JSON.stringify(defaultState))
 
     const commit = jest.fn()
     const fileSha = 'fileSha'
@@ -376,10 +356,7 @@ describe('actions.js', () => {
   })
 
   it('ファイルごとのshaからファイル情報を取得する(stateのキャッシュを使用する)', async () => {
-    shallowMount(actions, {
-      localVue,
-      store
-    })
+    const state = JSON.parse(JSON.stringify(defaultState))
 
     state.contentMetadatas = {
       fileSha: {
@@ -438,6 +415,7 @@ describe('actions.js', () => {
   })
 
   it('setCommitCsv', async () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
     state.currentBranch = 'cmstest'
     const branchName = state.currentBranch
     const token = state.currentUser.token.access_token
@@ -832,6 +810,7 @@ describe('actions.js', () => {
   })
 
   it('画像ファイルのshaを取得する(キャッシュなし)', async () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
     const token = state.currentUser.token.access_token
     const headers = {
       Authorization: `Bearer ${token}`
@@ -844,11 +823,6 @@ describe('actions.js', () => {
         { name: 'file2.jpg', sha: 'imageSha2' }
       ],
       headers
-    })
-
-    shallowMount(actions, {
-      localVue,
-      store
     })
 
     const commit = jest.fn()
@@ -873,6 +847,7 @@ describe('actions.js', () => {
   })
 
   it('画像ファイルのshaを取得する(stateキャッシュあり)', async () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
     const commit = jest.fn()
     const directoryPath = 'dir'
     const commitSha = 'sha'
@@ -881,11 +856,6 @@ describe('actions.js', () => {
         dir: { status: 'loaded' }
       }
     }
-
-    shallowMount(actions, {
-      localVue,
-      store
-    })
 
     const payload = {
       directoryPath,
@@ -901,6 +871,8 @@ describe('actions.js', () => {
   })
 
   it('ファイルのshaから画像データを取得する', async () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+
     const token = state.currentUser.token.access_token
     const headers = {
       Authorization: `Bearer ${token}`
@@ -946,11 +918,6 @@ describe('actions.js', () => {
       headers
     })
 
-    shallowMount(actions, {
-      localVue,
-      store
-    })
-
     const commit = jest.fn()
     const dispatch = jest.fn()
     global.URL.createObjectURL = jest.fn()
@@ -975,6 +942,8 @@ describe('actions.js', () => {
   })
 
   it('ブランチの新規作成', async () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+
     const token = state.currentUser.token.access_token
     const headers = {
       Authorization: `Bearer ${token}`
@@ -992,11 +961,6 @@ describe('actions.js', () => {
 
     fetchMock.post(`${url}/github/git/refs`, {
       status: 201
-    })
-
-    shallowMount(actions, {
-      localVue,
-      store
     })
 
     const commit = jest.fn()
@@ -1019,16 +983,13 @@ describe('actions.js', () => {
   })
 
   it('新しいファイルのアップロード', async () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+
     state.branches = {
       data: {
         newBranch: 'commitSha'
       }
     }
-
-    shallowMount(actions, {
-      localVue,
-      store
-    })
 
     const payload = {
       branch: 'newBranch',
@@ -1048,6 +1009,8 @@ describe('actions.js', () => {
   })
 
   it('commitの作成', async () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+
     const token = state.currentUser.token.access_token
     const headers = {
       Authorization: `Bearer ${token}`
@@ -1100,11 +1063,6 @@ describe('actions.js', () => {
 
     fetchMock.patch(`${url}/github/git/refs/heads/newBranch`, { status: 200 })
 
-    shallowMount(actions, {
-      localVue,
-      store
-    })
-
     const auth = 'Bearer 12345'
     const payload = {
       commitSha: 'commitSha',
@@ -1148,6 +1106,8 @@ describe('actions.js', () => {
   })
 
   it('upload時csvを生成し、blobを取得する', async () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+
     const token = state.currentUser.token.access_token
     const headers = {
       Authorization: `Bearer ${token}`
@@ -1171,7 +1131,7 @@ describe('actions.js', () => {
       branch: 'newBranch'
     }
 
-    expect(await getCsvBlobSha(state, payload)).toBe('sha')
+    expect(await getCsvBlobSha(token, payload)).toBe('sha')
     expect(fetchMock.calls(undefined, 'POST')[0][1].headers.Authorization).toBe(
       'Bearer 12345'
     )
