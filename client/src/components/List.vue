@@ -13,15 +13,17 @@
   </div>
 </template>
 
-<script>
-import { mapState } from 'vuex'
+<script lang="ts">
+import type { State } from '../store/state'
+import Vue from 'vue'
 
-export default {
+export default Vue.extend({
   name: 'List',
   computed: {
-    ...mapState({
-      files: state => state.changedFiles
-    })
+    files() {
+      const state = this.$store.state as State
+      return state.changedFiles
+    }
   }
-}
+})
 </script>

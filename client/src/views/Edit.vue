@@ -142,6 +142,7 @@ import { Spinner } from 'vuikit/lib/spinner'
 import Sidebar from '../components/Sidebar.vue'
 import Navbar from '../components/Navbar.vue'
 import Preview from '../components/Preview.vue'
+import List from '../components/List.vue'
 
 import Vue from 'vue'
 
@@ -154,6 +155,8 @@ interface Data {
   author: string
   selectedBranch: string
   editType: string
+  isPreview: boolean
+  isList: boolean
 }
 
 export default Vue.extend({
