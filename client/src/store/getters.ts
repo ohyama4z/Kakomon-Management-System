@@ -4,7 +4,7 @@ import type { State } from './state'
 interface CurrentBranchMetadatas {
   status: 'loaded' | 'loading'
   data: {
-    [key: string]: State['contentMetadatas']['']['data'] & {
+    [key: string]: State['contentMetadatas']['']['data'][''] & {
       csvFile: string
       sha: string
     }
