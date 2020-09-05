@@ -4,24 +4,9 @@ import type { State } from './state'
 interface CurrentBranchMetadatas {
   status: 'loaded' | 'loading'
   data: {
-    [key: string]: {
-      author: string
-      // eslint-disable-next-line camelcase
-      content_type: string
+    [key: string]: State['contentMetadatas']['']['data'] & {
       csvFile: string
-      // eslint-disable-next-line camelcase
-      fix_text: string
-      // eslint-disable-next-line camelcase
-      image_index: string
-      // eslint-disable-next-line camelcase
-      included_pages_num: string
-      period: string
       sha: string
-      src: string
-      subj: string
-      // eslint-disable-next-line camelcase
-      tool_type: string
-      year: string
     }
   }
 }
