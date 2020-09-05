@@ -16,16 +16,16 @@
             icon="thumbnails"
             @click="pushPreview"
             class="uk-margin-right"
-            :class="{ pushed: isPreview }"
+            :class="{ pushed: displayMode === 'preview' }"
           ></vk-icon-button>
           <vk-icon-button
             icon="list"
             @click="pushList"
-            :class="{ pushed: isList }"
+            :class="{ pushed: displayMode === 'list' }"
           ></vk-icon-button>
         </div>
 
-        <div class="uk-margin-large-top" v-show="isList">
+        <div class="uk-margin-large-top" v-show="displayMode === 'list'">
           <List></List>
           <div v-show="isSelectedFile">
             <div class="uk-margin uk-flex uk-flex-center">
@@ -133,7 +133,7 @@
             >
           </div>
         </div>
-        <Preview v-show="isPreview"></Preview>
+        <Preview v-show="displayMode === 'preview'"></Preview>
       </div>
     </div>
   </div>
@@ -165,8 +165,7 @@ interface Data {
   author: string
   selectedBranch: string
   editType: string
-  isPreview: boolean
-  isList: boolean
+  displayMode: 'preview' | 'list'
 }
 
 export default Vue.extend({
@@ -192,8 +191,7 @@ export default Vue.extend({
       author: '',
       selectedBranch: 'master',
       editType: '',
-      isPreview: false,
-      isList: true
+      displayMode: 'list'
     }
   },
 
@@ -284,13 +282,11 @@ export default Vue.extend({
     },
 
     pushPreview() {
-      this.isPreview = true
-      this.isList = false
+      this.displayMode = 'preview'
     },
 
     pushList() {
-      this.isPreview = false
-      this.isList = true
+      this.displayMode = 'list'
     }
   }
 })
