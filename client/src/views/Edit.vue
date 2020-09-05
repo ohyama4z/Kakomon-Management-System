@@ -10,7 +10,7 @@
 
     <div v-if="!isLoading">
       <Sidebar></Sidebar>
-      <div class="forms" v-bind:class="{ expand: expand }">
+      <div class="forms" v-bind:class="{ expand: expand, collapse: !expand }">
         <div class="uk-flex uk-flex-center">
           <vk-icon-button
             icon="thumbnails"
@@ -25,7 +25,7 @@
           ></vk-icon-button>
         </div>
 
-        <div class="uk-margin-large-top" v-if="isList">
+        <div class="uk-margin-large-top" v-show="isList">
           <List></List>
           <div class="uk-margin uk-flex uk-flex-center">
             <input
@@ -126,7 +126,7 @@
             >
           </div>
         </div>
-        <Preview v-if="isPreview"></Preview>
+        <Preview v-show="isPreview"></Preview>
       </div>
     </div>
   </div>
@@ -139,6 +139,8 @@ import { State } from '../store/state'
 import { Button } from 'vuikit/lib/button'
 // @ts-ignore
 import { Spinner } from 'vuikit/lib/spinner'
+// @ts-ignore
+import { IconButton } from 'vuikit/lib/icon'
 import Sidebar from '../components/Sidebar.vue'
 import Navbar from '../components/Navbar.vue'
 import Preview from '../components/Preview.vue'
@@ -165,6 +167,7 @@ export default Vue.extend({
   components: {
     VkSpinner: Spinner,
     VkButton: Button,
+    VkIconButton: IconButton,
     Sidebar,
     Navbar,
     Preview,
@@ -287,6 +290,9 @@ export default Vue.extend({
 }
 .expand {
   padding-left: 350px;
+}
+.collapse {
+  padding-left: 50px;
 }
 .pushed {
   color: white;

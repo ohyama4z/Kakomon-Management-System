@@ -14,7 +14,7 @@ import Vue from 'vue'
 
 export default Vue.extend({
   name: 'login',
-  mounted() {
+  async mounted() {
     this.$store.dispatch('updateCurrentUser')
 
     if (this.$store.state.currentUser != null) {

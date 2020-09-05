@@ -9,10 +9,32 @@
         >
           <div v-if="image.blob" class="uk-margin-top">
             <div class="uk-inline">
-              <img :src="image.blob" class="image" width="700" />
-              <div class="uk-position-top-right uk-overlay"></div>
+              <img
+                :src="image.blob"
+                :class="{
+                  image: !isSelected(image.filePath),
+                  selectedImage: isSelected(image.filePath)
+                }"
+                width="700"
+              />
+              <div class="uk-position-top-right uk-overlay">
+                <vk-icon-button
+                  class="uk-margin-small-right"
+                  :class="{ selectedIcon: isSelected(image.filePath) }"
+                  icon="check"
+                  @click="selectImage(image.filePath)"
+                ></vk-icon-button>
+              </div>
             </div>
-            <div class="uk-text-center@s filename">{{ image.filename }}</div>
+            <div
+              class="uk-text-center@s"
+              :class="{
+                filename: !isSelected(image.filePath),
+                selectedFilename: isSelected(image.filePath)
+              }"
+            >
+              {{ image.filename }}
+            </div>
           </div>
           <vk-spinner raito="5" v-else />
         </li>
@@ -23,11 +45,21 @@
 
 <script lang="ts">
 import type { State } from '../store/state'
+// @ts-ignore
+import { IconButton } from 'vuikit/lib/icon'
 
 import Vue from 'vue'
+interface Image {
+  blob: string
+  filename: string
+  selected: boolean
+}
 
 export default Vue.extend({
   name: 'Preview',
+  components: {
+    VkIconButton: IconButton
+  },
   computed: {
     images() {
       const state = this.$store.state as State
@@ -38,8 +70,39 @@ export default Vue.extend({
         const imageSha =
           state.imageShas[commitSha]?.[directoryPath]?.data?.[filename]
 
-        return { blob: state.imageDatas?.[imageSha]?.data, filename }
+        return { blob: state.imageDatas?.[imageSha]?.data, filename, filePath }
       })
+    },
+    selectedFiles() {
+      const state = this.$store.state as State
+      return state.selectedFiles
+    }
+  },
+  methods: {
+    selectImage(filename: string): void {
+      const duplicatedFile: string | undefined = this.selectedFiles.find(
+        (f: string) => f === filename
+      )
+      if (duplicatedFile == null) {
+        const payload = [...this.selectedFiles, filename]
+        this.$store.commit('setSelectedFiles', payload)
+      }
+      const payload = this.selectedFiles.reduce(
+        (p: string[], filename: string) => {
+          if (filename !== duplicatedFile) {
+            p = [...p, filename]
+          }
+          return p
+        },
+        []
+      )
+      this.$store.commit('setSelectedFiles', payload)
+    },
+    isSelected(filename: string): boolean {
+      const duplicatedFile: string | undefined = this.selectedFiles.find(
+        (f: string) => f === filename
+      )
+      return duplicatedFile != null
     }
   }
 })
@@ -56,5 +119,20 @@ export default Vue.extend({
   border-left: solid #f5f5f5;
   border-right: solid #f5f5f5;
   background-color: #f5f5f5;
+}
+.selectedImage {
+  border-top: solid #87cefa;
+  border-left: solid #87cefa;
+  border-right: solid #87cefa;
+}
+.selectedFilename {
+  border-bottom: solid #87cefa;
+  border-left: solid #87cefa;
+  border-right: solid #87cefa;
+  background-color: #87cefa;
+}
+.selectedIcon {
+  color: white;
+  background-color: #39f;
 }
 </style>

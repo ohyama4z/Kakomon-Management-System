@@ -134,6 +134,10 @@ const mutations: MutationTree<State> = {
     ).map(([filename, data]) => [filename, { ...(data as object), ...files }])
     const changedFiles = Object.fromEntries(changedFilesArr)
     state.changedFiles = { ...changedFiles }
+  },
+
+  setSelectedFiles: (state, selectedFiles: string[]) => {
+    state.selectedFiles = selectedFiles
   }
 }
 
