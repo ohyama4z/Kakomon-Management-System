@@ -36,7 +36,7 @@
                   >作成</vk-button
                 >
               </div>
-              <div class="uk-text-center@s" v-if="isExisted">
+              <div class="uk-text-center" v-if="isExisted">
                 そのbranchはすでに存在します
               </div>
 
@@ -102,7 +102,7 @@
         </div>
       </div>
 
-      <div class="uk-text-center@s uk-margin">
+      <div class="uk-text-center uk-margin">
         <div v-if="!branchName">ブランチ名を入力してください</div>
         <div v-if="branchName === 'master'">
           master branchは選択できません
