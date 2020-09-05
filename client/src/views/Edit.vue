@@ -34,7 +34,13 @@
                 type="text"
                 placeholder="教科名を入力"
                 v-model="subject"
+                list="subjectList"
               />
+              <datalist id="subjectList">
+                <option v-for="subject in subjects" :key="subject">
+                  {{ subject }}
+                </option>
+              </datalist>
             </div>
 
             <div class="uk-margin uk-flex uk-flex-center">
@@ -134,6 +140,7 @@
 </template>
 
 <script lang="ts">
+import { mapGetters } from 'vuex'
 import 'vuikit'
 import { State } from '../store/state'
 // @ts-ignore
@@ -203,6 +210,8 @@ export default Vue.extend({
   },
 
   computed: {
+    ...mapGetters(['subjects']),
+
     isLoadingFiles(): boolean {
       const state = this.$store.state as State
       const checkLoading = (status: string) => {

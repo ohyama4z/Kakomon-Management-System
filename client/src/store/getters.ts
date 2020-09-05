@@ -1,6 +1,35 @@
 import type { GetterTree } from 'vuex'
 import type { State } from './state'
 
+interface CurrentBranchMetadatas {
+  status: 'loaded' | 'loading'
+  data: {
+    [key: string]: {
+      author: string
+      // eslint-disable-next-line camelcase
+      content_type: string
+      csvFile: string
+      // eslint-disable-next-line camelcase
+      fix_text: string
+      // eslint-disable-next-line camelcase
+      image_index: string
+      // eslint-disable-next-line camelcase
+      included_pages_num: string
+      period: string
+      sha: string
+      src: string
+      subj: string
+      // eslint-disable-next-line camelcase
+      tool_type: string
+      year: string
+    }
+  }
+}
+interface Getters {
+  currentBranchMetadatas: CurrentBranchMetadatas
+  subjects: string[]
+}
+
 const getters: GetterTree<Readonly<State>, unknown> = {
   currentBranchMetadatas: state => {
     const branch = state.currentBranch
@@ -47,6 +76,15 @@ const getters: GetterTree<Readonly<State>, unknown> = {
     const result = Object.fromEntries(contentMetadatasBySource)
 
     return { status: 'loaded', data: result }
+  },
+
+  subjects: (_, getters: Getters) => {
+    const set = new Set<string>()
+    Object.entries(getters.currentBranchMetadatas.data).map(([, v]) => {
+      set.add(v.subj)
+    })
+
+    return [...set]
   }
 }
 
