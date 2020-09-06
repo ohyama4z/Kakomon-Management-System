@@ -127,7 +127,8 @@
     "collectCoverageFrom": [
       "**/*.{js,vue,ts}",
       "!**/mytest.*",
-      "!**/node_modules/**"
+      "!**/node_modules/**",
+      "!**/*.d.ts"
     ],
     "setupFiles": [
       "jest-localstorage-mock",
