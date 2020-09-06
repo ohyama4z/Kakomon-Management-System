@@ -22,7 +22,24 @@ netlifyIdentity.on = jest.fn().mockImplementation((event, callback) => {
 })
 
 describe('Logout.vue', () => {
+  it('ログインしていないときに/logoutにするとおかしくならないようにする', () => {
+    router.push('/logout')
+    netlifyIdentity.currentUser = jest.fn(() => {
+      return null
+    })
+    const wrapper = shallowMount(Logout, {
+      localVue,
+      router
+    })
+
+    expect(wrapper.vm.$route.path).toBe('/login')
+    expect(netlifyIdentity.logout).not.toHaveBeenCalled()
+    expect(netlifyIdentity.on).not.toHaveBeenCalled()
+  })
   it('ページが読み込まれるとログアウトするactionが呼ばれ、/loginへ遷移する', () => {
+    netlifyIdentity.currentUser = jest.fn(() => {
+      return true
+    })
     router.push('/logout')
     const actions = {
       updateCurrentUser: jest.fn()
