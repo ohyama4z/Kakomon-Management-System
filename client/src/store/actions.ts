@@ -182,18 +182,43 @@ const actions: ActionTree<Readonly<State>, unknown> = {
     const userName = userEmail.slice(0, userNameLength)
     const branchName = state.currentBranch
 
-    const objName = 'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg'
-    const csvSha = '02f495e08b05c5b5b71c90a9c7c0f906a818aa80'
+    const newChangedFiles = merge({}, state.changedFiles)
 
-    const newContentMetadata = merge({}, state.contentMetadatas[csvSha].data)
-    const exchangeFileObj = state.changedFiles[objName]
-    merge(newContentMetadata[objName], exchangeFileObj)
+    const list = Object.values(newChangedFiles)
 
-    const editedCsvObj = newContentMetadata
+    const csvSrcs: String[] = []
+    const csvShas = []
+
+    for (const source of list) {
+      csvSrcs.push(source.csvFile)
+      csvShas.push(source.sha)
+    }
+    const setedCsvFileList = Array.from(new Set(csvSrcs))
+    const setedCsvShaList = Array.from(new Set(csvShas))
+
+    const filePath = setedCsvFileList[0]
+    const csvSha = setedCsvShaList[0]
+    // const filePath = state.changedFiles[0].csvFile // todo:いずれ複数に対応させる
+    // const csvSha = state.changedFiles[0].csvSha // todo:いずれ複数に対応させる
+
+    const newContentMetadata = merge(
+      state.contentMetadatas[csvSha].data,
+      {}
+    ) as typeof state.contentMetadatas['']['data']
+    const exchangeFile = merge(
+      {},
+      state.changedFiles
+    ) as typeof state.changedFiles
+
+    const editedCsvObj = merge(exchangeFile, newContentMetadata) as Pick<
+      typeof newContentMetadata,
+      keyof typeof exchangeFile
+    >
 
     // editedobject→csv
-    const objArray = Object.values(editedCsvObj)
-    const content = convertObjToCsv(objArray)
+    // const objArray = Object.values(editedCsvObj) as Array
+    const content = convertObjToCsv(Object.values(editedCsvObj)) // objArray
+
     // refの取得
     const refRes = await fetch(`${url}/github/git/refs/heads/${branchName}`, {
       method: getMethod,
@@ -231,12 +256,11 @@ const actions: ActionTree<Readonly<State>, unknown> = {
       sha: string
     }
     const blobRes = (await createBlobRes.json()) as BlobRes
-    console.log('check', blobRes)
     const fileInfo = {
       base_tree: commitres.commit.tree.sha,
       tree: [
         {
-          path: 'test.csv',
+          path: `metadatas/${filePath}`,
           mode: '100644',
           type: 'blob',
           sha: blobRes.sha

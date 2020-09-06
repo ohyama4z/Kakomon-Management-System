@@ -49,7 +49,9 @@ const defaultState = {
       author: '',
       image_index: '',
       included_pages_num: '',
-      fix_text: ''
+      fix_text: '',
+      csvFile: 'a.csv',
+      sha: '02f495e08b05c5b5b71c90a9c7c0f906a818aa80'
     },
     'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験2.jpg': {
       src: 'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験2.jpg',
@@ -61,7 +63,9 @@ const defaultState = {
       author: '',
       image_index: '',
       included_pages_num: '',
-      fix_text: ''
+      fix_text: '',
+      csvFile: 'a.csv',
+      sha: '02f495e08b05c5b5b71c90a9c7c0f906a818aa80'
     },
     'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg': {
       src: 'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg:',
@@ -73,7 +77,9 @@ const defaultState = {
       author: '',
       image_index: '',
       included_pages_num: '',
-      fix_text: ''
+      fix_text: '',
+      csvFile: 'a.csv',
+      sha: '02f495e08b05c5b5b71c90a9c7c0f906a818aa80'
     }
   },
 
@@ -778,6 +784,7 @@ describe('actions.js', () => {
       }
     }
 
+    console.log('781', state.contentMetadatas[csvSha].data)
     const saveContentMetadatas = merge({}, state.contentMetadatas[csvSha].data)
 
     await actions.postCommitCsv({ state })
