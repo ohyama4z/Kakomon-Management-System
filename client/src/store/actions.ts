@@ -185,14 +185,17 @@ const actions: ActionTree<Readonly<State>, unknown> = {
     const newChangedFiles = merge({}, state.changedFiles)
 
     const list = Object.values(newChangedFiles)
+    console.log('list', list)
 
     const csvSrcs: String[] = []
     const csvShas = []
-    for (const source in list) {
+
+    for (const source of list) {
       console.log(source)
-      csvSrcs.push(list[source].csvFile)
-      csvShas.push(list[source].sha)
+      csvSrcs.push(source.csvFile)
+      csvShas.push(source.sha)
     }
+    console.log('hoge', csvShas)
     const setedCsvFileList = Array.from(new Set(csvSrcs))
     const setedCsvShaList = Array.from(new Set(csvShas))
     console.log(setedCsvFileList, setedCsvShaList)
@@ -207,6 +210,8 @@ const actions: ActionTree<Readonly<State>, unknown> = {
     // const objNames = state.changedFiles // [test1.jpg, test2.jpg]
     // const filePath = state.changedFiles[0].csvFile // todo:いずれ複数に対応させる
 
+    console.log('csvshas', csvShas)
+    console.log('210', state.contentMetadatas)
     const newContentMetadata = merge(
       state.contentMetadatas[csvSha].data,
       {}
