@@ -125,12 +125,29 @@
             </div>
           </div>
           <div class="uk-flex uk-flex-center uk-margin">
-            <vk-button
-              type="primary"
-              class="uk-margin"
-              v-on:click="postCommitCsv"
-              >コミット</vk-button
+            <vk-button-link type="primary" class="uk-margin" @click="openModal"
+              >コミット</vk-button-link
             >
+
+            <vk-modal center :show="isModalOpened">
+              <vk-modal-close @click="closeModal"></vk-modal-close>
+              <p>
+                編集内容をコミットします。よろしいですか?
+              </p>
+              <p class="uk-text-right">
+                <vk-button
+                  @click="closeModal"
+                  size="small"
+                  class="uk-margin-small-right"
+                  type="primary"
+                >
+                  キャンセル
+                </vk-button>
+                <vk-button size="small" @click="postCommitCsv">
+                  はい
+                </vk-button>
+              </p>
+            </vk-modal>
           </div>
         </div>
         <Preview v-show="displayMode === 'preview'"></Preview>
@@ -166,6 +183,7 @@ interface Data {
   selectedBranch: string
   editType: string
   displayMode: 'preview' | 'list'
+  isModalOpened: boolean
 }
 
 export default Vue.extend({
@@ -191,7 +209,8 @@ export default Vue.extend({
       author: '',
       selectedBranch: 'master',
       editType: '',
-      displayMode: 'list'
+      displayMode: 'list',
+      isModalOpened: false
     }
   },
 
@@ -287,6 +306,14 @@ export default Vue.extend({
 
     pushList() {
       this.displayMode = 'list'
+    },
+
+    openModal() {
+      this.isModalOpened = true
+    },
+
+    closeModal() {
+      this.isModalOpened = false
     }
   }
 })
