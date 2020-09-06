@@ -185,33 +185,22 @@ const actions: ActionTree<Readonly<State>, unknown> = {
     const newChangedFiles = merge({}, state.changedFiles)
 
     const list = Object.values(newChangedFiles)
-    console.log('list', list)
 
     const csvSrcs: String[] = []
     const csvShas = []
 
     for (const source of list) {
-      console.log(source)
       csvSrcs.push(source.csvFile)
       csvShas.push(source.sha)
     }
-    console.log('hoge', csvShas)
     const setedCsvFileList = Array.from(new Set(csvSrcs))
     const setedCsvShaList = Array.from(new Set(csvShas))
-    console.log(setedCsvFileList, setedCsvShaList)
 
-    // const objName = 'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg'
     const filePath = setedCsvFileList[0]
     const csvSha = setedCsvShaList[0]
-    // const changedObjList = Object.values(objList)
-    // csvfileごとにするか オブジェクト1こずつにするか とりあえずオブジェクト毎 既存のファイルがあればそこに追加という感じ
+    // const filePath = state.changedFiles[0].csvFile // todo:いずれ複数に対応させる
     // const csvSha = state.changedFiles[0].csvSha // todo:いずれ複数に対応させる
 
-    // const objNames = state.changedFiles // [test1.jpg, test2.jpg]
-    // const filePath = state.changedFiles[0].csvFile // todo:いずれ複数に対応させる
-
-    console.log('csvshas', csvShas)
-    console.log('210', state.contentMetadatas)
     const newContentMetadata = merge(
       state.contentMetadatas[csvSha].data,
       {}
@@ -221,8 +210,6 @@ const actions: ActionTree<Readonly<State>, unknown> = {
       state.changedFiles
     ) as typeof state.changedFiles
 
-    console.log(newContentMetadata, exchangeFile)
-
     const editedCsvObj = merge(exchangeFile, newContentMetadata) as Pick<
       typeof newContentMetadata,
       keyof typeof exchangeFile
@@ -231,7 +218,7 @@ const actions: ActionTree<Readonly<State>, unknown> = {
     // editedobject→csv
     // const objArray = Object.values(editedCsvObj) as Array
     const content = convertObjToCsv(Object.values(editedCsvObj)) // objArray
-    console.log(content)
+
     // refの取得
     const refRes = await fetch(`${url}/github/git/refs/heads/${branchName}`, {
       method: getMethod,
@@ -259,7 +246,6 @@ const actions: ActionTree<Readonly<State>, unknown> = {
       encoding: 'utf-8'
     }
     const postContentsBody = JSON.stringify(postContents)
-    console.log('asdf', postContentsBody)
 
     // blobの作成
     const createBlobRes = await fetch(
@@ -270,7 +256,6 @@ const actions: ActionTree<Readonly<State>, unknown> = {
       sha: string
     }
     const blobRes = (await createBlobRes.json()) as BlobRes
-    console.log('check', blobRes)
     const fileInfo = {
       base_tree: commitres.commit.tree.sha,
       tree: [
