@@ -351,4 +351,41 @@ describe('mutations.js', () => {
     mutations.setChangedFiles(state, payload)
     expect(state.changedFiles).toEqual(result)
   })
+
+  it('選択された編集対象をstateに格納する', () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+    const selectedFiles = ['file1', 'file2']
+
+    const result = ['file1', 'file2']
+    mutations.setSelectedFiles(state, selectedFiles)
+    expect(state.selectedFiles).toEqual(result)
+  })
+
+  it('編集時の画像のindexをstateに格納', () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+    state.changedFiles = {
+      file1: {
+        image_index: '001'
+      },
+      file2: {
+        image_index: '002'
+      }
+    }
+
+    const payload = {
+      filename: 'file2',
+      index: '999'
+    }
+
+    const result = {
+      file1: {
+        image_index: '001'
+      },
+      file2: {
+        image_index: '999'
+      }
+    }
+    mutations.updateChangedFileIndex(state, payload)
+    expect(state.changedFiles).toEqual(result)
+  })
 })
