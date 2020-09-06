@@ -72,9 +72,6 @@ export default Vue.extend({
       selectedFiles: []
     }
   },
-  mounted() {
-    this.selectedFiles = this.$store.state.selectedFiles
-  },
   watch: {
     selectedFilesInState(val) {
       this.selectedFiles = val

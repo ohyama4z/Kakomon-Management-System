@@ -27,7 +27,7 @@
 
         <div class="uk-margin-large-top" v-show="displayMode === 'list'">
           <List></List>
-          <div v-show="isSelectedFile">
+          <div v-show="isExistSelectedFile">
             <div class="uk-margin uk-flex uk-flex-center">
               <input
                 class="uk-input uk-form-width-medium"
@@ -124,7 +124,10 @@
               >
             </div>
           </div>
-          <div class="uk-flex uk-flex-center uk-margin">
+          <div
+            class="uk-flex uk-flex-center uk-margin"
+            v-show="isExistChangedFiles"
+          >
             <vk-button-link type="primary" class="uk-margin" @click="openModal"
               >コミット</vk-button-link
             >
@@ -161,11 +164,14 @@ import { mapGetters } from 'vuex'
 import 'vuikit'
 import { State } from '../store/state'
 // @ts-ignore
-import { Button } from 'vuikit/lib/button'
+import { Button, ButtonLink } from 'vuikit/lib/button'
 // @ts-ignore
 import { Spinner } from 'vuikit/lib/spinner'
 // @ts-ignore
 import { IconButton } from 'vuikit/lib/icon'
+// @ts-ignore
+import { Modal } from 'vuikit/lib/modal'
+
 import Sidebar from '../components/Sidebar.vue'
 import Navbar from '../components/Navbar.vue'
 import Preview from '../components/Preview.vue'
@@ -193,6 +199,8 @@ export default Vue.extend({
     VkSpinner: Spinner,
     VkButton: Button,
     VkIconButton: IconButton,
+    VkButtonLink: ButtonLink,
+    VkModal: Modal,
     Sidebar,
     Navbar,
     Preview,
@@ -268,9 +276,14 @@ export default Vue.extend({
       )
     },
 
-    isSelectedFile(): boolean {
+    isExistSelectedFile(): boolean {
       const state = this.$store.state as State
       return state.selectedFiles.length > 0
+    },
+
+    isExistChangedFiles() {
+      const state = this.$store.state as State
+      return Object.keys(state.changedFiles).length > 0
     }
   },
 

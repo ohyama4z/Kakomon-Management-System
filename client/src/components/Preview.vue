@@ -47,6 +47,8 @@
 import type { State } from '../store/state'
 // @ts-ignore
 import { IconButton } from 'vuikit/lib/icon'
+// @ts-ignore
+import { Spinner } from 'vuikit/lib/spinner'
 
 import Vue from 'vue'
 interface Image {
@@ -58,7 +60,8 @@ interface Image {
 export default Vue.extend({
   name: 'Preview',
   components: {
-    VkIconButton: IconButton
+    VkIconButton: IconButton,
+    VkSpinner: Spinner
   },
   computed: {
     images() {
@@ -80,24 +83,19 @@ export default Vue.extend({
   },
   methods: {
     selectImage(filename: string): void {
-      const duplicatedFile: string | undefined = this.selectedFiles.find(
-        (f: string) => f === filename
-      )
-      if (duplicatedFile == null) {
-        const payload = [...this.selectedFiles, filename]
-        this.$store.commit('setSelectedFiles', payload)
+      console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+      const payload = new Set()
+      this.selectedFiles.map(f => {
+        payload.add(f)
+      })
+      if (payload.has(filename)) {
+        payload.delete(filename)
+      } else {
+        payload.add(filename)
       }
-      const payload = this.selectedFiles.reduce(
-        (p: string[], filename: string) => {
-          if (filename !== duplicatedFile) {
-            p = [...p, filename]
-          }
-          return p
-        },
-        []
-      )
-      this.$store.commit('setSelectedFiles', payload)
+      this.$store.commit('setSelectedFiles', [...payload])
     },
+
     isSelected(filename: string): boolean {
       const duplicatedFile: string | undefined = this.selectedFiles.find(
         (f: string) => f === filename
