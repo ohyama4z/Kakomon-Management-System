@@ -24,6 +24,10 @@ export default Vue.extend({
   },
 
   mounted() {
+    if (netlifyIdentity.currentUser() == null) {
+      this.$router.push('/login')
+      return
+    }
     netlifyIdentity.logout()
     netlifyIdentity.on('logout', () => {
       this.$store.dispatch('updateCurrentUser')
