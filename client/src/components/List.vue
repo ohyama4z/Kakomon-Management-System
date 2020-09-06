@@ -1,9 +1,10 @@
 <template>
   <div class="uk-overflow-auto uk-padding">
-    <table class="uk-table uk-table-divider uk-table-striped">
+    <table class="uk-table uk-table-divider uk-table-striped uk-table-middle">
       <thead>
         <tr>
           <th class="uk-text-nowrap">選択</th>
+          <th class="uk-text-nowrap">index</th>
           <th class="uk-text-nowrap">ファイル名</th>
           <th class="uk-text-nowrap">教科名</th>
           <th class="uk-text-nowrap">年度</th>
@@ -22,6 +23,14 @@
               :value="filename"
               v-model="selectedFiles"
               @change="setSelectedFiles"
+            />
+          </td>
+          <td>
+            <input
+              type="number"
+              class="uk-input uk-form-small uk-form-width-small"
+              :placeholder="data.image_index"
+              @change="updateIndex($event, filename)"
             />
           </td>
           <td>
@@ -84,6 +93,22 @@ export default Vue.extend({
   methods: {
     setSelectedFiles(): void {
       this.$store.commit('setSelectedFiles', this.selectedFiles)
+    },
+    updateIndex(e: any, filename: string): void {
+      if (e.target.value !== '') {
+        const index =
+          e.target.value.length < 3
+            ? '0'.repeat(3 - e.target.value.length) + e.target.value
+            : e.target.value
+        if (index !== '000') {
+          const payload = {
+            filename,
+            index
+          }
+          this.$store.commit('updateChangedFileIndex', payload)
+        }
+      }
+      e.target.value = ''
     }
   }
 })

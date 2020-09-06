@@ -139,6 +139,16 @@ const mutations: MutationTree<State> = {
 
   setSelectedFiles: (state, selectedFiles: string[]) => {
     state.selectedFiles = selectedFiles
+  },
+
+  updateChangedFileIndex: (state, payload) => {
+    state.changedFiles = {
+      ...state.changedFiles,
+      [payload.filename]: {
+        ...state.changedFiles[payload.filename],
+        image_index: payload.index
+      }
+    }
   }
 }
 
