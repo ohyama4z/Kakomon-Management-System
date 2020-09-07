@@ -83,7 +83,6 @@ export default Vue.extend({
   },
   methods: {
     selectImage(filename: string): void {
-      console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
       const payload = new Set()
       this.selectedFiles.map(f => {
         payload.add(f)
