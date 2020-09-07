@@ -57,7 +57,8 @@ const getters = {
 }
 
 const mutations = {
-  setExpand: jest.fn()
+  setExpand: jest.fn(),
+  setChangedFilesBase: jest.fn()
 }
 
 const actions = {

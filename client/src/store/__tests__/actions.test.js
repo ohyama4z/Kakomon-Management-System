@@ -8,7 +8,8 @@ import Vuex from 'vuex'
 import actions, {
   convertCsvToObj,
   convertObjToCsv,
-  getCsvBlobSha
+  getCsvBlobSha,
+  readFileAsync
 } from '../actions'
 
 const localVue = createLocalVue()
@@ -169,6 +170,15 @@ describe('actions.js', () => {
     )
   })
 
+  it('ブランチ取得の際tokenがnullならエラー', async () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+    state.currentUser = null
+    const commit = jest.fn()
+    await expect(actions.getBranches({ commit, state })).rejects.toEqual(
+      new Error('state.currentUser == null')
+    )
+  })
+
   it('コミットごとのファイルの状態を取得する(キャシュを使用しない場合)', async () => {
     const state = JSON.parse(JSON.stringify(defaultState))
 
@@ -219,6 +229,17 @@ describe('actions.js', () => {
     expect(fetchMock.calls(undefined, 'GET')[0][1].headers.Authorization).toBe(
       auth
     )
+  })
+
+  it('コミット取得の際tokenがnullならエラー', async () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+    state.currentUser = null
+    const commit = jest.fn()
+    const dispatch = jest.fn()
+    const commitSha = 'commitSha'
+    await expect(
+      actions.getCommit({ dispatch, commit, state }, commitSha)
+    ).rejects.toEqual(new Error('state.currentUser == null'))
   })
 
   it('コミットごとのファイルの状態を取得する(localStorageのキャッシュを使用)', async () => {
@@ -333,6 +354,17 @@ describe('actions.js', () => {
     expect(fetchMock.calls(undefined, 'GET')[0][1].headers.Authorization).toBe(
       auth
     )
+  })
+
+  it('ファイル情報取得の際tokenがnullならエラー', async () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+    state.currentUser = null
+    const commit = jest.fn()
+    const fileSha = 'fileSha'
+    const filename = 'filename'
+    await expect(
+      actions.getContentMetadata({ commit, state }, { fileSha, filename })
+    ).rejects.toEqual(new Error('state.currentUser == null'))
   })
 
   it('ファイルごとのshaからファイル情報を取得する(localStorageのキャッシュを使用する)', async () => {
@@ -816,6 +848,14 @@ describe('actions.js', () => {
     expect(state.contentMetadatas[csvSha].data).toEqual(saveContentMetadatas)
   })
 
+  it('ファイル編集の際tokenがnullならエラー', async () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+    state.currentUser = null
+    await expect(actions.postCommitCsv({ state })).rejects.toEqual(
+      new Error('state.currentUser == null')
+    )
+  })
+
   it('画像ファイルのshaを取得する(キャッシュなし)', async () => {
     const state = JSON.parse(JSON.stringify(defaultState))
     const token = state.currentUser.token.access_token
@@ -851,6 +891,18 @@ describe('actions.js', () => {
     expect(fetchMock.calls(undefined, 'GET')[0][1].headers.Authorization).toBe(
       auth
     )
+  })
+
+  it('画像ファイルのshaの取得の際tokenがnullならエラー', async () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+    state.currentUser = null
+    const commit = jest.fn()
+    const directoryPath = 'dir'
+    const commitSha = 'sha'
+
+    await expect(
+      actions.getImageShas({ state, commit }, { directoryPath, commitSha })
+    ).rejects.toEqual(new Error('state.currentUser == null'))
   })
 
   it('画像ファイルのshaを取得する(stateキャッシュあり)', async () => {
@@ -948,6 +1000,41 @@ describe('actions.js', () => {
     )
   })
 
+  it('画像データを取得の取得の際tokenがnullならエラー', async () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+    state.currentUser = null
+    state.currentBranch = 'master'
+    state.branches = {
+      status: 'loaded',
+      data: { master: 'commitSha' }
+    }
+    state.contentMetadatas = {
+      fileSha: {
+        status: 'loaded',
+        data: {
+          'dir/file1': { src: 'dir/file1' },
+          'dir/file2': { src: 'dir/file2' }
+        }
+      }
+    }
+    state.imageShas = {
+      commitSha: {
+        dir: {
+          data: {
+            file1: 'sha1',
+            file2: 'sha2'
+          }
+        }
+      }
+    }
+    const commit = jest.fn()
+    const dispatch = jest.fn()
+
+    await expect(
+      actions.getImageDatas({ dispatch, state, commit }, 'fileSha')
+    ).rejects.toEqual(new Error('state.currentUser == null'))
+  })
+
   it('ブランチの新規作成', async () => {
     const state = JSON.parse(JSON.stringify(defaultState))
 
@@ -987,6 +1074,17 @@ describe('actions.js', () => {
       auth
     )
     expect(fetchMock.calls(undefined, 'POST')[0][1].body).toEqual(body)
+  })
+
+  it('ブランチの新規作成の際tokenがnullならエラー', async () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+    state.currentUser = null
+    const commit = jest.fn()
+    const branch = 'newBranch'
+
+    await expect(
+      actions.createBranch({ state, commit }, branch)
+    ).rejects.toEqual(new Error('state.currentUser == null'))
   })
 
   it('新しいファイルのアップロード', async () => {
@@ -1094,6 +1192,34 @@ describe('actions.js', () => {
     expect(
       fetchMock.calls(undefined, 'PATCH')[0][1].headers.Authorization
     ).toBe(auth)
+  })
+
+  it('commitの作成の際tokenがnullならエラー', async () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+    state.currentUser = null
+    const payload = {
+      commitSha: 'commitSha',
+      branch: 'newBranch',
+      files: { filename: 'blobUri' },
+      commitMessage: 'commitMessage'
+    }
+    await expect(actions.createCommit({ state }, payload)).rejects.toEqual(
+      new Error('state.currentUser == null')
+    )
+  })
+
+  it('blobからbase64の取得の際string以外が帰ってきたらエラー', async () => {
+    global.FileReader = function () {
+      this.readAsDataURL = () => {
+        this.result = 12345
+        this.onload()
+      }
+    }
+    const blob = new Blob(['hello'], { type: 'text/plain' })
+
+    await expect(readFileAsync(blob)).rejects.toEqual(
+      new Error("typeof reader.result !== 'string'")
+    )
   })
 
   it('netlify-identityのユーザ情報の更新', async () => {

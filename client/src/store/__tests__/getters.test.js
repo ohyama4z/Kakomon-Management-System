@@ -157,4 +157,21 @@ describe('getters.js', () => {
       status: 'loading'
     })
   })
+
+  it('教科一覧を返す', () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+    const dammyGetters = {
+      currentBranchMetadatas: {
+        data: {
+          file1: { subj: '数学' },
+          file2: { subj: '英語' },
+          file3: { subj: '数学' },
+          file4: { subj: '論理回路' }
+        }
+      }
+    }
+    const result = ['数学', '英語', '論理回路']
+
+    expect(getters.subjects(state, dammyGetters)).toEqual(result)
+  })
 })

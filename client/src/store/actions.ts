@@ -17,7 +17,10 @@ interface CreateCommitPayload {
 const actions: ActionTree<Readonly<State>, unknown> = {
   getBranches: async ({ commit, state }) => {
     commit('setBranchesStatus', { path: 'branches', status: 'loading' })
-    const token = state.currentUser!.token.access_token
+    if (state.currentUser == null) {
+      throw new Error('state.currentUser == null')
+    }
+    const token = state.currentUser.token.access_token
     const getMethod = 'GET'
     const headers = {
       Authorization: `Bearer ${token}`

@@ -80,6 +80,7 @@ export interface State {
   imageDatas: ImageDatas
   imageShas: ImageShas
   displayedFiles: string[]
+  selectedFiles: string[]
 }
 
 const state: State = {
@@ -101,6 +102,7 @@ const state: State = {
 
   imageDatas: {},
   imageShas: {},
-  displayedFiles: []
+  displayedFiles: [],
+  selectedFiles: []
 }
 export default state

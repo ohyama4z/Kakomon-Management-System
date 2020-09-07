@@ -128,7 +128,8 @@
       "**/*.{js,vue,ts}",
       "!**/mytest.*",
       "!**/node_modules/**",
-      "!**/*.d.ts"
+      "!**/*.d.ts",
+      "!**/state.ts"
     ],
     "setupFiles": [
       "jest-localstorage-mock",
