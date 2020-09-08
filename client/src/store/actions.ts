@@ -4,6 +4,7 @@ import moment from 'moment'
 import netlifyIdentity from 'netlify-identity-widget'
 import { ActionTree } from 'vuex'
 import { State } from './state'
+const os = require('os')
 
 const url = process.env.VUE_APP_URL
 
@@ -220,8 +221,9 @@ const actions: ActionTree<Readonly<State>, unknown> = {
 
     // editedobject→csv
     // const objArray = Object.values(editedCsvObj) as Array
-    const content = convertObjToCsv(Object.values(editedCsvObj)) // objArray
-
+    const content =
+      '\ufeff' + convertObjToCsv(Object.values(editedCsvObj)) + os.EOL // objArray
+    console.log('content', content)
     // refの取得
     const refRes = await fetch(`${url}/github/git/refs/heads/${branchName}`, {
       method: getMethod,
@@ -600,9 +602,13 @@ export function convertObjToCsv(
         arr[property].fix_text
     )
   }
-  const csvHeaders = `src,subj,tool_type,period,year,content_type,author,image_index,included_pages_num,fix_text\n`
+  const csvHeaders = `src,subj,tool_type,period,year,content_type,author,image_index,included_pages_num,fix_text`
+  console.log('contents', contents)
   const unionCsv = contents.join(`\n`)
-  const convertedCsvFile = csvHeaders + unionCsv
+  const hoge = []
+  hoge.push(csvHeaders)
+  hoge.push(unionCsv)
+  const convertedCsvFile = hoge.join('\n') // csvHeaders + unionCsv + '\n'
   return convertedCsvFile
 }
 

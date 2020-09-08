@@ -24,6 +24,7 @@
     "moment": "^2.27.0",
     "native-promise-pool": "^3.13.0",
     "netlify-identity-widget": "^1.9.1",
+    "os": "^0.1.1",
     "tree-model": "^1.0.7",
     "vue": "^2.6.11",
     "vue-loading-overlay": "^3.3.3",
