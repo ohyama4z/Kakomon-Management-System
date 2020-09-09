@@ -599,9 +599,9 @@ export function convertObjToCsv(
         arr[property].fix_text
     )
   }
-  const headersCsv = `src,subj,tool_type,period,year,content_type,author,image_index,included_pages_num,fix_text\n`
-  const unionCsv = contents.join(`\n`)
-  const convertedCsvFile = headersCsv + unionCsv
+  const headerOfCsv = `src,subj,tool_type,period,year,content_type,author,image_index,included_pages_num,fix_text\n`
+  const integrationCsv = contents.join(`\n`)
+  const convertedCsvFile = headerOfCsv + integrationCsv
   return convertedCsvFile
 }
 
