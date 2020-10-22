@@ -219,9 +219,8 @@ const actions: ActionTree<Readonly<State>, unknown> = {
     >
 
     // editedobject→csv
-    // const objArray = Object.values(editedCsvObj) as Array
-    const content = convertObjToCsv(Object.values(editedCsvObj)) // objArray
-
+    const content =
+      '\ufeff' + convertObjToCsv(Object.values(editedCsvObj)) + '\n'
     // refの取得
     const refRes = await fetch(`${url}/github/git/refs/heads/${branchName}`, {
       method: getMethod,
@@ -600,9 +599,9 @@ export function convertObjToCsv(
         arr[property].fix_text
     )
   }
-  const csvHeaders = `src,subj,tool_type,period,year,content_type,author,image_index,included_pages_num,fix_text\n`
-  const unionCsv = contents.join(`\n`)
-  const convertedCsvFile = csvHeaders + unionCsv
+  const headerOfCsv = `src,subj,tool_type,period,year,content_type,author,image_index,included_pages_num,fix_text\n`
+  const integrationCsv = contents.join(`\n`)
+  const convertedCsvFile = headerOfCsv + integrationCsv
   return convertedCsvFile
 }
 

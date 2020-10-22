@@ -846,6 +846,24 @@ describe('actions.js', () => {
 
     // stateが変更されていないか
     expect(state.contentMetadatas[csvSha].data).toEqual(saveContentMetadatas)
+
+    // convertObjToCsvの動作確認
+    const convertedCsv =
+      `\ufeff` +
+      `src,subj,tool_type,period,year,content_type,author,image_index,included_pages_num,fix_text` +
+      `\n` +
+      `scanned/20180802_2年3紐。5組『倫理社会」前期定期試験1.jpg,倫理社会,テスト,前期定期,2018,,,,,` +
+      `\n` +
+      `scanned/20180802_2年3紐。5組『倫理社会」前期定期試験2.jpg,,,,,,,,,` +
+      `\n` +
+      `tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg:,算数,勉強用,,,,,,,` +
+      `\n` +
+      `tests/2018/テスト_2018_後期中間_論理回路i_問題002.jpg,論理回路i,テスト,後期中間,2018,問題,,002,1,` +
+      `\n`
+    const persedConvertedBody = JSON.parse(
+      fetchMock.calls(undefined, 'POST')[0][1].body
+    )
+    expect(persedConvertedBody.content).toBe(convertedCsv)
   })
 
   it('ファイル編集の際tokenがnullならエラー', async () => {
