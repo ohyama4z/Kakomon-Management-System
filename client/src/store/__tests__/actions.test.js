@@ -643,7 +643,7 @@ describe('actions.js', () => {
       `\n` +
       `scanned/20180802_2年3紐。5組『倫理社会」前期定期試験2.jpg,,,,,,,,,` +
       `\n`
-    console.log(fetchMock.calls(undefined, 'POST')[0][1], 'contentsCheck')
+
     const persedConvertedBody = JSON.parse(
       fetchMock.calls(undefined, 'POST')[0][1].body
     )

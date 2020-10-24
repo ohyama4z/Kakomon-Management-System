@@ -204,8 +204,6 @@ const actions: ActionTree<Readonly<State>, unknown> = {
     // const filePath = state.changedFiles[0].csvFile // todo:いずれ複数に対応させる
     // const csvSha = state.changedFiles[0].csvSha // todo:いずれ複数に対応させる
 
-    console.log(state.contentMetadatas[csvSha].data, 'oldCsv')
-
     const newContentMetadata = merge(
       state.contentMetadatas[csvSha].data,
       {}
@@ -215,19 +213,15 @@ const actions: ActionTree<Readonly<State>, unknown> = {
       state.changedFiles
     ) as typeof state.changedFiles
 
-    // console.log(exchangeFile, 'exchangedfile') // 変更が適用されている(正しい)
-    // console.log(newContentMetadata, 'newcontentmeatadata') // 古いやつ(正しい)
     const editedCsvObj = merge(newContentMetadata, exchangeFile) as Pick<
       typeof newContentMetadata,
       keyof typeof exchangeFile
     >
 
-    // console.log(editedCsvObj, 'editedCsvObj') // この時点で変わっていない ここでnewcontetmetadataに変更がmergeされていないといけない
     // editedobject→csv
     const content =
       '\ufeff' + convertObjToCsv(Object.values(editedCsvObj)) + '\n'
 
-    // console.log(content, 'newCsv')
     // refの取得
     const refRes = await fetch(`${url}/github/git/refs/heads/${branchName}`, {
       method: getMethod,
