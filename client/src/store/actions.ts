@@ -213,7 +213,7 @@ const actions: ActionTree<Readonly<State>, unknown> = {
       state.changedFiles
     ) as typeof state.changedFiles
 
-    const editedCsvObj = merge(exchangeFile, newContentMetadata) as Pick<
+    const editedCsvObj = merge(newContentMetadata, exchangeFile) as Pick<
       typeof newContentMetadata,
       keyof typeof exchangeFile
     >
@@ -221,6 +221,7 @@ const actions: ActionTree<Readonly<State>, unknown> = {
     // editedobject→csv
     const content =
       '\ufeff' + convertObjToCsv(Object.values(editedCsvObj)) + '\n'
+
     // refの取得
     const refRes = await fetch(`${url}/github/git/refs/heads/${branchName}`, {
       method: getMethod,
