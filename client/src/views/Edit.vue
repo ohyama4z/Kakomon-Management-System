@@ -146,7 +146,7 @@
                 >
                   キャンセル
                 </vk-button>
-                <vk-button size="small" @click="postCommitCsv">
+                <vk-button size="small" @click="postCommitCsv(), closeModal()">
                   はい
                 </vk-button>
               </p>
