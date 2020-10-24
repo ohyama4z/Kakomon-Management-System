@@ -293,7 +293,7 @@ describe('Edit.vue', () => {
     expect(mutations.updateLastPage).toHaveBeenCalled()
   })
 
-  it('コミットボタンを押すと確認モーダルを出し、"はい"を押すとコミットするactionを呼ぶ', async () => {
+  it('コミットボタンを押すと確認モーダルを出し、"はい"を押すとコミットするactionを呼び、モーダルを閉じる', async () => {
     state.changedFiles = {
       'dir/file1.jpg': {
         subj: '数学',
@@ -337,6 +337,7 @@ describe('Edit.vue', () => {
       .at(0)
     acceptButton.trigger('click')
     await flushPromises()
+    expect(wrapper.vm.isModalOpened).toBe(false)
     expect(actions.postCommitCsv).toHaveBeenCalled()
   })
 
