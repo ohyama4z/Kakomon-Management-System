@@ -602,8 +602,13 @@ describe('actions.js', () => {
 
     const saveContentMetadatas = merge({}, state.contentMetadatas[csvSha].data)
 
-    await actions.postCommitCsv({ state })
+    const commit = jest.fn()
 
+    await actions.postCommitCsv({ state, commit })
+
+    expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
+      status: 'loading'
+    })
     expect(fetchMock.calls(undefined, 'GET')[0][1].headers.Authorization).toBe(
       postAuth
     )
@@ -648,12 +653,18 @@ describe('actions.js', () => {
       fetchMock.calls(undefined, 'POST')[0][1].body
     )
     expect(persedConvertedBody.content).toBe(editedCsv)
+
+    // commitが呼ばれたか
+    expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
+      status: 'loaded'
+    })
   })
 
   it('ファイル編集の際tokenがnullならエラー', async () => {
     const state = JSON.parse(JSON.stringify(defaultState))
+    const commit = jest.fn()
     state.currentUser = null
-    await expect(actions.postCommitCsv({ state })).rejects.toEqual(
+    await expect(actions.postCommitCsv({ state, commit })).rejects.toEqual(
       new Error('state.currentUser == null')
     )
   })
@@ -866,7 +877,6 @@ describe('actions.js', () => {
 
     await actions.createBranch({ state, commit }, branch)
     expect(commit).toHaveBeenCalledWith('setBranchesStatus', {
-      path: 'branches',
       status: 'loading'
     })
     expect(fetchMock.calls(undefined, 'GET')[0][1].headers.Authorization).toBe(

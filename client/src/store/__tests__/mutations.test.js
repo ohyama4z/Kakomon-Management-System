@@ -13,7 +13,8 @@ const defaultState = {
   imageShas: {},
   imageDatas: {},
   displayedFiles: [],
-  selectedFiles: []
+  selectedFiles: [],
+  commitStatus: 'unrequested'
 }
 
 describe('mutations.js', () => {
@@ -387,5 +388,24 @@ describe('mutations.js', () => {
     }
     mutations.updateChangedFileIndex(state, payload)
     expect(state.changedFiles).toEqual(result)
+  })
+
+  it('編集後のステータスをstateに格納する', () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+    const payload = { status: 'loaded' }
+    const result = { status: 'loaded' }
+    mutations.setCommitCsvStatus(state, payload)
+    expect(state.commitStatus).toBe(result.status)
+  })
+
+  it('選択された編集対象と変更内容とを空にしてstateに格納する', () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+
+    const resultChangedFiles = {}
+    const resultSelectedFiles = []
+
+    mutations.clearChangedFilesAndSelectedFiles(state)
+    expect(state.changedFiles).toEqual(resultChangedFiles)
+    expect(state.selectedFiles).toEqual(resultSelectedFiles)
   })
 })

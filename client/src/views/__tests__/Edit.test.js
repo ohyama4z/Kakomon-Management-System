@@ -50,7 +50,8 @@ describe('Edit.vue', () => {
         status: 'unrequested',
         data: {}
       },
-      selectedFiles: []
+      selectedFiles: [],
+      commitStatus: 'unrequested'
     }
 
     getters = {
@@ -72,7 +73,8 @@ describe('Edit.vue', () => {
 
     mutations = {
       updateLastPage: jest.fn(),
-      setChangedFiles: jest.fn()
+      setChangedFiles: jest.fn(),
+      clearChangedFilesAndSelectedFiles: jest.fn()
     }
 
     actions = {
@@ -339,6 +341,7 @@ describe('Edit.vue', () => {
     await flushPromises()
     expect(wrapper.vm.isModalOpened).toBe(false)
     expect(actions.postCommitCsv).toHaveBeenCalled()
+    expect(mutations.clearChangedFilesAndSelectedFiles).toHaveBeenCalled()
   })
 
   it('コミットボタンを押すと確認モーダルを出し、"キャンセル"を押すと閉じる', async () => {
@@ -429,5 +432,33 @@ describe('Edit.vue', () => {
     const listButton = wrapper.findAllComponents(IconButton).at(1)
     listButton.trigger('click')
     expect(wrapper.vm.displayMode).toBe('list')
+  })
+
+  it('コミットが完了するまでローディング表示にする', async () => {
+    state.currentBranch = 'master'
+    state.commits = {
+      master: {
+        status: 'loaded'
+      }
+    }
+    state.branches.status = 'loaded'
+    state.commitStatus = 'loading'
+
+    const store = new Vuex.Store({
+      state,
+      getters,
+      mutations,
+      actions
+    })
+    const wrapper = shallowMount(Edit, {
+      store,
+      router,
+      localVue
+    })
+
+    await flushPromises()
+    expect(wrapper.vm.isLoadingFiles).toBe(true)
+    expect(wrapper.vm.isLoading).toBe(true)
+    expect(wrapper.findComponent(Spinner).exists()).toBe(true)
   })
 })
