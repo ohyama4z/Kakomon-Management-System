@@ -149,6 +149,15 @@ const mutations: MutationTree<State> = {
         image_index: payload.index
       }
     }
+  },
+
+  setCommitCsvStatus: (state, payload) => {
+    state.commitStatus = payload.status
+  },
+
+  clearChangedFilesAndSelectedFiles: state => {
+    state.changedFiles = {}
+    state.selectedFiles = []
   }
 }
 
