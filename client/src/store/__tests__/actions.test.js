@@ -159,7 +159,6 @@ describe('actions.js', () => {
 
     await actions.getBranches({ commit, state })
     expect(commit).toHaveBeenNthCalledWith(1, 'setBranchesStatus', {
-      path: 'branches',
       status: 'loading'
     })
 
