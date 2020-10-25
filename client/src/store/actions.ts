@@ -16,7 +16,7 @@ interface CreateCommitPayload {
 
 const actions: ActionTree<Readonly<State>, unknown> = {
   getBranches: async ({ commit, state }) => {
-    commit('setBranchesStatus', { path: 'branches', status: 'loading' })
+    commit('setBranchesStatus', { status: 'loading' })
     if (state.currentUser == null) {
       throw new Error('state.currentUser == null')
     }
@@ -169,7 +169,8 @@ const actions: ActionTree<Readonly<State>, unknown> = {
     localStorage.setItem(payload.fileSha, JSON.stringify(resultObj))
   },
 
-  postCommitCsv: async ({ state }) => {
+  postCommitCsv: async ({ commit, state }) => {
+    commit('setCommitCsvStatus', { status: 'loading' })
     if (state.currentUser == null) {
       throw new Error('state.currentUser == null')
     }
@@ -317,6 +318,8 @@ const actions: ActionTree<Readonly<State>, unknown> = {
       headers,
       body: updateRefs
     })
+
+    commit('setCommitCsvStatus', { status: 'loaded' })
   },
 
   updateCurrentUser: async ({ commit }) => {
@@ -404,7 +407,7 @@ const actions: ActionTree<Readonly<State>, unknown> = {
   },
 
   createBranch: async ({ state, commit }, branch) => {
-    commit('setBranchesStatus', { path: 'branches', status: 'loading' })
+    commit('setBranchesStatus', { status: 'loading' })
     if (state.currentUser == null) {
       throw new Error('state.currentUser == null')
     }

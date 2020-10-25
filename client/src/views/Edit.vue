@@ -146,7 +146,7 @@
                 >
                   キャンセル
                 </vk-button>
-                <vk-button size="small" @click="postCommitCsv(), closeModal()">
+                <vk-button size="small" @click="postCommitCsv">
                   はい
                 </vk-button>
               </p>
@@ -245,7 +245,8 @@ export default Vue.extend({
 
       return (
         checkLoading(state.branches.status) ||
-        checkLoading(state.commits[state.currentBranch]?.status)
+        checkLoading(state.commits[state.currentBranch]?.status) ||
+        checkLoading(state.commitStatus)
       )
     },
 
@@ -294,6 +295,7 @@ export default Vue.extend({
     },
     async postCommitCsv(): Promise<void> {
       await this.$store.dispatch('postCommitCsv')
+      this.clearFormAndCloseModal()
     },
 
     logout(): void {
@@ -313,19 +315,24 @@ export default Vue.extend({
       this.$store.commit('setChangedFiles', changedFiles)
     },
 
-    pushPreview() {
+    pushPreview(): void {
       this.displayMode = 'preview'
     },
 
-    pushList() {
+    pushList(): void {
       this.displayMode = 'list'
     },
 
-    openModal() {
+    openModal(): void {
       this.isModalOpened = true
     },
 
-    closeModal() {
+    closeModal(): void {
+      this.isModalOpened = false
+    },
+
+    clearFormAndCloseModal(): void {
+      this.$store.commit('clearChangedFilesAndSelectedFiles')
       this.isModalOpened = false
     }
   }
