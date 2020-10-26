@@ -574,11 +574,9 @@ const actions: ActionTree<Readonly<State>, unknown> = {
     })
   },
 
-  notifyErr: ({ commit }, errorMessage) => {
-    commit('setErrorMessage', errorMessage)
+  notify: ({ commit }, text) => {
+    commit('notify', { text })
   }
-  // const errorMessage = '何かしらのエラーメッセージ'
-  // dispatch('notifyErr', errorMessage)
 }
 
 export function convertObjToCsv(

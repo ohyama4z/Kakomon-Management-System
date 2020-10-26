@@ -158,6 +158,10 @@ const mutations: MutationTree<State> = {
   clearChangedFilesAndSelectedFiles: state => {
     state.changedFiles = {}
     state.selectedFiles = []
+  },
+
+  notify: (state, payload) => {
+    state.notifications = [...state.notifications, payload.text]
   }
 }
 
