@@ -82,6 +82,7 @@ export interface State {
   displayedFiles: string[]
   selectedFiles: string[]
   commitStatus: Status
+  errorMessages: string[]
 }
 
 const state: State = {
@@ -105,6 +106,7 @@ const state: State = {
   imageShas: {},
   displayedFiles: [],
   selectedFiles: [],
-  commitStatus: 'unrequested'
+  commitStatus: 'unrequested',
+  errorMessages: []
 }
 export default state

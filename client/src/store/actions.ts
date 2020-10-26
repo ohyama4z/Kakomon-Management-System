@@ -572,7 +572,13 @@ const actions: ActionTree<Readonly<State>, unknown> = {
         force: false
       })
     })
+  },
+
+  notifyErr: ({ commit }, errorMessage) => {
+    commit('setErrorMessage', errorMessage)
   }
+  // const errorMessage = '何かしらのエラーメッセージ'
+  // dispatch('notifyErr', errorMessage)
 }
 
 export function convertObjToCsv(
