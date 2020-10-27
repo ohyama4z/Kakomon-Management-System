@@ -1,8 +1,10 @@
 <template>
   <div>
     <router-view></router-view>
-    <vk-notification :messages.sync="messages"></vk-notification>
-    <button @click="notify">あほあほｆでゃおｓ</button>
+    <vk-notification
+      position="bottom-center"
+      :messages.sync="messages"
+    ></vk-notification>
   </div>
 </template>
 
@@ -10,23 +12,37 @@
 import Vue from 'vue'
 import { State } from './store/state'
 import 'vuikit'
-
 // @ts-ignore
 import { Notification } from 'vuikit/lib/notification'
+
+interface Data {
+  messages: string[]
+  text: string
+}
+
 export default Vue.extend({
   name: 'App',
 
   components: {
     VkNotification: Notification
   },
-  computed: {
-    messages() {
-      return (this.$store.state as State).notifications
+  data(): Data {
+    return {
+      messages: [],
+      text: ''
     }
   },
-  methods: {
-    notify() {
-      this.$store.dispatch('notify', 'あほ')
+  watch: {
+    notificactionInState(val) {
+      this.messages = val
+    },
+    messages(val) {
+      this.$store.commit('syncNotificationsChange', { messages: val })
+    }
+  },
+  computed: {
+    notificactionInState() {
+      return (this.$store.state as State).notifications
     }
   }
 })

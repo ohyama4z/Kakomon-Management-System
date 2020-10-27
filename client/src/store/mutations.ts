@@ -161,7 +161,11 @@ const mutations: MutationTree<State> = {
   },
 
   notify: (state, payload) => {
-    state.notifications = [...state.notifications, payload.text]
+    state.notifications = [...state.notifications, payload.message]
+  },
+
+  syncNotificationsChange: (state, payload) => {
+    state.notifications = payload.messages
   }
 }
 

@@ -574,8 +574,8 @@ const actions: ActionTree<Readonly<State>, unknown> = {
     })
   },
 
-  notify: ({ commit }, text) => {
-    commit('notify', { text })
+  notify: ({ commit }, message) => {
+    commit('notify', { message })
   }
 }
 
