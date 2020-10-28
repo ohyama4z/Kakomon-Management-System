@@ -1083,4 +1083,20 @@ describe('actions.js', () => {
     const csv = `src,subj,tool_type,period,year,content_type,author,image_index,included_pages_num,fix_text\nscanned/A.jpg,,,,,,,,,\nscanned/B.jpg,,,,,,,,,\nscanned/C.jpg,,,,,,,,,\n`
     expect(postBody.content).toBe(csv)
   })
+
+  it('通知内容をstateに追加するmutationを呼ぶ', () => {
+    const message = 'あほ'
+    const commit = jest.fn()
+    actions.notify({ commit }, message)
+    expect(commit).toHaveBeenCalledWith('notify', { message: 'あほ' })
+  })
+
+  it('Vue側からの通知の内容変更をstateと同期させるmutationを呼ぶ', () => {
+    const messages = ['aho', 'oha']
+    const commit = jest.fn()
+    actions.syncNotificationsChange({ commit }, messages)
+    expect(commit).toHaveBeenCalledWith('syncNotificationsChange', {
+      messages: ['aho', 'oha']
+    })
+  })
 })

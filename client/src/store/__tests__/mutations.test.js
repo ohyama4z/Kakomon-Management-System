@@ -14,7 +14,8 @@ const defaultState = {
   imageDatas: {},
   displayedFiles: [],
   selectedFiles: [],
-  commitStatus: 'unrequested'
+  commitStatus: 'unrequested',
+  notifications: []
 }
 
 describe('mutations.js', () => {
@@ -407,5 +408,25 @@ describe('mutations.js', () => {
     mutations.clearChangedFilesAndSelectedFiles(state)
     expect(state.changedFiles).toEqual(resultChangedFiles)
     expect(state.selectedFiles).toEqual(resultSelectedFiles)
+  })
+
+  it('新たな通知をstateに追加する', () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+
+    state.notifications = ['aho']
+    const payload = { message: 'エラーです!!!' }
+
+    mutations.notify(state, payload)
+    expect(state.notifications).toEqual(['aho', 'エラーです!!!'])
+  })
+
+  it('Vueでの通知内容の変更をstateに同期させる', () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+    state.notifications = ['aho', 'エラー']
+
+    const payload = { messages: ['エラー'] }
+
+    mutations.syncNotificationsChange(state, payload)
+    expect(state.notifications).toEqual(['エラー'])
   })
 })
