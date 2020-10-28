@@ -1084,7 +1084,7 @@ describe('actions.js', () => {
     expect(postBody.content).toBe(csv)
   })
 
-  it('通知内容をstateに追加するmutationを呼ぶ', () => {
+  it('通知内容をstateに追加するmutationを呼ぶ', () => {
     const message = 'あほ'
     const commit = jest.fn()
     actions.notify({ commit }, message)

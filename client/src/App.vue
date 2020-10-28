@@ -34,7 +34,7 @@ export default Vue.extend({
   },
   watch: {
     notificactionInState(val) {
-      this.messages = val
+      ;(this as any).messages = val
     },
     messages(val) {
       this.$store.dispatch('syncNotificationsChange', val)
