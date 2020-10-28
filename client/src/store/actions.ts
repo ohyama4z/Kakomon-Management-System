@@ -236,7 +236,7 @@ const actions: ActionTree<Readonly<State>, unknown> = {
       }
     } catch (e) {
       const errorMessage = e
-      dispatch('notifyErr', errorMessage)
+      dispatch('notify', errorMessage)
       return
     }
 
@@ -262,7 +262,7 @@ const actions: ActionTree<Readonly<State>, unknown> = {
       }
     } catch (e) {
       const errorMessage = e
-      dispatch('notifyErr', errorMessage)
+      dispatch('notify', errorMessage)
       return
     }
     commitRes = await fetch(`${url}/github/commits/${parseRef.object.sha}`, {
@@ -296,7 +296,7 @@ const actions: ActionTree<Readonly<State>, unknown> = {
       }
     } catch (e) {
       const errorMessage = e
-      dispatch('notifyErr', errorMessage)
+      dispatch('notify', errorMessage)
       return
     }
     createBlobRes = await fetch(`${url}/github/git/blobs?ref=${branchName}`, {
@@ -335,7 +335,7 @@ const actions: ActionTree<Readonly<State>, unknown> = {
       }
     } catch (e) {
       const errorMessage = e
-      dispatch('notifyErr', errorMessage)
+      dispatch('notify', errorMessage)
       return
     }
     createTreeRes = await fetch(`${url}/github/git/trees`, {
@@ -374,7 +374,7 @@ const actions: ActionTree<Readonly<State>, unknown> = {
       }
     } catch (e) {
       const errorMessage = e
-      dispatch('notifyErr', errorMessage)
+      dispatch('notify', errorMessage)
       return
     }
     createCommitRes = await fetch(
@@ -409,7 +409,7 @@ const actions: ActionTree<Readonly<State>, unknown> = {
       }
     } catch (e) {
       const errorMessage = e
-      dispatch('notifyErr', errorMessage)
+      dispatch('notify', errorMessage)
       return
     }
     await fetch(`${url}/github/git/refs/heads/${branchName}`, {
