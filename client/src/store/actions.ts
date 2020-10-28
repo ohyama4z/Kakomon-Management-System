@@ -169,7 +169,7 @@ const actions: ActionTree<Readonly<State>, unknown> = {
     localStorage.setItem(payload.fileSha, JSON.stringify(resultObj))
   },
 
-  postCommitCsv: async ({ commit, state }) => {
+  postCommitCsv: async ({ dispatch, commit, state }) => {
     commit('setCommitCsvStatus', { status: 'loading' })
     if (state.currentUser == null) {
       throw new Error('state.currentUser == null')
@@ -224,7 +224,23 @@ const actions: ActionTree<Readonly<State>, unknown> = {
       '\ufeff' + convertObjToCsv(Object.values(editedCsvObj)) + '\n'
 
     // refの取得
-    const refRes = await fetch(`${url}/github/git/refs/heads/${branchName}`, {
+    let refRes
+    try {
+      refRes = await fetch(`${url}/github/git/refs/heads/${branchName}`, {
+        method: getMethod,
+        headers
+      })
+      // ステータス200以外
+      if (!refRes.ok) {
+        throw new Error(refRes.statusText)
+      }
+    } catch (e) {
+      const errorMessage = e
+      dispatch('notifyErr', errorMessage)
+      return
+    }
+
+    refRes = await fetch(`${url}/github/git/refs/heads/${branchName} `, {
       method: getMethod,
       headers
     })
@@ -234,10 +250,25 @@ const actions: ActionTree<Readonly<State>, unknown> = {
     const parseRef = (await refRes.json()) as ParseRef
 
     // commitの取得
-    const commitRes = await fetch(
-      `${url}/github/commits/${parseRef.object.sha}`,
-      { method: getMethod, headers }
-    )
+    let commitRes
+    try {
+      commitRes = await fetch(`${url}/github/commits/${parseRef.object.sha}`, {
+        method: getMethod,
+        headers
+      })
+      // ステータス200以外
+      if (!commitRes.ok) {
+        throw new Error(commitRes.statusText)
+      }
+    } catch (e) {
+      const errorMessage = e
+      dispatch('notifyErr', errorMessage)
+      return
+    }
+    commitRes = await fetch(`${url}/github/commits/${parseRef.object.sha}`, {
+      method: getMethod,
+      headers
+    })
     interface CommitRes {
       commit: {
         tree: { sha: string }
@@ -252,10 +283,27 @@ const actions: ActionTree<Readonly<State>, unknown> = {
     const postContentsBody = JSON.stringify(postContents)
 
     // blobの作成
-    const createBlobRes = await fetch(
-      `${url}/github/git/blobs?ref=${branchName}`,
-      { method: postMethod, headers, body: postContentsBody }
-    )
+    let createBlobRes
+    try {
+      createBlobRes = await fetch(`${url}/github/git/blobs?ref=${branchName}`, {
+        method: postMethod,
+        headers,
+        body: postContentsBody
+      })
+      // ステータス200以外
+      if (!createBlobRes.ok) {
+        throw new Error(createBlobRes.statusText)
+      }
+    } catch (e) {
+      const errorMessage = e
+      dispatch('notifyErr', errorMessage)
+      return
+    }
+    createBlobRes = await fetch(`${url}/github/git/blobs?ref=${branchName}`, {
+      method: postMethod,
+      headers,
+      body: postContentsBody
+    })
     interface BlobRes {
       sha: string
     }
@@ -274,7 +322,23 @@ const actions: ActionTree<Readonly<State>, unknown> = {
 
     // treeの作成
     const postFileInfoBody = JSON.stringify(fileInfo)
-    const createTreeRes = await fetch(`${url}/github/git/trees`, {
+    let createTreeRes
+    try {
+      createTreeRes = await fetch(`${url}/github/git/trees` + 'asfdasf', {
+        method: postMethod,
+        headers,
+        body: postFileInfoBody
+      })
+      // ステータス200以外
+      if (!createTreeRes.ok) {
+        throw new Error(createTreeRes.statusText)
+      }
+    } catch (e) {
+      const errorMessage = e
+      dispatch('notifyErr', errorMessage)
+      return
+    }
+    createTreeRes = await fetch(`${url}/github/git/trees`, {
       method: postMethod,
       headers,
       body: postFileInfoBody
@@ -298,7 +362,22 @@ const actions: ActionTree<Readonly<State>, unknown> = {
     const postCommitInfoBody = JSON.stringify(postCommitInfo)
 
     // commitの作成
-    const createCommitRes = await fetch(
+    let createCommitRes
+    try {
+      createCommitRes = await fetch(
+        `${url}/github/git/commits?ref=${branchName}`,
+        { method: postMethod, headers, body: postCommitInfoBody }
+      )
+      // ステータス200以外
+      if (!createCommitRes.ok) {
+        throw new Error(createCommitRes.statusText)
+      }
+    } catch (e) {
+      const errorMessage = e
+      dispatch('notifyErr', errorMessage)
+      return
+    }
+    createCommitRes = await fetch(
       `${url}/github/git/commits?ref=${branchName}`,
       { method: postMethod, headers, body: postCommitInfoBody }
     )
@@ -308,11 +387,31 @@ const actions: ActionTree<Readonly<State>, unknown> = {
     const createdCommitRes = (await createCommitRes.json()) as CreateCommitRes
 
     // refの更新
+    let updateRefsRes
     const updateRef = {
       sha: createdCommitRes.sha,
       force: false // 強制pushするか否
     }
     const updateRefs = JSON.stringify(updateRef)
+
+    try {
+      updateRefsRes = await fetch(
+        `${url}/github/git/refs/heads/${branchName}`,
+        {
+          method: patchMethod,
+          headers,
+          body: updateRefs
+        }
+      )
+      // ステータス200以外
+      if (!updateRefsRes.ok) {
+        throw new Error(updateRefsRes.statusText)
+      }
+    } catch (e) {
+      const errorMessage = e
+      dispatch('notifyErr', errorMessage)
+      return
+    }
     await fetch(`${url}/github/git/refs/heads/${branchName}`, {
       method: patchMethod,
       headers,
