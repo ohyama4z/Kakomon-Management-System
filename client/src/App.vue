@@ -37,7 +37,7 @@ export default Vue.extend({
       this.messages = val
     },
     messages(val) {
-      this.$store.commit('syncNotificationsChange', { messages: val })
+      this.$store.dispatch('syncNotificationsChange', val)
     }
   },
   computed: {
