@@ -1,4 +1,5 @@
-import { createLocalVue, mount } from '@vue/test-utils'
+import { createLocalVue, shallowMount } from '@vue/test-utils'
+import flushPromises from 'flush-promises'
 import Vuex, { ActionTree } from 'vuex'
 // @ts-ignore
 import Vuikit from 'vuikit'
@@ -30,24 +31,38 @@ describe('App.vue', () => {
     jest.clearAllMocks()
   })
 
-  it('stateの通知が変更されると画面下に通知が表示される', () => {
-    const stubs = {
-      VkNotification: Notification
-    }
+  it('stateに格納されている通知内容が変更されるとローカルにその値を渡す', async () => {
     const store = new Vuex.Store({
-      state: { notifications: ['あほ', 'あひ'] },
+      state,
       actions
     })
 
-    const wrapper = mount(App, {
+    const wrapper = shallowMount(App, {
       store,
       localVue
     })
 
-    const aho = wrapper.findComponent(Notification).text()
-    // state.notifications = ['あほ']
+    state.notifications = ['aho']
+    await flushPromises()
+    const localNotificationsVal = wrapper.vm.$data.messages
+    expect(localNotificationsVal).toEqual(['aho'])
+  })
 
-    // const manu = wrapper.findComponent(Notification).html()
-    expect(aho).toEqual('')
+  it('ローカルに保存してる通知内容が変更(タイムアウト)されると、変更をstateに同期するactionsが呼ばれる', async () => {
+    const store = new Vuex.Store({
+      state,
+      actions
+    })
+
+    const wrapper = shallowMount(App, {
+      store,
+      localVue
+    })
+
+    const notificationsWrapper = wrapper.findComponent(Notification)
+    await new Promise(resolve => setTimeout(resolve, 5000))
+    const wasTimeoutNotification = wrapper.findComponent(Notification)
+
+    expect(wasTimeoutNotification.html()).toEqual(notificationsWrapper)
   })
 })

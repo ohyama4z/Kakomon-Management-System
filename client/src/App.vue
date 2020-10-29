@@ -4,10 +4,9 @@
     <vk-notification
       position="bottom-center"
       :messages.sync="messages"
-      timeout="1000000000"
     ></vk-notification>
-    <input type="text" v-model="text" />
-    <button @click="notify">通知テスト</button>
+    <!-- <input type="text" v-model="text" />
+    <button @click="notify">通知テスト</button> -->
   </div>
 </template>
 
@@ -35,6 +34,7 @@ export default Vue.extend({
       text: ''
     }
   },
+
   watch: {
     notificactionInState(val) {
       ;(this as any).messages = val
@@ -43,15 +43,16 @@ export default Vue.extend({
       this.$store.dispatch('syncNotificationsChange', val)
     }
   },
+
   computed: {
     notificactionInState() {
       return (this.$store.state as State).notifications
     }
-  },
-  methods: {
-    notify(): void {
-      this.$store.dispatch('notify', this.text)
-    }
   }
+  // methods: {
+  //   notify(): void {
+  //     this.$store.dispatch('notify', this.text)
+  //   }
+  // }
 })
 </script>
