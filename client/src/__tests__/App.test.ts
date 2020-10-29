@@ -1,4 +1,4 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils'
+import { createLocalVue, mount } from '@vue/test-utils'
 import Vuex, { ActionTree } from 'vuex'
 // @ts-ignore
 import Vuikit from 'vuikit'
@@ -39,14 +39,15 @@ describe('App.vue', () => {
       actions
     })
 
-    const wrapper = shallowMount(App, {
+    const wrapper = mount(App, {
       store,
       localVue
-      // stubs
     })
 
-    const aho = wrapper.findComponent(Notification)
-    // const manu = wrapper.findComponent(Notification)
-    expect(wrapper.html()).toEqual('')
+    const aho = wrapper.findComponent(Notification).text()
+    // state.notifications = ['あほ']
+
+    // const manu = wrapper.findComponent(Notification).html()
+    expect(aho).toEqual('')
   })
 })
