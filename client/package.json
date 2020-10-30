@@ -127,6 +127,8 @@
     "collectCoverageFrom": [
       "**/*.{js,vue,ts}",
       "!**/mytest.*",
+      "!src/main.ts",
+      "!src/router.ts",
       "!**/node_modules/**",
       "!**/*.d.ts",
       "!**/state.ts"
