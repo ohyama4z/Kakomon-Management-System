@@ -5,8 +5,6 @@
       position="bottom-center"
       :messages.sync="messages"
     ></vk-notification>
-    <!-- <input type="text" v-model="text" />
-    <button @click="notify">通知テスト</button> -->
   </div>
 </template>
 
@@ -19,7 +17,6 @@ import { Notification } from 'vuikit/lib/notification'
 
 interface Data {
   messages: string[]
-  text: string
 }
 
 export default Vue.extend({
@@ -30,8 +27,7 @@ export default Vue.extend({
   },
   data(): Data {
     return {
-      messages: [],
-      text: ''
+      messages: []
     }
   },
 
@@ -49,10 +45,5 @@ export default Vue.extend({
       return (this.$store.state as State).notifications
     }
   }
-  // methods: {
-  //   notify(): void {
-  //     this.$store.dispatch('notify', this.text)
-  //   }
-  // }
 })
 </script>
