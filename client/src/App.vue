@@ -17,7 +17,6 @@ import { Notification } from 'vuikit/lib/notification'
 
 interface Data {
   messages: string[]
-  text: string
 }
 
 export default Vue.extend({
@@ -28,10 +27,10 @@ export default Vue.extend({
   },
   data(): Data {
     return {
-      messages: [],
-      text: ''
+      messages: []
     }
   },
+
   watch: {
     notificactionInState(val) {
       ;(this as any).messages = val
@@ -40,6 +39,7 @@ export default Vue.extend({
       this.$store.dispatch('syncNotificationsChange', val)
     }
   },
+
   computed: {
     notificactionInState() {
       return (this.$store.state as State).notifications
