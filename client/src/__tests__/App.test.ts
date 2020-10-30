@@ -3,8 +3,6 @@ import flushPromises from 'flush-promises'
 import Vuex, { ActionTree } from 'vuex'
 // @ts-ignore
 import Vuikit from 'vuikit'
-// @ts-ignore
-import { Notification } from 'vuikit/lib/notification'
 import App from '../App.vue'
 
 const localVue = createLocalVue()
@@ -18,7 +16,9 @@ interface State {
 
 describe('App.vue', () => {
   let state: State
-  let actions: ActionTree<Readonly<State>, unknown>
+  let actions: ActionTree<Readonly<State>, unknown> & {
+    syncNotificationsChange: jest.Mock<any, any>
+  }
   beforeEach(() => {
     state = {
       notifications: []
@@ -32,6 +32,9 @@ describe('App.vue', () => {
   })
 
   it('stateに格納されている通知内容が変更されるとローカルにその値を渡す', async () => {
+    const stubs = {
+      routerView: { template: '<div></div>' }
+    }
     const store = new Vuex.Store({
       state,
       actions
@@ -39,7 +42,8 @@ describe('App.vue', () => {
 
     const wrapper = shallowMount(App, {
       store,
-      localVue
+      localVue,
+      stubs
     })
 
     state.notifications = ['aho']
@@ -48,7 +52,11 @@ describe('App.vue', () => {
     expect(localNotificationsVal).toEqual(['aho'])
   })
 
-  it('ローカルに保存してる通知内容が変更(タイムアウト)されると、変更をstateに同期するactionsが呼ばれる', async () => {
+  it('ローカルに保存してる通知内容が変更されると、変更をstateに同期するactionsが呼ばれる', async () => {
+    const stubs = {
+      routerView: { template: '<div></div>' }
+    }
+
     const store = new Vuex.Store({
       state,
       actions
@@ -56,13 +64,17 @@ describe('App.vue', () => {
 
     const wrapper = shallowMount(App, {
       store,
-      localVue
+      localVue,
+      stubs
     })
 
-    const notificationsWrapper = wrapper.findComponent(Notification)
-    await new Promise(resolve => setTimeout(resolve, 5000))
-    const wasTimeoutNotification = wrapper.findComponent(Notification)
+    state.notifications = ['aho', 'hoa']
+    await flushPromises()
+    expect(wrapper.vm.$data.messages).toEqual(['aho', 'hoa'])
 
-    expect(wasTimeoutNotification.html()).toEqual(notificationsWrapper)
+    wrapper.vm.$data.messages = ['aho']
+
+    await flushPromises()
+    expect(actions.syncNotificationsChange.mock.calls[1][1]).toEqual(['aho'])
   })
 })
