@@ -1,4 +1,9 @@
-type Status = 'unrequested' | 'loading' | 'loaded' | 'invalied_status'
+type Status =
+  | 'unrequested'
+  | 'loading'
+  | 'loaded'
+  | 'invalied_status'
+  | 'failed'
 
 interface CurrentUser {
   token: {
