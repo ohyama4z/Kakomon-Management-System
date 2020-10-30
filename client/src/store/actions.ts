@@ -352,10 +352,14 @@ const actions: ActionTree<Readonly<State>, unknown> = {
     interface Res {
       name: string
       sha: string
+      // eslint-disable-next-line camelcase
+      download_url: string
     }
     const res = (await httpRes.json()) as Res[]
 
-    const data = Object.fromEntries(res.map(file => [file.name, file.sha]))
+    const data = Object.fromEntries(
+      res.map(file => [file.name, { sha: file.sha, url: file.download_url }])
+    )
     commit('setImageShas', { commitSha, directoryPath, data })
   },
 
@@ -376,34 +380,10 @@ const actions: ActionTree<Readonly<State>, unknown> = {
       return path.substr(path.lastIndexOf('/') + 1)
     })
 
-    await Promise.all(
-      filenames.map(async filename => {
-        const sha = state.imageShas[commitSha][directoryPath].data[filename]
-        if (state.currentUser == null) {
-          throw new Error('state.currentUser == null')
-        }
-        const token = state.currentUser.token.access_token
-        const method = 'GET'
-        const headers = {
-          Authorization: `Bearer ${token}`
-        }
-        const httpRes = await fetch(`${url}/github/git/blobs/${sha}`, {
-          method,
-          headers
-        })
-        interface Res {
-          content: string
-        }
-        const res = (await httpRes.json()) as Res
-
-        // Todo: image/ だけじゃなくpdfとかもあるので対応できるようにする
-        const imageType = filename.substr(filename.lastIndexOf('.') + 1)
-        const blob = toBlob(res.content, imageType)
-        const blobUri = URL.createObjectURL(blob)
-
-        commit('setImageData', { sha, blobUri })
-      })
-    )
+    filenames.map(filename => {
+      const image = state.imageShas[commitSha][directoryPath].data[filename]
+      commit('setImageData', { sha: image.sha, url: image.url })
+    })
   },
 
   createBranch: async ({ state, commit }, branch) => {
@@ -644,17 +624,6 @@ export function convertCsvToObj(csv: string, filename: string) {
       }
       return previous
     }, {})
-}
-
-function toBlob(base64: string, type: string) {
-  const bin = atob(base64.replace(/^.*,/, ''))
-  const buffer = new Uint8Array(bin.length)
-  for (let i = 0; i < bin.length; i++) {
-    buffer[i] = bin.charCodeAt(i)
-  }
-  // Blobを作成
-
-  return new Blob([buffer.buffer], { type })
 }
 
 export function readFileAsync(blob: Blob) {

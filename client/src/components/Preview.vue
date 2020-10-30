@@ -4,13 +4,13 @@
       <template>
         <li
           v-for="image in images"
-          v-bind:key="image.blob"
+          v-bind:key="image.url"
           class="uk-flex uk-flex-center"
         >
-          <div v-if="image.blob" class="uk-margin-top">
+          <div v-if="image.url" class="uk-margin-top">
             <div class="uk-inline">
               <img
-                :src="image.blob"
+                :src="image.url"
                 :class="{
                   image: !isSelected(image.filePath),
                   selectedImage: isSelected(image.filePath)
@@ -51,11 +51,11 @@ import { IconButton } from 'vuikit/lib/icon'
 import { Spinner } from 'vuikit/lib/spinner'
 
 import Vue from 'vue'
-interface Image {
-  blob: string
-  filename: string
-  selected: boolean
-}
+// interface Image {
+//   url: string
+//   filename: string
+//   selected: boolean
+// }
 
 export default Vue.extend({
   name: 'Preview',
@@ -71,9 +71,9 @@ export default Vue.extend({
         const directoryPath = filePath.substr(0, filePath.lastIndexOf('/'))
         const filename = filePath.substr(filePath.lastIndexOf('/') + 1)
         const imageSha =
-          state.imageShas[commitSha]?.[directoryPath]?.data?.[filename]
+          state.imageShas[commitSha]?.[directoryPath]?.data?.[filename].sha
 
-        return { blob: state.imageDatas?.[imageSha]?.data, filename, filePath }
+        return { url: state.imageDatas?.[imageSha]?.data, filename, filePath }
       })
     },
     selectedFiles() {

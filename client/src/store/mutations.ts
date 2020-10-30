@@ -115,7 +115,7 @@ const mutations: MutationTree<State> = {
       ...state.imageDatas,
       [payload.sha]: {
         status: 'loaded',
-        data: payload.blobUri
+        data: payload.url
       }
     }
   },
