@@ -352,10 +352,14 @@ const actions: ActionTree<Readonly<State>, unknown> = {
     interface Res {
       name: string
       sha: string
+      // eslint-disable-next-line camelcase
+      download_url: string
     }
     const res = (await httpRes.json()) as Res[]
 
-    const data = Object.fromEntries(res.map(file => [file.name, file.sha]))
+    const data = Object.fromEntries(
+      res.map(file => [file.name, { sha: file.sha, url: file.download_url }])
+    )
     commit('setImageShas', { commitSha, directoryPath, data })
   },
 
@@ -378,7 +382,9 @@ const actions: ActionTree<Readonly<State>, unknown> = {
 
     await Promise.all(
       filenames.map(async filename => {
-        const sha = state.imageShas[commitSha][directoryPath].data[filename]
+        const sha = state.imageShas[commitSha][directoryPath].data[filename].sha
+        const downloadUrl =
+          state.imageShas[commitSha][directoryPath].data[filename].url
         if (state.currentUser == null) {
           throw new Error('state.currentUser == null')
         }
@@ -401,7 +407,7 @@ const actions: ActionTree<Readonly<State>, unknown> = {
         const blob = toBlob(res.content, imageType)
         const blobUri = URL.createObjectURL(blob)
 
-        commit('setImageData', { sha, blobUri })
+        commit('setImageData', { sha, blobUri, downloadUrl })
       })
     )
   },

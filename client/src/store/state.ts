@@ -53,7 +53,10 @@ interface Branches {
 }
 interface ImageDatas {
   [imageSha: string]: {
-    data: string
+    data: {
+      blobUri: string
+      downloadUrl: string
+    }
     status: Status
   }
 }
@@ -61,7 +64,10 @@ interface ImageShas {
   [commitSha: string]: {
     [directoryPath: string]: {
       data: {
-        [filename: string]: string
+        [filename: string]: {
+          sha: string
+          url: string
+        }
       }
       status: Status
     }
