@@ -13,6 +13,7 @@ import { mapGetters } from 'vuex'
 import { SidebarMenu } from 'vue-sidebar-menu'
 
 import Vue from 'vue'
+import { Getters } from '../store/getters'
 export default Vue.extend({
   name: 'Sidebar',
   components: {
@@ -22,19 +23,19 @@ export default Vue.extend({
   computed: {
     ...mapGetters(['currentBranchMetadatas']),
 
-    intermediateFiles(): any {
-      const files = Object.values(this.currentBranchMetadatas.data)
-      const beforeMerge = files.map((file: any) => {
+    intermediateFiles() {
+      const files = Object.values(
+        this.currentBranchMetadatas
+          .data as Getters['currentBranchMetadatas']['data']
+      )
+      const beforeMerge = files.map(file => {
         const {
           period,
           subj,
           // eslint-disable-next-line camelcase
           tool_type,
-          year,
-          // eslint-disable-next-line camelcase
-          content_type
-        }: // @ts-ignore
-        any = Object.fromEntries(
+          year
+        } = Object.fromEntries(
           Object.entries(file).map(([key, value]) => [
             key,
             value === '' ? '不明' : value
@@ -46,12 +47,7 @@ export default Vue.extend({
             [subj]: {
               // eslint-disable-next-line camelcase
               [tool_type]: {
-                [year]: {
-                  // eslint-disable-next-line camelcase
-                  [content_type]: {
-                    [file.src.replace(/^.*\//, '')]: file
-                  }
-                }
+                [year]: file
               }
             }
           }
@@ -62,18 +58,21 @@ export default Vue.extend({
       return result
     },
 
-    menuStructure(): any {
+    menuStructure() {
       const icon = 'fa fa-folder'
-      const result = generateMenuStructure(this.intermediateFiles, 6)
+      const result = generateMenuStructure(this.intermediateFiles, 4)
       return result
 
-      function generateMenuStructure(intermediate: any, num: any): any {
+      function generateMenuStructure(
+        intermediate: typeof (this.interMediaFiles),
+        num: number
+      ): any {
         if (num === 1) {
           const result = Object.entries(intermediate).map(([key, file]) => ({
             title: key,
-            icon: 'fas fa-file',
+            icon: 'fas fa-circle',
             data: file,
-            isSecondFromEnd: false,
+            isEndOfFolder: true,
             expand: false
           }))
 
@@ -87,7 +86,7 @@ export default Vue.extend({
                 title: key,
                 icon,
                 child: generateMenuStructure(value, num - 1),
-                isSecondFromEnd: num === 2, // 末端ファイルの元となるフォルダかを確かめる
+                isEndOfFolder: false,
                 expand: false
               }
             ]
@@ -111,15 +110,17 @@ export default Vue.extend({
 
   methods: {
     onItemClick(e: any, item: any): void {
-      // データツリーの末端ファイルの元となるフォルダをクリックしたときに処理を行う
-      if (item.isSecondFromEnd && !item.expand) {
-        const fileSha = item.child[0].data.sha
+      // データツリーの末端フォルダ(年度)をクリックしたときに処理を行う
+      if (item.isEndOfFolder && !item.expand) {
+        const fileSha = item.data.sha
         this.$store.dispatch('getImageDatas', fileSha)
-        const changedFilesBase = Object.fromEntries(
-          item.child.map((file: any) => {
-            return [file.data.src, file.data]
-          })
-        )
+        // const changedFilesBase = Object.fromEntries(
+        //   item.child.map((file: any) => {
+        //     return [file.data.src, file.data]
+        //   })
+        // )
+
+        const changedFilesBase = { [item.src]: item.data }
         this.$store.commit('setChangedFilesBase', changedFilesBase)
       }
 

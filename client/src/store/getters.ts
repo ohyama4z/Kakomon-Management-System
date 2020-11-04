@@ -10,7 +10,7 @@ interface CurrentBranchMetadatas {
     }
   }
 }
-interface Getters {
+export interface Getters {
   currentBranchMetadatas: CurrentBranchMetadatas
   subjects: string[]
 }
