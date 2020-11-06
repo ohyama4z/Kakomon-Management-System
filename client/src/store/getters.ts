@@ -1,21 +1,28 @@
 import type { GetterTree } from 'vuex'
 import type { State } from './state'
 
-interface CurrentBranchMetadatas {
-  status: 'loaded' | 'loading'
-  data: {
-    [key: string]: State['contentMetadatas']['']['data'][''] & {
-      csvFile: string
-      sha: string
+type CurrentBranchMetadatas =
+  | {
+      status: 'loading'
+      data: {}
     }
-  }
-}
+  | {
+      status: 'loaded'
+      data: {
+        [key: string]: State['contentMetadatas']['']['data'][''] & {
+          // csvFile: string
+          sha: string
+        }
+      }
+    }
+
 export interface Getters extends GetterTree<Readonly<State>, unknown> {
-  currentBranchMetadatas: (
-    state: State,
-    getters: Getters
-  ) => CurrentBranchMetadatas
-  subjects: (state: State, getters: Getters) => string[]
+  currentBranchMetadatas: (state: State) => CurrentBranchMetadatas
+  subjects: (state: State, getters: GetterValues) => string[]
+}
+
+export type GetterValues = {
+  [K in keyof Getters]: Getters[K] extends (...args: any) => infer U ? U : never
 }
 
 const getters: Getters = {
@@ -42,7 +49,7 @@ const getters: Getters = {
 
     const loadedContentMetadataShas = Object.values(
       state.commits[commitSha].data
-    ).filter((sha: any) => contentMetadatas[sha]?.status === 'loaded')
+    ).filter(sha => contentMetadatas[sha]?.status === 'loaded')
 
     if (
       loadedContentMetadataShas.length !==
@@ -51,9 +58,9 @@ const getters: Getters = {
       return { status: 'loading', data: {} }
     }
 
-    const loadedMetadatas = loadedContentMetadataShas.flatMap((sha: any) => {
+    const loadedMetadatas = loadedContentMetadataShas.flatMap(sha => {
       return Object.entries(contentMetadatas[sha]?.data).map(([key, value]) => {
-        return { [key]: { ...(value as object), sha } }
+        return { [key]: { ...value, sha } }
       })
     })
 
@@ -66,7 +73,7 @@ const getters: Getters = {
     return { status: 'loaded', data: result }
   },
 
-  subjects: (_, getters: Getters) => {
+  subjects: (_, getters) => {
     const set = new Set<string>()
     Object.entries(getters.currentBranchMetadatas.data).map(([, v]) => {
       set.add(v.subj)
@@ -75,7 +82,5 @@ const getters: Getters = {
     return [...set]
   }
 }
-
-type GetterValues = {}
 
 export default getters
