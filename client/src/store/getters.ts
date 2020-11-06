@@ -10,12 +10,15 @@ interface CurrentBranchMetadatas {
     }
   }
 }
-export interface Getters {
-  currentBranchMetadatas: CurrentBranchMetadatas
-  subjects: string[]
+export interface Getters extends GetterTree<Readonly<State>, unknown> {
+  currentBranchMetadatas: (
+    state: State,
+    getters: Getters
+  ) => CurrentBranchMetadatas
+  subjects: (state: State, getters: Getters) => string[]
 }
 
-const getters: GetterTree<Readonly<State>, unknown> = {
+const getters: Getters = {
   currentBranchMetadatas: state => {
     const branch = state.currentBranch
     const branches = state.branches
@@ -72,5 +75,7 @@ const getters: GetterTree<Readonly<State>, unknown> = {
     return [...set]
   }
 }
+
+type GetterValues = {}
 
 export default getters
