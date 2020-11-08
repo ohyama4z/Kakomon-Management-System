@@ -9,6 +9,7 @@ import { State } from './state'
 const url = process.env.VUE_APP_URL
 
 // https://dev.to/3vilarthas/vuex-typescript-m4j
+
 interface AugmentedActionContext
   extends ActionContext<Readonly<State>, unknown> {
   commit<K extends keyof Mutations>(
@@ -20,8 +21,10 @@ interface AugmentedActionContext
     key: K,
     payload?: Actions[K] extends (...args: any[]) => any
       ? Parameters<Actions[K]>[1]
-      : any
-  ): Actions[K] extends (...args: any[]) => any ? ReturnType<Actions[K]> : any
+      : unknown
+  ): Actions[K] extends (...args: any[]) => Promise<any>
+    ? ReturnType<Actions[K]>
+    : Promise<unknown>
 }
 
 export interface Actions extends ActionTree<Readonly<State>, unknown> {
@@ -30,8 +33,8 @@ export interface Actions extends ActionTree<Readonly<State>, unknown> {
     context: AugmentedActionContext,
     payload: string
   ) => Promise<void>
-  getToken: (context: AugmentedActionContext) => string
-  getEmail: (context: AugmentedActionContext) => string
+  getToken: (context: AugmentedActionContext) => Promise<string>
+  getEmail: (context: AugmentedActionContext) => Promise<string>
   getCommit: (
     context: AugmentedActionContext,
     commitSha: string
@@ -79,7 +82,7 @@ export interface Actions extends ActionTree<Readonly<State>, unknown> {
 const actions: Actions = {
   getBranches: async ({ commit, dispatch }) => {
     commit('setBranchesStatus', { status: 'loading' })
-    const token = dispatch('getToken')
+    const token = await dispatch('getToken')
     const getMethod = 'GET'
     const headers = {
       Authorization: `Bearer ${token}`
@@ -107,7 +110,7 @@ const actions: Actions = {
     await dispatch('getCommit', commitSha)
   },
 
-  getToken: ({ state }) => {
+  getToken: async ({ state }) => {
     // eslint-disable-next-line camelcase
     const token = state.currentUser?.token?.access_token
     if (token == null) {
@@ -116,7 +119,7 @@ const actions: Actions = {
     return token
   },
 
-  getEmail: ({ state }) => {
+  getEmail: async ({ state }) => {
     const email = state.currentUser?.email
     if (email == null) {
       throw new Error('state.currentUser?.email == null')
@@ -158,7 +161,7 @@ const actions: Actions = {
       return
     }
 
-    const token = dispatch(`getToken`)
+    const token = await dispatch(`getToken`)
     const getMethod = 'GET'
     const headers = {
       Authorization: `Bearer ${token}`
@@ -203,16 +206,16 @@ const actions: Actions = {
 
     const fileDataInLocalStorage = JSON.parse(
       localStorage.getItem(payload.fileSha) as string
-    ) as State['contentMetadatas']['']
+    ) as State['contentMetadatas']['']['data']
     if (fileDataInLocalStorage != null) {
       commit('setContentMetadata', {
         sha: payload.fileSha,
-        data: fileDataInLocalStorage.data
+        data: fileDataInLocalStorage
       })
       return
     }
 
-    const token = dispatch('getToken')
+    const token = await dispatch('getToken')
     const getMethod = 'GET'
     const headers = {
       Authorization: `Bearer ${token}`
@@ -241,14 +244,15 @@ const actions: Actions = {
 
   postCommitCsv: async ({ commit, state, dispatch }) => {
     commit('setCommitCsvStatus', { status: 'loading' })
-    const token = dispatch('getToken')
+    const token = await dispatch('getToken')
+
     const getMethod = 'GET'
     const postMethod = 'POST'
     const patchMethod = 'PATCH'
     const headers = {
       Authorization: `Bearer ${token}`
     }
-    const userEmail = dispatch('getEmail')
+    const userEmail = await dispatch('getEmail')
     const userNameLength = userEmail.search('@')
     const userName = userEmail.slice(0, userNameLength)
     const branchName = state.currentBranch
@@ -405,7 +409,7 @@ const actions: Actions = {
     if (state.imageShas?.[commitSha]?.[directoryPath]?.status === 'loaded') {
       return
     }
-    const token = dispatch('getToken')
+    const token = await dispatch('getToken')
     const method = 'GET'
     const headers = {
       Authorization: `Bearer ${token}`
@@ -445,7 +449,7 @@ const actions: Actions = {
     await Promise.all(
       filenames.map(async filename => {
         const sha = state.imageShas[commitSha][directoryPath].data[filename]
-        const token = dispatch('getToken')
+        const token = await dispatch('getToken')
         const method = 'GET'
         const headers = {
           Authorization: `Bearer ${token}`
@@ -471,7 +475,7 @@ const actions: Actions = {
 
   createBranch: async ({ commit, dispatch }, branch) => {
     commit('setBranchesStatus', { status: 'loading' })
-    const token = dispatch('getToken')
+    const token = await dispatch('getToken')
     const method = 'GET'
     const headers = {
       Authorization: `Bearer ${token}`
@@ -514,7 +518,7 @@ const actions: Actions = {
 
   createCommit: async ({ dispatch }, payload) => {
     // https://int128.hatenablog.com/entry/2017/09/05/161641 詳しくはここ見ろ
-    const token = dispatch('getToken')
+    const token = await dispatch('getToken')
     const headers = {
       Authorization: `Bearer ${token}`
     }
@@ -596,7 +600,7 @@ const actions: Actions = {
     }
     const createTreeRes = (await createTreeHttpRes.json()) as CreateTreeRes
 
-    const email = dispatch('getEmail')
+    const email = await dispatch('getEmail')
     const name = email.substr(0, email.lastIndexOf('@'))
     const createCommitBody = {
       message: payload.commitMessage,
@@ -708,7 +712,7 @@ export function convertCsvToObj(csv: string, filename: string) {
 function assertIsCsvRow(
   row: any
 ): row is Omit<State['contentMetadatas']['']['data'][''], 'csvFile'> {
-  return row.csvFile != null // (仮)
+  return row.src != null
 }
 
 function toBlob(base64: string, type: string) {

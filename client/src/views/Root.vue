@@ -5,7 +5,8 @@
 <script lang="ts">
 import Vue from 'vue'
 
-export default Vue.extend({
+import { StateTypedVueConstructor } from '../extended'
+export default (Vue as StateTypedVueConstructor).extend({
   name: 'Root',
   async mounted() {
     if (typeof this.$route.hash === 'string') {

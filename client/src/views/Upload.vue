@@ -142,6 +142,8 @@ import Navbar from '../components/Navbar.vue'
 import Vue from 'vue'
 import { State } from '../store/state'
 
+import { StateTypedVueConstructor } from '../extended'
+
 interface DataType {
   uploadedFiles: {
     [filename: string]: string
@@ -150,8 +152,7 @@ interface DataType {
   commitMessage: string
   newBranch: string
 }
-
-export default Vue.extend({
+export default (Vue as StateTypedVueConstructor).extend({
   name: 'Upload',
   components: {
     VkButton: Button,

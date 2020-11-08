@@ -13,7 +13,7 @@ import { mapGetters } from 'vuex'
 import { SidebarMenu } from 'vue-sidebar-menu'
 
 import Vue from 'vue'
-import { Getters } from '../store/getters'
+import { GetterValues } from '../store/getters'
 export default Vue.extend({
   name: 'Sidebar',
   components: {
@@ -26,7 +26,7 @@ export default Vue.extend({
     intermediateFiles() {
       const files = Object.values(
         this.currentBranchMetadatas
-          .data as Getters['currentBranchMetadatas']['data']
+          .data as GetterValues['currentBranchMetadatas']['data']
       )
       const beforeMerge = files.map(file => {
         const {
@@ -63,10 +63,7 @@ export default Vue.extend({
       const result = generateMenuStructure(this.intermediateFiles, 4)
       return result
 
-      function generateMenuStructure(
-        intermediate: typeof (this.interMediaFiles),
-        num: number
-      ): any {
+      function generateMenuStructure(intermediate, num): any {
         if (num === 1) {
           const result = Object.entries(intermediate).map(([key, file]) => ({
             title: key,

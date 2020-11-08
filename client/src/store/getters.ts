@@ -10,13 +10,12 @@ type CurrentBranchMetadatas =
       status: 'loaded'
       data: {
         [key: string]: State['contentMetadatas']['']['data'][''] & {
-          // csvFile: string
           sha: string
         }
       }
     }
 
-export interface Getters extends GetterTree<Readonly<State>, unknown> {
+interface Getters extends GetterTree<Readonly<State>, unknown> {
   currentBranchMetadatas: (state: State) => CurrentBranchMetadatas
   subjects: (state: State, getters: GetterValues) => string[]
 }

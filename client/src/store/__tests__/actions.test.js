@@ -15,12 +15,6 @@ import actions, {
 const localVue = createLocalVue()
 const url = process.env.VUE_APP_URL
 
-localVue.use(Vuex)
-
-jest.mock('node-fetch', () => jest.fn())
-// netlifyIdentityの関数を使えるようにする
-jest.mock('netlify-identity-widget')
-
 const defaultState = {
   currentUser: {
     token: {
@@ -92,6 +86,23 @@ const defaultState = {
   imageDatas: {}
 }
 
+const getValidTokenDispatch = key =>
+  key === 'getToken' ? defaultState.currentUser.token.access_token : undefined
+const getInvalidTokenDispatch = key =>
+  key === 'getToken' ? actions.getToken({ state: {} }) : undefined
+localVue.use(Vuex)
+
+const createGetValidTokenAndEmailDispatcher = state => key => {
+  if (key === `getEmail`) {
+    return state.currentUser.email
+  }
+  return getValidTokenDispatch(key)
+}
+
+jest.mock('node-fetch', () => jest.fn())
+// netlifyIdentityの関数を使えるようにする
+jest.mock('netlify-identity-widget')
+
 describe('actions.js', () => {
   beforeEach(() => {
     fetchMock.resetBehavior()
@@ -152,12 +163,13 @@ describe('actions.js', () => {
     })
 
     const commit = jest.fn()
+    const dispatch = jest.fn(getValidTokenDispatch)
     const branches = {
       master: 'sha1',
       branch1: 'sha2'
     }
 
-    await actions.getBranches({ commit, state })
+    await actions.getBranches({ commit, state, dispatch })
     expect(commit).toHaveBeenNthCalledWith(1, 'setBranchesStatus', {
       status: 'loading'
     })
@@ -167,15 +179,19 @@ describe('actions.js', () => {
     expect(fetchMock.calls(undefined, 'GET')[0][1].headers.Authorization).toBe(
       auth
     )
+    expect(dispatch).toHaveBeenCalledTimes(1)
   })
 
   it('ブランチ取得の際tokenがnullならエラー', async () => {
     const state = JSON.parse(JSON.stringify(defaultState))
-    state.currentUser = null
     const commit = jest.fn()
-    await expect(actions.getBranches({ commit, state })).rejects.toEqual(
-      new Error('state.currentUser == null')
+    const dispatch = jest.fn(getInvalidTokenDispatch)
+    await expect(
+      actions.getBranches({ commit, state, dispatch })
+    ).rejects.toEqual(
+      new Error('state.currentUser?.token?.access_token == null')
     )
+    expect(dispatch).toHaveBeenCalledTimes(1)
   })
 
   it('コミットごとのファイルの状態を取得する(キャシュを使用しない場合)', async () => {
@@ -202,7 +218,7 @@ describe('actions.js', () => {
     })
 
     const commitSha = 'commitSha'
-    const dispatch = jest.fn()
+    const dispatch = jest.fn(getValidTokenDispatch)
     const commit = jest.fn()
     const payloadForSetCommitStatus = { sha: commitSha, status: 'loading' }
     const commitData = {
@@ -228,24 +244,28 @@ describe('actions.js', () => {
     expect(fetchMock.calls(undefined, 'GET')[0][1].headers.Authorization).toBe(
       auth
     )
+    expect(dispatch).toHaveBeenCalledTimes(3)
   })
 
   it('コミット取得の際tokenがnullならエラー', async () => {
     const state = JSON.parse(JSON.stringify(defaultState))
     state.currentUser = null
     const commit = jest.fn()
-    const dispatch = jest.fn()
+    const dispatch = jest.fn(getInvalidTokenDispatch)
     const commitSha = 'commitSha'
     await expect(
       actions.getCommit({ dispatch, commit, state }, commitSha)
-    ).rejects.toEqual(new Error('state.currentUser == null'))
+    ).rejects.toEqual(
+      new Error('state.currentUser?.token?.access_token == null')
+    )
+    expect(dispatch).toHaveBeenCalledTimes(1)
   })
 
   it('コミットごとのファイルの状態を取得する(localStorageのキャッシュを使用)', async () => {
     const state = JSON.parse(JSON.stringify(defaultState))
 
     const commitSha = 'commitSha'
-    const dispatch = jest.fn()
+    const dispatch = jest.fn(getValidTokenDispatch)
     const commit = jest.fn()
     const payloadForSetCommitStatus = { sha: commitSha, status: 'loading' }
     localStorage.commitSha = JSON.stringify({
@@ -264,7 +284,8 @@ describe('actions.js', () => {
       payloadForSetCommitStatus
     )
     expect(localStorage.getItem).toHaveBeenCalled()
-    expect(dispatch).toHaveBeenCalled()
+    expect(dispatch).toHaveBeenCalledTimes(2)
+
     expect(commit).toHaveBeenNthCalledWith(2, 'setCommit', payloadForSetCommit)
     expect(localStorage.setItem).not.toHaveBeenCalled()
   })
@@ -273,7 +294,7 @@ describe('actions.js', () => {
     const state = JSON.parse(JSON.stringify(defaultState))
 
     const commitSha = 'commitSha'
-    const dispatch = jest.fn()
+    const dispatch = jest.fn(getValidTokenDispatch)
     const commit = jest.fn()
     const payloadForSetCommitStatus = { sha: commitSha, status: 'loading' }
     state.commits = {
@@ -302,7 +323,7 @@ describe('actions.js', () => {
       status: 'loaded',
       data: { master: 'sha1' }
     }
-    const dispatch = jest.fn()
+    const dispatch = jest.fn(getValidTokenDispatch)
     const commit = jest.fn()
     const branchName = 'master'
 
@@ -335,6 +356,7 @@ describe('actions.js', () => {
     })
 
     const commit = jest.fn()
+    const dispatch = jest.fn(getValidTokenDispatch)
     const fileSha = 'fileSha'
     const payload = {
       sha: fileSha,
@@ -343,7 +365,10 @@ describe('actions.js', () => {
     const auth = 'Bearer 12345'
     const filename = 'filename'
 
-    await actions.getContentMetadata({ commit, state }, { fileSha, filename })
+    await actions.getContentMetadata(
+      { commit, state, dispatch },
+      { fileSha, filename }
+    )
     expect(commit).toHaveBeenNthCalledWith(1, 'setContentMetadataStatus', {
       sha: fileSha,
       status: 'loading'
@@ -353,17 +378,24 @@ describe('actions.js', () => {
     expect(fetchMock.calls(undefined, 'GET')[0][1].headers.Authorization).toBe(
       auth
     )
+    expect(dispatch).toHaveBeenCalledTimes(1)
   })
 
   it('ファイル情報取得の際tokenがnullならエラー', async () => {
     const state = JSON.parse(JSON.stringify(defaultState))
-    state.currentUser = null
     const commit = jest.fn()
+    const dispatch = jest.fn(getInvalidTokenDispatch)
     const fileSha = 'fileSha'
     const filename = 'filename'
     await expect(
-      actions.getContentMetadata({ commit, state }, { fileSha, filename })
-    ).rejects.toEqual(new Error('state.currentUser == null'))
+      actions.getContentMetadata(
+        { commit, dispatch, state },
+        { fileSha, filename }
+      )
+    ).rejects.toEqual(
+      new Error('state.currentUser?.token?.access_token == null')
+    )
+    expect(dispatch).toHaveBeenCalledTimes(1)
   })
 
   it('ファイルごとのshaからファイル情報を取得する(localStorageのキャッシュを使用する)', async () => {
@@ -602,8 +634,9 @@ describe('actions.js', () => {
     const saveContentMetadatas = merge({}, state.contentMetadatas[csvSha].data)
 
     const commit = jest.fn()
+    const dispatch = jest.fn(createGetValidTokenAndEmailDispatcher(state))
 
-    await actions.postCommitCsv({ state, commit })
+    await actions.postCommitCsv({ state, commit, dispatch })
 
     expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
       status: 'loading'
@@ -657,15 +690,16 @@ describe('actions.js', () => {
     expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
       status: 'loaded'
     })
+    expect(dispatch).toHaveBeenCalledTimes(2)
   })
 
   it('ファイル編集の際tokenがnullならエラー', async () => {
-    const state = JSON.parse(JSON.stringify(defaultState))
+    const dispatch = jest.fn(getInvalidTokenDispatch)
     const commit = jest.fn()
-    state.currentUser = null
-    await expect(actions.postCommitCsv({ state, commit })).rejects.toEqual(
-      new Error('state.currentUser == null')
+    await expect(actions.postCommitCsv({ dispatch, commit })).rejects.toEqual(
+      new Error('state.currentUser?.token?.access_token == null')
     )
+    expect(dispatch).toHaveBeenCalledTimes(1)
   })
 
   it('画像ファイルのshaを取得する(キャッシュなし)', async () => {
@@ -684,6 +718,7 @@ describe('actions.js', () => {
       headers
     })
 
+    const dispatch = jest.fn(getValidTokenDispatch)
     const commit = jest.fn()
     const directoryPath = 'dir'
     const commitSha = 'sha'
@@ -698,23 +733,32 @@ describe('actions.js', () => {
     }
     const auth = 'Bearer 12345'
 
-    await actions.getImageShas({ state, commit }, { directoryPath, commitSha })
+    await actions.getImageShas(
+      { state, commit, dispatch },
+      { directoryPath, commitSha }
+    )
     expect(commit).toHaveBeenCalledWith('setImageShas', payload)
     expect(fetchMock.calls(undefined, 'GET')[0][1].headers.Authorization).toBe(
       auth
     )
+    expect(dispatch).toHaveBeenCalledTimes(1)
   })
 
   it('画像ファイルのshaの取得の際tokenがnullならエラー', async () => {
-    const state = JSON.parse(JSON.stringify(defaultState))
-    state.currentUser = null
+    const dispatch = jest.fn(getInvalidTokenDispatch)
     const commit = jest.fn()
     const directoryPath = 'dir'
     const commitSha = 'sha'
 
     await expect(
-      actions.getImageShas({ state, commit }, { directoryPath, commitSha })
-    ).rejects.toEqual(new Error('state.currentUser == null'))
+      actions.getImageShas(
+        { dispatch, commit, state: {} },
+        { directoryPath, commitSha }
+      )
+    ).rejects.toEqual(
+      new Error('state.currentUser?.token?.access_token == null')
+    )
+    expect(dispatch).toHaveBeenCalledTimes(1)
   })
 
   it('画像ファイルのshaを取得する(stateキャッシュあり)', async () => {
@@ -790,7 +834,7 @@ describe('actions.js', () => {
     })
 
     const commit = jest.fn()
-    const dispatch = jest.fn()
+    const dispatch = jest.fn(getValidTokenDispatch)
     global.URL.createObjectURL = jest.fn()
     const auth = 'Bearer 12345'
 
@@ -810,6 +854,7 @@ describe('actions.js', () => {
     expect(fetchMock.calls(undefined, 'GET')[1][1].headers.Authorization).toBe(
       auth
     )
+    expect(dispatch).toHaveBeenCalledTimes(3)
   })
 
   it('画像データを取得の取得の際tokenがnullならエラー', async () => {
@@ -840,11 +885,14 @@ describe('actions.js', () => {
       }
     }
     const commit = jest.fn()
-    const dispatch = jest.fn()
+    const dispatch = jest.fn(getInvalidTokenDispatch)
 
     await expect(
       actions.getImageDatas({ dispatch, state, commit }, 'fileSha')
-    ).rejects.toEqual(new Error('state.currentUser == null'))
+    ).rejects.toEqual(
+      new Error('state.currentUser?.token?.access_token == null')
+    )
+    expect(dispatch).toHaveBeenCalledTimes(3)
   })
 
   it('ブランチの新規作成', async () => {
@@ -869,12 +917,13 @@ describe('actions.js', () => {
       status: 201
     })
 
+    const dispatch = jest.fn(getValidTokenDispatch)
     const commit = jest.fn()
     const branch = 'newBranch'
     const auth = 'Bearer 12345'
     const body = JSON.stringify({ ref: `refs/heads/newBranch`, sha: `sha` })
 
-    await actions.createBranch({ state, commit }, branch)
+    await actions.createBranch({ state, dispatch, commit }, branch)
     expect(commit).toHaveBeenCalledWith('setBranchesStatus', {
       status: 'loading'
     })
@@ -885,17 +934,19 @@ describe('actions.js', () => {
       auth
     )
     expect(fetchMock.calls(undefined, 'POST')[0][1].body).toEqual(body)
+    expect(dispatch).toHaveBeenCalledTimes(1)
   })
 
   it('ブランチの新規作成の際tokenがnullならエラー', async () => {
-    const state = JSON.parse(JSON.stringify(defaultState))
-    state.currentUser = null
     const commit = jest.fn()
     const branch = 'newBranch'
-
+    const dispatch = jest.fn(getInvalidTokenDispatch)
     await expect(
-      actions.createBranch({ state, commit }, branch)
-    ).rejects.toEqual(new Error('state.currentUser == null'))
+      actions.createBranch({ dispatch, commit }, branch)
+    ).rejects.toEqual(
+      new Error('state.currentUser?.token?.access_token == null')
+    )
+    expect(dispatch).toHaveBeenCalledTimes(1)
   })
 
   it('新しいファイルのアップロード', async () => {
@@ -980,6 +1031,7 @@ describe('actions.js', () => {
     fetchMock.patch(`${url}/github/git/refs/heads/newBranch`, { status: 200 })
 
     const auth = 'Bearer 12345'
+    const dispatch = jest.fn(createGetValidTokenAndEmailDispatcher(state))
     const payload = {
       commitSha: 'commitSha',
       branch: 'newBranch',
@@ -987,7 +1039,7 @@ describe('actions.js', () => {
       commitMessage: 'commitMessage'
     }
 
-    await actions.createCommit({ state }, payload)
+    await actions.createCommit({ state, dispatch }, payload)
     expect(fetchMock.calls(undefined, 'GET')[0][1].headers.Authorization).toBe(
       auth
     )
@@ -1003,20 +1055,21 @@ describe('actions.js', () => {
     expect(
       fetchMock.calls(undefined, 'PATCH')[0][1].headers.Authorization
     ).toBe(auth)
+    expect(dispatch).toHaveBeenCalledTimes(2)
   })
 
   it('commitの作成の際tokenがnullならエラー', async () => {
-    const state = JSON.parse(JSON.stringify(defaultState))
-    state.currentUser = null
+    const dispatch = jest.fn(getInvalidTokenDispatch)
     const payload = {
       commitSha: 'commitSha',
       branch: 'newBranch',
       files: { filename: 'blobUri' },
       commitMessage: 'commitMessage'
     }
-    await expect(actions.createCommit({ state }, payload)).rejects.toEqual(
-      new Error('state.currentUser == null')
+    await expect(actions.createCommit({ dispatch }, payload)).rejects.toEqual(
+      new Error('state.currentUser?.token?.access_token == null')
     )
+    expect(dispatch).toHaveBeenCalledTimes(1)
   })
 
   it('blobからbase64の取得の際string以外が帰ってきたらエラー', async () => {
