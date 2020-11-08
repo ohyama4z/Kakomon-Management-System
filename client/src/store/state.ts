@@ -1,5 +1,8 @@
-type Status = 'unrequested' | 'loading' | 'loaded' | 'invalied_status'
+import { User } from 'netlify-identity-widget'
+export type PendingStatus = 'unrequested' | 'loading' | 'invalied_status'
+export type SuccessStatus = 'loaded'
 
+export type Status = PendingStatus | SuccessStatus
 interface CurrentUser {
   token: {
     // eslint-disable-next-line camelcase
@@ -8,10 +11,15 @@ interface CurrentUser {
   email: string
 }
 interface Commits {
-  [commitSha: string]: {
-    data: { [csvName: string]: string }
-    status: Status
-  }
+  [commitSha: string]:
+    | {
+        data: { [csvName: string]: string }
+        status: SuccessStatus
+      }
+    | {
+        data: {}
+        status: PendingStatus
+      }
 }
 
 const headers = [
@@ -24,14 +32,16 @@ const headers = [
   'author',
   'image_index',
   'included_pages_num',
-  'fix_text'
+  'fix_text',
+  'csvFile'
 ] as const
-type Headers = typeof headers[number]
+
+export type CsvHeaders = typeof headers[number]
 interface ContentMetadatas {
   [key: string]: {
     data: {
       [imageName: string]: {
-        [key in Headers]: string
+        [key in CsvHeaders]: string
       }
     }
     status: Status
@@ -69,7 +79,7 @@ interface ImageShas {
 }
 
 export interface State {
-  currentUser: CurrentUser | null
+  currentUser: User | null
   lastPage: string
   currentBranch: string
   expand: boolean
