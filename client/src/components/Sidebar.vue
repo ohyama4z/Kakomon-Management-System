@@ -9,26 +9,88 @@
 
 <script lang="ts">
 import merge from 'deepmerge'
-import { mapGetters } from 'vuex'
+// import { mapGetters } from 'vuex'
 import { SidebarMenu } from 'vue-sidebar-menu'
 
 import Vue from 'vue'
 import { GetterValues } from '../store/getters'
-export default Vue.extend({
+import { StateTypedVueConstructor } from '../extended'
+import { State } from '../store/state'
+
+interface InterMediateFilesOld {
+  [period: string]: {
+    [subj: string]: {
+      [toolType: string]: {
+        [year: string]: {
+          [filename: string]: State['contentMetadatas']['']['data'][''] & {
+            sha: string
+          }
+        }
+      }
+    }
+  }
+}
+
+type CsvRow = State['contentMetadatas']['']['data'][''] & {
+  sha: string
+  isLast: true
+}
+interface InterMediateFiles {
+  [key: string]: CsvRow | InterMediateFiles
+}
+
+function isCsvRow(x: InterMediateFiles['']): asserts x is CsvRow {
+  // (仮)
+  if (typeof x?.src === 'string') {
+    throw new Error()
+  }
+}
+
+function isInterMediateFiles(
+  x: InterMediateFiles['']
+): asserts x is InterMediateFiles {
+  // (仮)
+  if (typeof x?.src !== 'string') {
+    throw new Error()
+  }
+}
+
+type GenerateMenuStructurePattern =
+  | {
+      child: GenerateMenuStructurePattern[]
+      expand: boolean
+      icon: string
+      isEndOfFolder: false
+      title: string
+    }
+  | {
+      expand: boolean
+      icon: string
+      isEndOfFolder: true
+      title: string
+      data: State['contentMetadatas']['']['data']['']
+    }
+
+type GenerateMenuStructure = (
+  intermediate: InterMediateFiles,
+  num: number
+) => GenerateMenuStructurePattern[]
+
+export default (Vue as StateTypedVueConstructor).extend({
   name: 'Sidebar',
   components: {
     SidebarMenu
   },
 
   computed: {
-    ...mapGetters(['currentBranchMetadatas']),
+    // ...mapGetters(['currentBranchMetadatas']),
+    currentBranchMetadatas(): GetterValues['currentBranchMetadatas'] {
+      return this.$store.getters.currentBranchMetadatas
+    },
 
-    intermediateFiles() {
-      const files = Object.values(
-        this.currentBranchMetadatas
-          .data as GetterValues['currentBranchMetadatas']['data']
-      )
-      const beforeMerge = files.map(file => {
+    intermediateFiles(): InterMediateFiles {
+      const files = Object.entries(this.currentBranchMetadatas.data)
+      const beforeMerge = files.map(([filename, file]) => {
         const {
           period,
           subj,
@@ -45,16 +107,15 @@ export default Vue.extend({
         const fileResult = {
           [period]: {
             [subj]: {
-              // eslint-disable-next-line camelcase
               [tool_type]: {
-                [year]: file
+                [year]: { [filename]: file }
               }
             }
           }
         }
         return fileResult
       })
-      const result = merge.all(beforeMerge)
+      const result = merge.all<InterMediateFiles>(beforeMerge)
       return result
     },
 
@@ -63,33 +124,39 @@ export default Vue.extend({
       const result = generateMenuStructure(this.intermediateFiles, 4)
       return result
 
-      function generateMenuStructure(intermediate, num): any {
+      function generateMenuStructure(
+        intermediate: InterMediateFiles,
+        num: number
+      ): GenerateMenuStructurePattern[] {
         if (num === 1) {
-          const result = Object.entries(intermediate).map(([key, file]) => ({
-            title: key,
-            icon: 'fas fa-circle',
-            data: file,
-            isEndOfFolder: true,
-            expand: false
-          }))
-
+          const result: GenerateMenuStructurePattern[] = Object.entries(
+            intermediate
+          ).map(([key, file]) => {
+            isCsvRow(file)
+            return {
+              title: key,
+              icon: 'fas fa-circle',
+              data: file,
+              isEndOfFolder: true,
+              expand: false
+            }
+          })
           return result
         }
-        return Object.entries(intermediate).reduce(
-          (previous: any, [key, value]: any) => {
-            return [
-              ...previous,
-              {
-                title: key,
-                icon,
-                child: generateMenuStructure(value, num - 1),
-                isEndOfFolder: false,
-                expand: false
-              }
-            ]
-          },
-          []
-        )
+
+        return Object.entries(intermediate).reduce((previous, [key, value]) => {
+          isInterMediateFiles(value)
+          return [
+            ...previous,
+            {
+              title: key,
+              icon,
+              child: generateMenuStructure(value, num - 1),
+              isEndOfFolder: false,
+              expand: false
+            }
+          ]
+        }, [] as GenerateMenuStructurePattern[])
       }
     },
 

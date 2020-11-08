@@ -1,6 +1,7 @@
 import { Vue, VueConstructor } from 'vue/types/vue'
 import { store } from './main'
 import { Actions } from './store/actions'
+import { GetterValues } from './store/getters'
 import { Mutations } from './store/mutations'
 import { State as ExtendedState } from './store/state'
 
@@ -8,6 +9,7 @@ type VuexStore = typeof store
 interface Store extends VuexStore {
   dispatch<K extends keyof Actions>(
     key: K,
+    // payload?: Parameters<Actions[K]>[1]
     payload?: Actions[K] extends (...args: any[]) => any
       ? Parameters<Actions[K]>[1]
       : unknown
@@ -21,6 +23,7 @@ interface Store extends VuexStore {
   ): ReturnType<Mutations[K]>
 
   state: ExtendedState
+  getters: GetterValues
 }
 
 interface StateTypedVue extends Vue {
