@@ -31,28 +31,27 @@ interface InterMediateFilesOld {
   }
 }
 
+class CsvItem {
+  readonly files: { [filename: string]: CsvRow }
+  constructor(files: { [filename: string]: CsvRow }) {
+    this.files = files
+  }
+}
+
 type CsvRow = State['contentMetadatas']['']['data'][''] & {
   sha: string
-  isLast: true
+  // isLast: true
 }
 interface InterMediateFiles {
-  [key: string]: CsvRow | InterMediateFiles
+  [key: string]: CsvItem | InterMediateFiles
 }
 
-function isCsvRow(x: InterMediateFiles['']): asserts x is CsvRow {
-  // (仮)
-  if (typeof x?.src === 'string') {
-    throw new Error()
-  }
-}
-
-function isInterMediateFiles(
-  x: InterMediateFiles['']
-): asserts x is InterMediateFiles {
-  // (仮)
-  if (typeof x?.src !== 'string') {
-    throw new Error()
-  }
+interface LastOfDataTree {
+  title: string
+  icon: string
+  data: CsvRow
+  isLast: true
+  expand: boolean
 }
 
 type GenerateMenuStructurePattern =
@@ -60,13 +59,13 @@ type GenerateMenuStructurePattern =
       child: GenerateMenuStructurePattern[]
       expand: boolean
       icon: string
-      isEndOfFolder: false
+      isLast: false
       title: string
     }
   | {
       expand: boolean
       icon: string
-      isEndOfFolder: true
+      isLast: true
       title: string
       data: State['contentMetadatas']['']['data']['']
     }
@@ -91,13 +90,7 @@ export default (Vue as StateTypedVueConstructor).extend({
     intermediateFiles(): InterMediateFiles {
       const files = Object.entries(this.currentBranchMetadatas.data)
       const beforeMerge = files.map(([filename, file]) => {
-        const {
-          period,
-          subj,
-          // eslint-disable-next-line camelcase
-          tool_type,
-          year
-        } = Object.fromEntries(
+        const { period, subj, tool_type: toolType, year } = Object.fromEntries(
           Object.entries(file).map(([key, value]) => [
             key,
             value === '' ? '不明' : value
@@ -107,15 +100,18 @@ export default (Vue as StateTypedVueConstructor).extend({
         const fileResult = {
           [period]: {
             [subj]: {
-              [tool_type]: {
-                [year]: { [filename]: file }
+              [toolType]: {
+                [year]: new CsvItem({ [filename]: file })
               }
             }
           }
         }
         return fileResult
       })
-      const result = merge.all<InterMediateFiles>(beforeMerge)
+      const result = merge.all<InterMediateFiles>(beforeMerge, {
+        isMergeableObject: obj =>
+          typeof obj === `object` && !(obj instanceof CsvItem)
+      })
       return result
     },
 
@@ -128,35 +124,25 @@ export default (Vue as StateTypedVueConstructor).extend({
         intermediate: InterMediateFiles,
         num: number
       ): GenerateMenuStructurePattern[] {
-        if (num === 1) {
-          const result: GenerateMenuStructurePattern[] = Object.entries(
-            intermediate
-          ).map(([key, file]) => {
-            isCsvRow(file)
+        return Object.entries(intermediate).map(([filename, value]) => {
+          if (value instanceof CsvItem) {
             return {
-              title: key,
+              title: filename,
               icon: 'fas fa-circle',
-              data: file,
-              isEndOfFolder: true,
+              data: value.files,
+              isLast: true,
               expand: false
             }
-          })
-          return result
-        }
+          }
 
-        return Object.entries(intermediate).reduce((previous, [key, value]) => {
-          isInterMediateFiles(value)
-          return [
-            ...previous,
-            {
-              title: key,
-              icon,
-              child: generateMenuStructure(value, num - 1),
-              isEndOfFolder: false,
-              expand: false
-            }
-          ]
-        }, [] as GenerateMenuStructurePattern[])
+          return {
+            title: filename,
+            icon,
+            child: generateMenuStructure(value, num - 1),
+            isLast: false,
+            expand: false
+          }
+        })
       }
     },
 
@@ -173,18 +159,19 @@ export default (Vue as StateTypedVueConstructor).extend({
   },
 
   methods: {
-    onItemClick(e: any, item: any): void {
+    onItemClick(e: any, item: LastOfDataTree): void {
       // データツリーの末端フォルダ(年度)をクリックしたときに処理を行う
-      if (item.isEndOfFolder && !item.expand) {
-        const fileSha = item.data.sha
-        this.$store.dispatch('getImageDatas', fileSha)
-        // const changedFilesBase = Object.fromEntries(
-        //   item.child.map((file: any) => {
-        //     return [file.data.src, file.data]
-        //   })
-        // )
+      console.log(item)
+      if (item.isLast) {
+        Object.values(item.data).map(file => {
+          const fileSha = file.sha
+          this.$store.dispatch('getImageDatas', fileSha)
+        })
 
-        const changedFilesBase = { [item.src]: item.data }
+        const changedFilesBase = item.reduce((result, curFile) => {
+          result = { ...result, [curFile.src]: curFile }
+          return result
+        }, {})
         this.$store.commit('setChangedFilesBase', changedFilesBase)
       }
 
