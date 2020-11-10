@@ -46,10 +46,18 @@ interface InterMediateFiles {
   [key: string]: CsvItem | InterMediateFiles
 }
 
+interface FilePathData {
+  period: string
+  subj: string
+  toolType: string
+  year: string
+  filename: string
+}
+
 interface LastOfDataTree {
   title: string
   icon: string
-  data: CsvRow
+  data: FilePathData
   isLast: true
   expand: boolean
 }
@@ -61,13 +69,14 @@ type GenerateMenuStructurePattern =
       icon: string
       isLast: false
       title: string
+      data: FilePathData
     }
   | {
       expand: boolean
       icon: string
       isLast: true
       title: string
-      data: State['contentMetadatas']['']['data']['']
+      data: FilePathData
     }
 
 type GenerateMenuStructure = (
@@ -75,6 +84,13 @@ type GenerateMenuStructure = (
   num: number
 ) => GenerateMenuStructurePattern[]
 
+type SidebarHeader = {
+  header: true
+  title: string
+  hiddenOnCollapse: boolean
+}
+
+type SidebarTree = (SidebarHeader | GenerateMenuStructurePattern)[]
 export default (Vue as StateTypedVueConstructor).extend({
   name: 'Sidebar',
   components: {
@@ -101,7 +117,9 @@ export default (Vue as StateTypedVueConstructor).extend({
           [period]: {
             [subj]: {
               [toolType]: {
-                [year]: { [filename]: new CsvItem(file) }
+                [year]: {
+                  [filename]: new CsvItem(file)
+                }
               }
             }
           }
@@ -135,6 +153,7 @@ export default (Vue as StateTypedVueConstructor).extend({
             }
           }
         }
+
         return fileResult
       })
 
@@ -144,22 +163,33 @@ export default (Vue as StateTypedVueConstructor).extend({
       })
       return result
     },
-
     menuStructure() {
       const icon = 'fa fa-folder'
-      const result = generateMenuStructure(this.intermediateFiles, 4)
+      const result = generateMenuStructure(
+        this.intermediateFiles,
+        { period: '', subj: '', toolType: '', year: '', filename: '' },
+        'period'
+      )
       return result
+
+      function getNextProperty(currentProperty: string): string {
+        const propertyArr = ['period', 'subj', 'toolType', 'year', 'filename']
+        const index = propertyArr.findIndex(el => el === currentProperty)
+
+        return propertyArr[index + 1]
+      }
 
       function generateMenuStructure(
         intermediate: InterMediateFiles,
-        num: number
+        data: FilePathData,
+        property: string
       ): GenerateMenuStructurePattern[] {
         return Object.entries(intermediate).map(([filename, value]) => {
           if (value instanceof CsvItem) {
             return {
               title: filename,
               icon: 'fas fa-circle',
-              data: value.row,
+              data: { ...data, [property]: filename },
               isLast: true,
               expand: false
             }
@@ -168,40 +198,51 @@ export default (Vue as StateTypedVueConstructor).extend({
           return {
             title: filename,
             icon,
-            child: generateMenuStructure(value, num - 1),
+            child: generateMenuStructure(
+              value,
+              { ...data, [property]: filename },
+              getNextProperty(property)
+            ),
             isLast: false,
-            expand: false
+            expand: false,
+            // data: { ...data, [value.property]: filename }
+            data: { ...data, [property]: filename }
           }
         })
       }
     },
 
-    sidebarMenu(): any {
-      const header = [
-        {
-          header: true,
-          title: `Branch : ${this.$store.state.currentBranch}`,
-          hiddenOnCollapse: true
-        }
-      ]
-      return [...header, ...this.menuStructure]
+    sidebarMenu(): SidebarTree {
+      const header: SidebarHeader = {
+        header: true,
+        title: `Branch : ${this.$store.state.currentBranch}`,
+        hiddenOnCollapse: true
+      }
+
+      return [header, ...this.menuStructure]
     }
   },
 
   methods: {
     onItemClick(e: any, item: LastOfDataTree): void {
       // データツリーの末端フォルダ(年度)をクリックしたときに処理を行う
-      console.log(item)
       if (item.isLast) {
-        Object.values(item.data).map(file => {
-          const fileSha = file.sha
+        const files = this.fileMetadataTree?.[item.data.period]?.[
+          item.data.subj
+        ]?.[item.data.toolType]?.[item.data.year]
+
+        Object.values(files).map(file => {
+          const fileSha = file.row.sha
           this.$store.dispatch('getImageDatas', fileSha)
         })
 
-        const changedFilesBase = item.reduce((result, curFile) => {
-          result = { ...result, [curFile.src]: curFile }
-          return result
-        }, {})
+        const changedFilesBase = Object.entries(files).reduce(
+          (result, [filename, file]) => {
+            result = { ...result, [filename]: file.row }
+            return result
+          },
+          {}
+        )
         this.$store.commit('setChangedFilesBase', changedFilesBase)
       }
 
