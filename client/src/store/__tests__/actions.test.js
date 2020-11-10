@@ -602,8 +602,9 @@ describe('actions.js', () => {
     const saveContentMetadatas = merge({}, state.contentMetadatas[csvSha].data)
 
     const commit = jest.fn()
+    const dispatch = jest.fn() // (テストで引数を全部設定する必要があるか)
 
-    await actions.postCommitCsv({ state, commit })
+    await actions.postCommitCsv({ dispatch, state, commit })
 
     expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
       status: 'loading'
@@ -620,9 +621,10 @@ describe('actions.js', () => {
     expect(fetchMock.calls(undefined, 'POST')[1][1].headers.Authorization).toBe(
       postAuth
     )
-    expect(fetchMock.calls(undefined, 'POST')[2][1].headers.Authorization).toBe(
-      postAuth
-    )
+    // console.log('', fetchMock.calls(undefined, 'POST')[2][1])
+    // expect(fetchMock.calls(undefined, 'POST')[2][1].headers.Authorization).toBe(
+    //   postAuth
+    // )
 
     const parsedBody = JSON.parse(fetchMock.calls(undefined, 'POST')[2][1].body)
     expect(parsedBody.author.name).toBe(userName)
@@ -655,7 +657,217 @@ describe('actions.js', () => {
 
     // commitが呼ばれたか
     expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
-      status: 'loaded'
+      status: 'loaded' // todo: loadingの時にtestが通らないようにする
+    })
+  })
+
+  it('fetchのエラー確認', async () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+    state.currentBranch = 'cmstest'
+    const branchName = state.currentBranch
+    const token = state.currentUser.token.access_token
+
+    const headers = {
+      Authorization: `Bearer ${token}`
+    }
+    const commit = jest.fn()
+    const dispatch = jest.fn()
+    state.contentMetadatas = {
+      '02f495e08b05c5b5b71c90a9c7c0f906a818aa80': {
+        data: {
+          'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg': {
+            author: '',
+            content_type: '',
+            fix_text: '',
+            image_index: '',
+            included_pages_num: '',
+            period: '',
+            src: 'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg:',
+            subj: '論理回路',
+            tool_type: '勉強用',
+            year: ''
+          },
+          'tests/2018/テスト_2018_後期中間_論理回路i_問題002.jpg': {
+            author: '',
+            content_type: '問題',
+            fix_text: '',
+            image_index: '002',
+            included_pages_num: '1',
+            period: '後期中間',
+            src: 'tests/2018/テスト_2018_後期中間_論理回路i_問題002.jpg',
+            subj: '論理回路i',
+            tool_type: 'テスト',
+            year: '2018'
+          },
+          'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験1.jpg': {
+            src: 'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験1.jpg',
+            subj: '倫理社会',
+            tool_type: 'テスト',
+            period: '前期定期',
+            year: '2018',
+            content_type: '',
+            author: '',
+            image_index: '',
+            included_pages_num: '',
+            fix_text: ''
+          },
+          'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験2.jpg': {
+            src: 'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験2.jpg',
+            subj: '',
+            tool_type: '',
+            period: '',
+            year: '',
+            content_type: '',
+            author: '',
+            image_index: '',
+            included_pages_num: '',
+            fix_text: ''
+          }
+        }
+      }
+    }
+
+    // fetch.mockReject(new Error('error'))
+
+    // fetchMock.mock(`${url}/github/git/commits?ref=${branchName}`, {
+    //   status: 503,
+    //   headers,
+    //   config: {
+    //     status: 500
+    //   }
+    // })
+
+    // 501: 'Not Implemented',
+    // 502: 'Bad Gateway',
+    // 503: 'Service Unavailable',
+    // 504: 'Gateway Timeout',
+    // 505: 'HTTP Version Not Supported',
+    fetchMock
+      .mock(`${url}/github/git/commits?ref=${branchName}`, 200, headers)
+      .catch(502)
+    // fetchMock.mock(`${url}/github/git/commits?ref=${branchName}`, 502, headers)
+    await actions.postCommitCsv({ dispatch, state, commit })
+    // expect()
+    // try {
+    //   await actions.postCommitCsv({ dispatch, state, commit })
+    // } catch (e) {
+    //   expect(e.message).toBe('error')
+    // }
+    const badGateway = 'Bad Gateway'
+    expect(dispatch).toHaveBeenCalledWith('notify', badGateway)
+    expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
+      status: 'failed' // todo: loadingでテストが通らないようにする
+    })
+    // expect.assertions(1)
+    // await actions.postCommitCsv({ dispatch, state, commit }).catch(e => {
+    //   console.log(e.message)
+    // })
+    // await actions.postCommitCsv({ dispatch, state, commit }){
+    //   try {
+    //   }
+    // }
+  })
+
+  it('レスポンスエラーのテスト', async () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+    state.currentBranch = 'cmstest'
+    const branchName = state.currentBranch
+    const token = state.currentUser.token.access_token
+    const headers = {
+      Authorization: `Bearer ${token}`
+    }
+    const commit = jest.fn()
+    const dispatch = jest.fn() // (テストで引数を全部設定する必要があるか)
+    state.contentMetadatas = {
+      '02f495e08b05c5b5b71c90a9c7c0f906a818aa80': {
+        data: {
+          'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg': {
+            author: '',
+            content_type: '',
+            fix_text: '',
+            image_index: '',
+            included_pages_num: '',
+            period: '',
+            src: 'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg:',
+            subj: '論理回路',
+            tool_type: '勉強用',
+            year: ''
+          },
+          'tests/2018/テスト_2018_後期中間_論理回路i_問題002.jpg': {
+            author: '',
+            content_type: '問題',
+            fix_text: '',
+            image_index: '002',
+            included_pages_num: '1',
+            period: '後期中間',
+            src: 'tests/2018/テスト_2018_後期中間_論理回路i_問題002.jpg',
+            subj: '論理回路i',
+            tool_type: 'テスト',
+            year: '2018'
+          },
+          'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験1.jpg': {
+            src: 'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験1.jpg',
+            subj: '倫理社会',
+            tool_type: 'テスト',
+            period: '前期定期',
+            year: '2018',
+            content_type: '',
+            author: '',
+            image_index: '',
+            included_pages_num: '',
+            fix_text: ''
+          },
+          'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験2.jpg': {
+            src: 'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験2.jpg',
+            subj: '',
+            tool_type: '',
+            period: '',
+            year: '',
+            content_type: '',
+            author: '',
+            image_index: '',
+            included_pages_num: '',
+            fix_text: ''
+          }
+        }
+      }
+    }
+
+    // fetchMock.post(`${url}/github/git/trees`, {
+    //   status: 200,
+    //   body: {
+    //     sha: '2192c7b798b4d4479e942f4d065780b44a04dbd6'
+    //   },
+    //   headers
+    // })
+
+    // ref取得
+    fetchMock.mock(
+      `${url}/github/git/refs/heads/${branchName}`,
+      // { method: 'get' },
+      404,
+      headers
+    )
+    // { method : 'get' }を加えるか
+    // fethcMock.getとすると responseを見ることができない
+
+    // fetchMock.mock(
+    //   `${url}/github/git/refs/heads/${branchName}`,
+    //   { status: 404 },
+    //   { ok: false },
+    //   headers
+    // )
+    // fetchMock
+    //   .mock(`${url}/github/git/commits?ref=${branchName}`, 200, headers)
+    //   .catch(404)
+
+    await actions.postCommitCsv({ dispatch, state, commit })
+
+    // console.log(fetchMock.calls(undefined, 'GET'), 'asdf')
+    const errorMessage = 'Not Found'
+    expect(dispatch).toHaveBeenCalledWith('notify', errorMessage)
+    expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
+      status: 'failed' // todo: loadingでテストが通らないようにする
     })
   })
 

@@ -229,8 +229,10 @@ const actions: ActionTree<Readonly<State>, unknown> = {
         method: getMethod,
         headers
       })
+      console.log('refRes', refRes)
       // ステータス200以外
       if (!refRes.ok) {
+        console.log('not ok')
         throw new Error(refRes.statusText)
       }
 
@@ -369,6 +371,7 @@ const actions: ActionTree<Readonly<State>, unknown> = {
 
       commit('setCommitCsvStatus', { status: 'loaded' })
     } catch (e) {
+      console.log('here is catch')
       const errorMessage = e
       dispatch('notify', errorMessage.message)
       commit('setCommitCsvStatus', { status: 'failed' })
