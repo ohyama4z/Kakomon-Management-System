@@ -32,9 +32,9 @@ interface InterMediateFilesOld {
 }
 
 class CsvItem {
-  readonly files: { [filename: string]: CsvRow }
-  constructor(files: { [filename: string]: CsvRow }) {
-    this.files = files
+  readonly row: CsvRow
+  constructor(row: CsvRow) {
+    this.row = row
   }
 }
 
@@ -87,7 +87,7 @@ export default (Vue as StateTypedVueConstructor).extend({
       return this.$store.getters.currentBranchMetadatas
     },
 
-    intermediateFiles(): InterMediateFiles {
+    fileMetadataTree(): InterMediateFiles {
       const files = Object.entries(this.currentBranchMetadatas.data)
       const beforeMerge = files.map(([filename, file]) => {
         const { period, subj, tool_type: toolType, year } = Object.fromEntries(
@@ -101,13 +101,43 @@ export default (Vue as StateTypedVueConstructor).extend({
           [period]: {
             [subj]: {
               [toolType]: {
-                [year]: new CsvItem({ [filename]: file })
+                [year]: { [filename]: new CsvItem(file) }
               }
             }
           }
         }
         return fileResult
       })
+
+      const result = merge.all<InterMediateFiles>(beforeMerge, {
+        isMergeableObject: obj =>
+          typeof obj === `object` && !(obj instanceof CsvItem)
+      })
+      return result
+    },
+
+    intermediateFiles(): InterMediateFiles {
+      const files = Object.entries(this.currentBranchMetadatas.data)
+      const beforeMerge = files.map(([, file]) => {
+        const { period, subj, tool_type: toolType, year } = Object.fromEntries(
+          Object.entries(file).map(([key, value]) => [
+            key,
+            value === '' ? '不明' : value
+          ])
+        )
+
+        const fileResult = {
+          [period]: {
+            [subj]: {
+              [toolType]: {
+                [year]: new CsvItem(file)
+              }
+            }
+          }
+        }
+        return fileResult
+      })
+
       const result = merge.all<InterMediateFiles>(beforeMerge, {
         isMergeableObject: obj =>
           typeof obj === `object` && !(obj instanceof CsvItem)
@@ -129,7 +159,7 @@ export default (Vue as StateTypedVueConstructor).extend({
             return {
               title: filename,
               icon: 'fas fa-circle',
-              data: value.files,
+              data: value.row,
               isLast: true,
               expand: false
             }
