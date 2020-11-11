@@ -46,8 +46,6 @@ interface InterMediateFiles {
   [key: string]: CsvItem | InterMediateFiles
 }
 
-// const files = InterMediateFiles['前期定期']['数学']['テスト']['2019']
-
 interface FilePathData {
   period: string
   subj: string
@@ -108,17 +106,21 @@ export default (Vue as StateTypedVueConstructor).extend({
     fileMetadataTree(): InterMediateFiles {
       const files = Object.entries(this.currentBranchMetadatas.data)
       const beforeMerge = files.map(([filename, file]) => {
+        const requiredFileValue = {
+          period: file.period,
+          subj: file.subj,
+          toolType: file.tool_type,
+          year: file.year,
+          contentType: file.content_type
+        }
+        const isUnvalue = Object.values(requiredFileValue).includes('')
+
         const { period, subj, tool_type: toolType, year } = Object.fromEntries(
           Object.entries(file).map(([key, value]) => [
             key,
-            value === '' ? '不明' : value
+            isUnvalue ? '不明' : value
           ])
         )
-
-        // if ([period, subj, toolType, year].find(el => el === `不明`)) {
-        //   return this.unvaluedFileMetadataTree(filename, file)
-        // }
-
         const fileResult = {
           [period]: {
             [subj]: {
@@ -143,7 +145,16 @@ export default (Vue as StateTypedVueConstructor).extend({
     intermediateFiles(): InterMediateFiles {
       const files = Object.entries(this.currentBranchMetadatas.data)
       const beforeMerge = files.map(([, file]) => {
-        const isUnvalue = Object.entries(file).includes('')
+        const requiredFileValue = {
+          period: file.period,
+          subj: file.subj,
+          toolType: file.tool_type,
+          year: file.year,
+          contentType: file.content_type
+        }
+        const isUnvalue =
+          Object.values(requiredFileValue).includes('') ||
+          file.csvFile === 'unassorted.csv'
         const { period, subj, tool_type: toolType, year } = Object.fromEntries(
           Object.entries(file).map(([key, value]) => [
             key,
@@ -212,7 +223,6 @@ export default (Vue as StateTypedVueConstructor).extend({
             ),
             isLast: false,
             expand: false,
-            // data: { ...data, [value.property]: filename }
             data: { ...data, [property]: filename }
           }
         })
@@ -231,28 +241,6 @@ export default (Vue as StateTypedVueConstructor).extend({
   },
 
   methods: {
-    // async unvaluedFileMetadataTree(filename:string, file):Promise<InterMediateFiles> {
-    //     const { period, subj, tool_type: toolType, year } = Object.fromEntries(
-    //       Object.entries(file).map(([key, value]) => [
-    //         key,
-    //         value === '' ? '不明' : value
-    //       ])
-    //     )
-
-    //     await this.$store.dispatch('getTimeStamp',file)
-
-    //     const lastCommitYear = this.$store.state.timeStamp[filename]
-    //     const lastCommitMonth = this.$store.state.timeStamp[filename]
-
-    //     return {
-    //       '不明': {
-    //         [lastCommitYear]:{
-    //           [lastCommitMonth]: new CsvItem(file)
-    //         }
-    //       }
-    //     }
-    // }
-
     onItemClick(e: any, item: LastOfDataTree): void {
       // データツリーの末端フォルダ(年度)をクリックしたときに処理を行う
       if (item.isLast) {

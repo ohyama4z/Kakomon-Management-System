@@ -5,7 +5,6 @@ import netlifyIdentity from 'netlify-identity-widget'
 import { ActionContext, ActionTree } from 'vuex'
 import { Mutations } from './mutations'
 import { State } from './state'
-// import { GetterValues } from '../store/getters'
 
 const url = process.env.VUE_APP_URL
 
@@ -78,11 +77,6 @@ export interface Actions extends ActionTree<Readonly<State>, unknown> {
       commitMessage: string
     }
   ) => Promise<void>
-
-  // getTimeStamp: (
-  //   context: AugmentedActionContext,
-  //   file: GetterValues['currentBranchMetadatas']['data']['']
-  // ) => Promise<void>
 }
 
 const actions: Actions = {

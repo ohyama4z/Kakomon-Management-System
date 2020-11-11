@@ -78,10 +78,6 @@ interface ImageShas {
   }
 }
 
-// interface TimeStamps: {
-//   [filename: string]: string
-// }
-
 export interface State {
   currentUser: User | null
   lastPage: string
@@ -96,7 +92,6 @@ export interface State {
   displayedFiles: string[]
   selectedFiles: string[]
   commitStatus: Status
-  // timeStamp: TimeStamp
 }
 
 const state: State = {
