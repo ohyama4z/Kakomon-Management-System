@@ -183,7 +183,7 @@ import { StateTypedVueConstructor } from '../extended'
 
 interface Data {
   subject: string
-  year: string | null
+  year: string
   toolType: string
   period: string
   contentType: string
@@ -211,7 +211,7 @@ export default (Vue as StateTypedVueConstructor).extend({
   data(): Data {
     return {
       subject: '',
-      year: null,
+      year: '',
       toolType: '',
       period: '',
       contentType: '',

@@ -46,6 +46,8 @@ interface InterMediateFiles {
   [key: string]: CsvItem | InterMediateFiles
 }
 
+// const files = InterMediateFiles['前期定期']['数学']['テスト']['2019']
+
 interface FilePathData {
   period: string
   subj: string
@@ -112,6 +114,10 @@ export default (Vue as StateTypedVueConstructor).extend({
             value === '' ? '不明' : value
           ])
         )
+
+        // if ([period, subj, toolType, year].find(el => el === `不明`)) {
+        //   return this.unvaluedFileMetadataTree(filename, file)
+        // }
 
         const fileResult = {
           [period]: {
@@ -224,14 +230,62 @@ export default (Vue as StateTypedVueConstructor).extend({
   },
 
   methods: {
+    // async unvaluedFileMetadataTree(filename:string, file):Promise<InterMediateFiles> {
+    //     const { period, subj, tool_type: toolType, year } = Object.fromEntries(
+    //       Object.entries(file).map(([key, value]) => [
+    //         key,
+    //         value === '' ? '不明' : value
+    //       ])
+    //     )
+
+    //     await this.$store.dispatch('getTimeStamp',file)
+
+    //     const lastCommitYear = this.$store.state.timeStamp[filename]
+    //     const lastCommitMonth = this.$store.state.timeStamp[filename]
+
+    //     return {
+    //       '不明': {
+    //         [lastCommitYear]:{
+    //           [lastCommitMonth]: new CsvItem(file)
+    //         }
+    //       }
+    //     }
+    // }
+
     onItemClick(e: any, item: LastOfDataTree): void {
       // データツリーの末端フォルダ(年度)をクリックしたときに処理を行う
       if (item.isLast) {
-        const files = this.fileMetadataTree?.[item.data.period]?.[
-          item.data.subj
-        ]?.[item.data.toolType]?.[item.data.year]
+        const tree = this.fileMetadataTree
+        if (tree instanceof CsvItem) {
+          throw new Error()
+        }
+        const periodTree = tree[item.data.period]
 
-        Object.values(files).map(file => {
+        if (periodTree instanceof CsvItem) {
+          throw new Error()
+        }
+
+        const subjTree = periodTree[item.data.subj]
+        if (subjTree instanceof CsvItem) {
+          throw new Error()
+        }
+
+        const toolTypeTree = subjTree[item.data.toolType]
+        if (toolTypeTree instanceof CsvItem) {
+          throw new Error()
+        }
+
+        const yearTree = toolTypeTree[item.data.year]
+        if (yearTree instanceof CsvItem) {
+          throw new Error()
+        }
+
+        const files = yearTree
+
+        Object.values(files).forEach(file => {
+          if (!(file instanceof CsvItem)) {
+            return
+          }
           const fileSha = file.row.sha
           this.$store.dispatch('getImageDatas', fileSha)
         })
