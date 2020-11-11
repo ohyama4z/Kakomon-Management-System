@@ -657,7 +657,14 @@ describe('actions.js', () => {
 
     // commitが呼ばれたか
     expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
-      status: 'loaded' // todo: loadingの時にtestが通らないようにする
+      status: 'loading'
+    })
+    expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
+      status: 'loaded'
+    })
+
+    expect(commit).toHaveBeenLastCalledWith('setCommitCsvStatus', {
+      status: 'loaded'
     })
   })
 
@@ -756,7 +763,13 @@ describe('actions.js', () => {
     const badGateway = 'Bad Gateway'
     expect(dispatch).toHaveBeenCalledWith('notify', badGateway)
     expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
-      status: 'failed' // todo: loadingでテストが通らないようにする
+      status: 'loading'
+    })
+    expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
+      status: 'failed'
+    })
+    expect(commit).toHaveBeenLastCalledWith('setCommitCsvStatus', {
+      status: 'failed'
     })
     // expect.assertions(1)
     // await actions.postCommitCsv({ dispatch, state, commit }).catch(e => {
@@ -867,7 +880,13 @@ describe('actions.js', () => {
     const errorMessage = 'Not Found'
     expect(dispatch).toHaveBeenCalledWith('notify', errorMessage)
     expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
-      status: 'failed' // todo: loadingでテストが通らないようにする
+      status: 'loading'
+    })
+    expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
+      status: 'failed'
+    })
+    expect(commit).toHaveBeenLastCalledWith('setCommitCsvStatus', {
+      status: 'failed'
     })
   })
 
@@ -959,7 +978,13 @@ describe('actions.js', () => {
     const errorMessage = 'Not Found'
     expect(dispatch).toHaveBeenCalledWith('notify', errorMessage)
     expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
-      status: 'failed' // todo: loadingでテストが通らないようにする
+      status: 'loading'
+    })
+    expect(commit).toHaveBeenLastCalledWith('setCommitCsvStatus', {
+      status: 'failed'
+    })
+    expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
+      status: 'failed'
     })
   })
 
@@ -1070,7 +1095,13 @@ describe('actions.js', () => {
     const errorMessage = 'Not Found'
     expect(dispatch).toHaveBeenCalledWith('notify', errorMessage)
     expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
-      status: 'failed' // todo: loadingでテストが通らないようにする
+      status: 'loading'
+    })
+    expect(commit).toHaveBeenLastCalledWith('setCommitCsvStatus', {
+      status: 'failed'
+    })
+    expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
+      status: 'failed'
     })
   })
 
@@ -1193,7 +1224,13 @@ describe('actions.js', () => {
     const errorMessage = 'Not Found'
     expect(dispatch).toHaveBeenCalledWith('notify', errorMessage)
     expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
-      status: 'failed' // todo: loadingでテストが通らないようにする
+      status: 'loading'
+    })
+    expect(commit).toHaveBeenLastCalledWith('setCommitCsvStatus', {
+      status: 'failed'
+    })
+    expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
+      status: 'failed'
     })
   })
 
@@ -1325,7 +1362,13 @@ describe('actions.js', () => {
     const errorMessage = 'Not Found'
     expect(dispatch).toHaveBeenCalledWith('notify', errorMessage)
     expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
-      status: 'failed' // todo: loadingでテストが通らないようにする
+      status: 'loading'
+    })
+    expect(commit).toHaveBeenLastCalledWith('setCommitCsvStatus', {
+      status: 'failed'
+    })
+    expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
+      status: 'failed'
     })
   })
 
@@ -1469,7 +1512,13 @@ describe('actions.js', () => {
     const errorMessage = 'Not Found'
     expect(dispatch).toHaveBeenCalledWith('notify', errorMessage)
     expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
-      status: 'failed' // todo: loadingでテストが通らないようにする
+      status: 'loading'
+    })
+    expect(commit).toHaveBeenLastCalledWith('setCommitCsvStatus', {
+      status: 'failed'
+    })
+    expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
+      status: 'failed'
     })
   })
 
