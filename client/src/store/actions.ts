@@ -223,8 +223,8 @@ const actions: ActionTree<Readonly<State>, unknown> = {
     const content =
       '\ufeff' + convertObjToCsv(Object.values(editedCsvObj)) + '\n'
 
-    // refの取得
     try {
+      // refの取得
       const refRes = await fetch(`${url}/github/git/refs/heads/${branchName}`, {
         method: getMethod,
         headers

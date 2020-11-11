@@ -768,7 +768,7 @@ describe('actions.js', () => {
     // }
   })
 
-  it('レスポンスエラーのテスト', async () => {
+  it('refの取得レスポンスエラーのテスト', async () => {
     const state = JSON.parse(JSON.stringify(defaultState))
     state.currentBranch = 'cmstest'
     const branchName = state.currentBranch
@@ -864,6 +864,608 @@ describe('actions.js', () => {
     await actions.postCommitCsv({ dispatch, state, commit })
 
     // console.log(fetchMock.calls(undefined, 'GET'), 'asdf')
+    const errorMessage = 'Not Found'
+    expect(dispatch).toHaveBeenCalledWith('notify', errorMessage)
+    expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
+      status: 'failed' // todo: loadingでテストが通らないようにする
+    })
+  })
+
+  it('commitresの取得レスポンスエラーのテスト', async () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+    state.currentBranch = 'cmstest'
+    const branchName = state.currentBranch
+    const token = state.currentUser.token.access_token
+    const headers = {
+      Authorization: `Bearer ${token}`
+    }
+    const commit = jest.fn()
+    const dispatch = jest.fn() // (テストで引数を全部設定する必要があるか)
+    state.contentMetadatas = {
+      '02f495e08b05c5b5b71c90a9c7c0f906a818aa80': {
+        data: {
+          'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg': {
+            author: '',
+            content_type: '',
+            fix_text: '',
+            image_index: '',
+            included_pages_num: '',
+            period: '',
+            src: 'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg:',
+            subj: '論理回路',
+            tool_type: '勉強用',
+            year: ''
+          },
+          'tests/2018/テスト_2018_後期中間_論理回路i_問題002.jpg': {
+            author: '',
+            content_type: '問題',
+            fix_text: '',
+            image_index: '002',
+            included_pages_num: '1',
+            period: '後期中間',
+            src: 'tests/2018/テスト_2018_後期中間_論理回路i_問題002.jpg',
+            subj: '論理回路i',
+            tool_type: 'テスト',
+            year: '2018'
+          },
+          'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験1.jpg': {
+            src: 'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験1.jpg',
+            subj: '倫理社会',
+            tool_type: 'テスト',
+            period: '前期定期',
+            year: '2018',
+            content_type: '',
+            author: '',
+            image_index: '',
+            included_pages_num: '',
+            fix_text: ''
+          },
+          'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験2.jpg': {
+            src: 'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験2.jpg',
+            subj: '',
+            tool_type: '',
+            period: '',
+            year: '',
+            content_type: '',
+            author: '',
+            image_index: '',
+            included_pages_num: '',
+            fix_text: ''
+          }
+        }
+      }
+    }
+
+    fetchMock.get(
+      `${url}/github/git/refs/heads/${branchName}`,
+      {
+        status: 200,
+        body: {
+          object: {
+            sha: '58c821fea857ca1e270c3b34f5bc97db64c84fc9'
+          }
+        }
+      },
+      headers
+    )
+
+    const commitsHash = '58c821fea857ca1e270c3b34f5bc97db64c84fc9'
+    // todo: .callsを使って直接shaを取る
+
+    // ref取得
+    fetchMock.mock(`${url}/github/commits/${commitsHash}`, 404, headers)
+    await actions.postCommitCsv({ dispatch, state, commit })
+
+    const errorMessage = 'Not Found'
+    expect(dispatch).toHaveBeenCalledWith('notify', errorMessage)
+    expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
+      status: 'failed' // todo: loadingでテストが通らないようにする
+    })
+  })
+
+  it('blob作成の取得レスポンスエラーのテスト', async () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+    state.currentBranch = 'cmstest'
+    const branchName = state.currentBranch
+    const token = state.currentUser.token.access_token
+    const headers = {
+      Authorization: `Bearer ${token}`
+    }
+    const commit = jest.fn()
+    const dispatch = jest.fn() // (テストで引数を全部設定する必要があるか)
+    state.contentMetadatas = {
+      '02f495e08b05c5b5b71c90a9c7c0f906a818aa80': {
+        data: {
+          'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg': {
+            author: '',
+            content_type: '',
+            fix_text: '',
+            image_index: '',
+            included_pages_num: '',
+            period: '',
+            src: 'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg:',
+            subj: '論理回路',
+            tool_type: '勉強用',
+            year: ''
+          },
+          'tests/2018/テスト_2018_後期中間_論理回路i_問題002.jpg': {
+            author: '',
+            content_type: '問題',
+            fix_text: '',
+            image_index: '002',
+            included_pages_num: '1',
+            period: '後期中間',
+            src: 'tests/2018/テスト_2018_後期中間_論理回路i_問題002.jpg',
+            subj: '論理回路i',
+            tool_type: 'テスト',
+            year: '2018'
+          },
+          'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験1.jpg': {
+            src: 'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験1.jpg',
+            subj: '倫理社会',
+            tool_type: 'テスト',
+            period: '前期定期',
+            year: '2018',
+            content_type: '',
+            author: '',
+            image_index: '',
+            included_pages_num: '',
+            fix_text: ''
+          },
+          'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験2.jpg': {
+            src: 'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験2.jpg',
+            subj: '',
+            tool_type: '',
+            period: '',
+            year: '',
+            content_type: '',
+            author: '',
+            image_index: '',
+            included_pages_num: '',
+            fix_text: ''
+          }
+        }
+      }
+    }
+
+    // refの取得
+    fetchMock.get(
+      `${url}/github/git/refs/heads/${branchName}`,
+      {
+        status: 200,
+        body: {
+          object: {
+            sha: '58c821fea857ca1e270c3b34f5bc97db64c84fc9'
+          }
+        }
+      },
+      headers
+    )
+
+    const commitsHash = '58c821fea857ca1e270c3b34f5bc97db64c84fc9'
+    // todo: .callsを使って直接shaを取る
+
+    // commitの取得
+    fetchMock.get(
+      `${url}/github/commits/${commitsHash}`,
+      {
+        status: 200,
+        body: {
+          sha: '58c821fea857ca1e270c3b34f5bc97db64c84fc9',
+          commit: {
+            tree: {
+              sha: '2192c7b798b4d4479e942f4d065780b44a04dbd6'
+            }
+          }
+        }
+      },
+      headers
+    )
+
+    // blobの作成
+    fetchMock.post(`${url}/github/git/blobs?ref=${branchName}`, 404, headers)
+
+    await actions.postCommitCsv({ dispatch, state, commit })
+
+    const errorMessage = 'Not Found'
+    expect(dispatch).toHaveBeenCalledWith('notify', errorMessage)
+    expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
+      status: 'failed' // todo: loadingでテストが通らないようにする
+    })
+  })
+
+  it('tree作成の取得レスポンスエラーのテスト', async () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+    state.currentBranch = 'cmstest'
+    const branchName = state.currentBranch
+    const token = state.currentUser.token.access_token
+    const headers = {
+      Authorization: `Bearer ${token}`
+    }
+    const commit = jest.fn()
+    const dispatch = jest.fn() // (テストで引数を全部設定する必要があるか)
+    state.contentMetadatas = {
+      '02f495e08b05c5b5b71c90a9c7c0f906a818aa80': {
+        data: {
+          'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg': {
+            author: '',
+            content_type: '',
+            fix_text: '',
+            image_index: '',
+            included_pages_num: '',
+            period: '',
+            src: 'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg:',
+            subj: '論理回路',
+            tool_type: '勉強用',
+            year: ''
+          },
+          'tests/2018/テスト_2018_後期中間_論理回路i_問題002.jpg': {
+            author: '',
+            content_type: '問題',
+            fix_text: '',
+            image_index: '002',
+            included_pages_num: '1',
+            period: '後期中間',
+            src: 'tests/2018/テスト_2018_後期中間_論理回路i_問題002.jpg',
+            subj: '論理回路i',
+            tool_type: 'テスト',
+            year: '2018'
+          },
+          'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験1.jpg': {
+            src: 'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験1.jpg',
+            subj: '倫理社会',
+            tool_type: 'テスト',
+            period: '前期定期',
+            year: '2018',
+            content_type: '',
+            author: '',
+            image_index: '',
+            included_pages_num: '',
+            fix_text: ''
+          },
+          'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験2.jpg': {
+            src: 'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験2.jpg',
+            subj: '',
+            tool_type: '',
+            period: '',
+            year: '',
+            content_type: '',
+            author: '',
+            image_index: '',
+            included_pages_num: '',
+            fix_text: ''
+          }
+        }
+      }
+    }
+
+    // refの取得
+    fetchMock.get(
+      `${url}/github/git/refs/heads/${branchName}`,
+      {
+        status: 200,
+        body: {
+          object: {
+            sha: '58c821fea857ca1e270c3b34f5bc97db64c84fc9'
+          }
+        }
+      },
+      headers
+    )
+
+    const commitsHash = '58c821fea857ca1e270c3b34f5bc97db64c84fc9'
+    // todo: .callsを使って直接shaを取る
+
+    // commitの取得
+    fetchMock.get(
+      `${url}/github/commits/${commitsHash}`,
+      {
+        status: 200,
+        body: {
+          sha: '58c821fea857ca1e270c3b34f5bc97db64c84fc9',
+          commit: {
+            tree: {
+              sha: '2192c7b798b4d4479e942f4d065780b44a04dbd6'
+            }
+          }
+        }
+      },
+      headers
+    )
+
+    // blobの作成
+    fetchMock.post(
+      `${url}/github/git/blobs?ref=${branchName}`,
+      {
+        status: 200,
+        body: {
+          sha: '8c187d7baccab1c2abf487e09051f0ee8cb04c18'
+        }
+      },
+      headers
+    )
+
+    // treeの作成
+    fetchMock.post(`${url}/github/git/trees`, 404, headers)
+
+    await actions.postCommitCsv({ dispatch, state, commit })
+
+    const errorMessage = 'Not Found'
+    expect(dispatch).toHaveBeenCalledWith('notify', errorMessage)
+    expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
+      status: 'failed' // todo: loadingでテストが通らないようにする
+    })
+  })
+
+  it('commit作成の取得レスポンスエラーのテスト', async () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+    state.currentBranch = 'cmstest'
+    const branchName = state.currentBranch
+    const token = state.currentUser.token.access_token
+    const headers = {
+      Authorization: `Bearer ${token}`
+    }
+    const commit = jest.fn()
+    const dispatch = jest.fn() // (テストで引数を全部設定する必要があるか)
+    state.contentMetadatas = {
+      '02f495e08b05c5b5b71c90a9c7c0f906a818aa80': {
+        data: {
+          'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg': {
+            author: '',
+            content_type: '',
+            fix_text: '',
+            image_index: '',
+            included_pages_num: '',
+            period: '',
+            src: 'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg:',
+            subj: '論理回路',
+            tool_type: '勉強用',
+            year: ''
+          },
+          'tests/2018/テスト_2018_後期中間_論理回路i_問題002.jpg': {
+            author: '',
+            content_type: '問題',
+            fix_text: '',
+            image_index: '002',
+            included_pages_num: '1',
+            period: '後期中間',
+            src: 'tests/2018/テスト_2018_後期中間_論理回路i_問題002.jpg',
+            subj: '論理回路i',
+            tool_type: 'テスト',
+            year: '2018'
+          },
+          'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験1.jpg': {
+            src: 'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験1.jpg',
+            subj: '倫理社会',
+            tool_type: 'テスト',
+            period: '前期定期',
+            year: '2018',
+            content_type: '',
+            author: '',
+            image_index: '',
+            included_pages_num: '',
+            fix_text: ''
+          },
+          'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験2.jpg': {
+            src: 'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験2.jpg',
+            subj: '',
+            tool_type: '',
+            period: '',
+            year: '',
+            content_type: '',
+            author: '',
+            image_index: '',
+            included_pages_num: '',
+            fix_text: ''
+          }
+        }
+      }
+    }
+
+    // refの取得
+    fetchMock.get(
+      `${url}/github/git/refs/heads/${branchName}`,
+      {
+        status: 200,
+        body: {
+          object: {
+            sha: '58c821fea857ca1e270c3b34f5bc97db64c84fc9'
+          }
+        }
+      },
+      headers
+    )
+
+    const commitsHash = '58c821fea857ca1e270c3b34f5bc97db64c84fc9'
+    // todo: .callsを使って直接shaを取る
+
+    // commitの取得
+    fetchMock.get(
+      `${url}/github/commits/${commitsHash}`,
+      {
+        status: 200,
+        body: {
+          sha: '58c821fea857ca1e270c3b34f5bc97db64c84fc9',
+          commit: {
+            tree: {
+              sha: '2192c7b798b4d4479e942f4d065780b44a04dbd6'
+            }
+          }
+        }
+      },
+      headers
+    )
+
+    // blobの作成
+    fetchMock.post(
+      `${url}/github/git/blobs?ref=${branchName}`,
+      {
+        status: 200,
+        body: {
+          sha: '8c187d7baccab1c2abf487e09051f0ee8cb04c18'
+        }
+      },
+      headers
+    )
+
+    // treeの作成
+    fetchMock.post(`${url}/github/git/trees`, {
+      status: 200,
+      body: {
+        sha: '2192c7b798b4d4479e942f4d065780b44a04dbd6'
+      },
+      headers
+    })
+
+    // commitの作成
+    fetchMock.post(`${url}/github/git/commits?ref=${branchName}`, 404, headers)
+
+    await actions.postCommitCsv({ dispatch, state, commit })
+
+    const errorMessage = 'Not Found'
+    expect(dispatch).toHaveBeenCalledWith('notify', errorMessage)
+    expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
+      status: 'failed' // todo: loadingでテストが通らないようにする
+    })
+  })
+
+  it('ref更新の取得レスポンスエラーのテスト', async () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+    state.currentBranch = 'cmstest'
+    const branchName = state.currentBranch
+    const token = state.currentUser.token.access_token
+    const headers = {
+      Authorization: `Bearer ${token}`
+    }
+    const commit = jest.fn()
+    const dispatch = jest.fn() // (テストで引数を全部設定する必要があるか)
+    state.contentMetadatas = {
+      '02f495e08b05c5b5b71c90a9c7c0f906a818aa80': {
+        data: {
+          'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg': {
+            author: '',
+            content_type: '',
+            fix_text: '',
+            image_index: '',
+            included_pages_num: '',
+            period: '',
+            src: 'tests/2018/テスト_2018_後期中間_論理回路i_問題001.jpg:',
+            subj: '論理回路',
+            tool_type: '勉強用',
+            year: ''
+          },
+          'tests/2018/テスト_2018_後期中間_論理回路i_問題002.jpg': {
+            author: '',
+            content_type: '問題',
+            fix_text: '',
+            image_index: '002',
+            included_pages_num: '1',
+            period: '後期中間',
+            src: 'tests/2018/テスト_2018_後期中間_論理回路i_問題002.jpg',
+            subj: '論理回路i',
+            tool_type: 'テスト',
+            year: '2018'
+          },
+          'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験1.jpg': {
+            src: 'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験1.jpg',
+            subj: '倫理社会',
+            tool_type: 'テスト',
+            period: '前期定期',
+            year: '2018',
+            content_type: '',
+            author: '',
+            image_index: '',
+            included_pages_num: '',
+            fix_text: ''
+          },
+          'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験2.jpg': {
+            src: 'scanned/20180802_2年3紐。5組『倫理社会」前期定期試験2.jpg',
+            subj: '',
+            tool_type: '',
+            period: '',
+            year: '',
+            content_type: '',
+            author: '',
+            image_index: '',
+            included_pages_num: '',
+            fix_text: ''
+          }
+        }
+      }
+    }
+
+    // refの取得
+    fetchMock.get(
+      `${url}/github/git/refs/heads/${branchName}`,
+      {
+        status: 200,
+        body: {
+          object: {
+            sha: '58c821fea857ca1e270c3b34f5bc97db64c84fc9'
+          }
+        }
+      },
+      headers
+    )
+
+    const commitsHash = '58c821fea857ca1e270c3b34f5bc97db64c84fc9'
+    // todo: .callsを使って直接shaを取る
+
+    // commitの取得
+    fetchMock.get(
+      `${url}/github/commits/${commitsHash}`,
+      {
+        status: 200,
+        body: {
+          sha: '58c821fea857ca1e270c3b34f5bc97db64c84fc9',
+          commit: {
+            tree: {
+              sha: '2192c7b798b4d4479e942f4d065780b44a04dbd6'
+            }
+          }
+        }
+      },
+      headers
+    )
+
+    // blobの作成
+    fetchMock.post(
+      `${url}/github/git/blobs?ref=${branchName}`,
+      {
+        status: 200,
+        body: {
+          sha: '8c187d7baccab1c2abf487e09051f0ee8cb04c18'
+        }
+      },
+      headers
+    )
+
+    // treeの作成
+    fetchMock.post(`${url}/github/git/trees`, {
+      status: 200,
+      body: {
+        sha: '2192c7b798b4d4479e942f4d065780b44a04dbd6'
+      },
+      headers
+    })
+
+    // commitの作成
+    fetchMock.post(
+      `${url}/github/git/commits?ref=${branchName}`,
+      {
+        status: 200,
+        body: {
+          sha: '1ce0d6ec02ff4a364245a4f435cdf9a7119507a4'
+        }
+      },
+      headers
+    )
+
+    // refの更新
+    fetchMock.patch(`${url}/github/git/refs/heads/${branchName}`, 404, headers)
+
+    await actions.postCommitCsv({ dispatch, state, commit })
+
     const errorMessage = 'Not Found'
     expect(dispatch).toHaveBeenCalledWith('notify', errorMessage)
     expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
