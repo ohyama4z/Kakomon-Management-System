@@ -143,10 +143,11 @@ export default (Vue as StateTypedVueConstructor).extend({
     intermediateFiles(): InterMediateFiles {
       const files = Object.entries(this.currentBranchMetadatas.data)
       const beforeMerge = files.map(([, file]) => {
+        const isUnvalue = Object.entries(file).includes('')
         const { period, subj, tool_type: toolType, year } = Object.fromEntries(
           Object.entries(file).map(([key, value]) => [
             key,
-            value === '' ? '不明' : value
+            isUnvalue ? '不明' : value
           ])
         )
 
