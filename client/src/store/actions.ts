@@ -733,7 +733,7 @@ export function readFileAsync(blob: Blob) {
       if (typeof reader.result !== 'string') {
         throw new Error("typeof reader.result !== 'string'")
       }
-      const base64 = reader.result.replace(/data:.*\/.*;base64,/, '')
+      const base64 = reader.result.replace(/$data:.*\/.*;base64,/, '')
       resolve(base64)
     }
     reader.readAsDataURL(blob)

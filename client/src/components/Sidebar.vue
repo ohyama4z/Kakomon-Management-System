@@ -246,27 +246,27 @@ export default (Vue as StateTypedVueConstructor).extend({
       if (item.isLast) {
         const tree = this.fileMetadataTree
         if (tree instanceof CsvItem) {
-          throw new Error()
+          throw new Error('tree instanceof CsvItem')
         }
         const periodTree = tree[item.data.period]
 
         if (periodTree instanceof CsvItem) {
-          throw new Error()
+          throw new Error('periodTree instanceof CsvItem')
         }
 
         const subjTree = periodTree[item.data.subj]
         if (subjTree instanceof CsvItem) {
-          throw new Error()
+          throw new Error('subjTree instanceof CsvItem')
         }
 
         const toolTypeTree = subjTree[item.data.toolType]
         if (toolTypeTree instanceof CsvItem) {
-          throw new Error()
+          throw new Error('toolTypeTree instanceof CsvItem')
         }
 
         const yearTree = toolTypeTree[item.data.year]
         if (yearTree instanceof CsvItem) {
-          throw new Error()
+          throw new Error('yearTree instanceof CsvItem')
         }
 
         const files = yearTree
