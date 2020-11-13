@@ -51,13 +51,13 @@ import { IconButton } from 'vuikit/lib/icon'
 import { Spinner } from 'vuikit/lib/spinner'
 
 import Vue from 'vue'
+import { StateTypedVueConstructor } from '../extended'
 interface Image {
   blob: string
   filename: string
   selected: boolean
 }
-
-export default Vue.extend({
+export default (Vue as StateTypedVueConstructor).extend({
   name: 'Preview',
   components: {
     VkIconButton: IconButton,
@@ -83,7 +83,7 @@ export default Vue.extend({
   },
   methods: {
     selectImage(filename: string): void {
-      const payload = new Set()
+      const payload = new Set<string>()
       this.selectedFiles.map(f => {
         payload.add(f)
       })

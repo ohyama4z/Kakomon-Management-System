@@ -84,7 +84,6 @@
 </template>
 
 <script lang="ts">
-import { State } from '../store/state'
 // @ts-ignore
 import { Sticky } from 'vuikit/lib/sticky'
 // @ts-ignore
@@ -98,12 +97,13 @@ import {
 // @ts-ignore
 import { Button } from 'vuikit/lib/button'
 import Vue from 'vue'
+import { StateTypedVueConstructor } from '../extended'
 
 interface Data {
   selectedBranch: string
 }
 
-export default Vue.extend({
+export default (Vue as StateTypedVueConstructor).extend({
   name: 'Navbar',
   components: {
     VkSticky: Sticky,
@@ -122,7 +122,7 @@ export default Vue.extend({
 
   computed: {
     branches(): any {
-      const state = this.$store.state as State
+      const state = this.$store.state
       return state.branches.data
     },
 

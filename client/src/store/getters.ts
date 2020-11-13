@@ -1,21 +1,30 @@
 import type { GetterTree } from 'vuex'
 import type { State } from './state'
 
-interface CurrentBranchMetadatas {
-  status: 'loaded' | 'loading'
-  data: {
-    [key: string]: State['contentMetadatas']['']['data'][''] & {
-      csvFile: string
-      sha: string
+type CurrentBranchMetadatas =
+  | {
+      status: 'loading'
+      data: {}
     }
-  }
-}
-interface Getters {
-  currentBranchMetadatas: CurrentBranchMetadatas
-  subjects: string[]
+  | {
+      status: 'loaded'
+      data: {
+        [key: string]: State['contentMetadatas']['']['data'][''] & {
+          sha: string
+        }
+      }
+    }
+
+interface Getters extends GetterTree<Readonly<State>, unknown> {
+  currentBranchMetadatas: (state: State) => CurrentBranchMetadatas
+  subjects: (state: State, getters: GetterValues) => string[]
 }
 
-const getters: GetterTree<Readonly<State>, unknown> = {
+export type GetterValues = {
+  [K in keyof Getters]: Getters[K] extends (...args: any) => infer U ? U : never
+}
+
+const getters: Getters = {
   currentBranchMetadatas: state => {
     const branch = state.currentBranch
     const branches = state.branches
@@ -39,7 +48,7 @@ const getters: GetterTree<Readonly<State>, unknown> = {
 
     const loadedContentMetadataShas = Object.values(
       state.commits[commitSha].data
-    ).filter((sha: any) => contentMetadatas[sha]?.status === 'loaded')
+    ).filter(sha => contentMetadatas[sha]?.status === 'loaded')
 
     if (
       loadedContentMetadataShas.length !==
@@ -48,9 +57,9 @@ const getters: GetterTree<Readonly<State>, unknown> = {
       return { status: 'loading', data: {} }
     }
 
-    const loadedMetadatas = loadedContentMetadataShas.flatMap((sha: any) => {
+    const loadedMetadatas = loadedContentMetadataShas.flatMap(sha => {
       return Object.entries(contentMetadatas[sha]?.data).map(([key, value]) => {
-        return { [key]: { ...(value as object), sha } }
+        return { [key]: { ...value, sha } }
       })
     })
 
@@ -63,7 +72,7 @@ const getters: GetterTree<Readonly<State>, unknown> = {
     return { status: 'loaded', data: result }
   },
 
-  subjects: (_, getters: Getters) => {
+  subjects: (_, getters) => {
     const set = new Set<string>()
     Object.entries(getters.currentBranchMetadatas.data).map(([, v]) => {
       set.add(v.subj)
