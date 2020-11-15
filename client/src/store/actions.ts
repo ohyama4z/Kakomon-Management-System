@@ -229,10 +229,8 @@ const actions: ActionTree<Readonly<State>, unknown> = {
         method: getMethod,
         headers
       })
-      console.log('refRes', refRes)
       // ステータス200以外
       if (!refRes.ok) {
-        console.log('not ok')
         throw new Error(refRes.statusText)
       }
 
@@ -240,15 +238,12 @@ const actions: ActionTree<Readonly<State>, unknown> = {
         object: { sha: string }
       }
       const parseRef = (await refRes.json()) as ParseRef
-
+      const hash = parseRef.object.sha
       // commitの取得
-      const commitRes = await fetch(
-        `${url}/github/commits/${parseRef.object.sha}`,
-        {
-          method: getMethod,
-          headers
-        }
-      )
+      const commitRes = await fetch(`${url}/github/commits/${hash}`, {
+        method: getMethod,
+        headers
+      })
       // ステータス200以外
       if (!commitRes.ok) {
         throw new Error(commitRes.statusText)
@@ -310,7 +305,6 @@ const actions: ActionTree<Readonly<State>, unknown> = {
         throw new Error(createTreeRes.statusText)
       }
 
-      console.log('asdf')
       interface TreeRes {
         sha: string
       }
@@ -371,7 +365,6 @@ const actions: ActionTree<Readonly<State>, unknown> = {
 
       commit('setCommitCsvStatus', { status: 'loaded' })
     } catch (e) {
-      console.log('here is catch')
       const errorMessage = e
       dispatch('notify', errorMessage.message)
       commit('setCommitCsvStatus', { status: 'failed' })

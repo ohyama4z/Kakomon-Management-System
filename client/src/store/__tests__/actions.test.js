@@ -781,7 +781,7 @@ describe('actions.js', () => {
     // }
   })
 
-  it('refの取得レスポンスエラーのテスト', async () => {
+  it('refResのレスポンスがfalseならエラー', async () => {
     const state = JSON.parse(JSON.stringify(defaultState))
     state.currentBranch = 'cmstest'
     const branchName = state.currentBranch
@@ -846,14 +846,6 @@ describe('actions.js', () => {
       }
     }
 
-    // fetchMock.post(`${url}/github/git/trees`, {
-    //   status: 200,
-    //   body: {
-    //     sha: '2192c7b798b4d4479e942f4d065780b44a04dbd6'
-    //   },
-    //   headers
-    // })
-
     // ref取得
     fetchMock.mock(
       `${url}/github/git/refs/heads/${branchName}`,
@@ -864,19 +856,8 @@ describe('actions.js', () => {
     // { method : 'get' }を加えるか
     // fethcMock.getとすると responseを見ることができない
 
-    // fetchMock.mock(
-    //   `${url}/github/git/refs/heads/${branchName}`,
-    //   { status: 404 },
-    //   { ok: false },
-    //   headers
-    // )
-    // fetchMock
-    //   .mock(`${url}/github/git/commits?ref=${branchName}`, 200, headers)
-    //   .catch(404)
-
     await actions.postCommitCsv({ dispatch, state, commit })
 
-    // console.log(fetchMock.calls(undefined, 'GET'), 'asdf')
     const errorMessage = 'Not Found'
     expect(dispatch).toHaveBeenCalledWith('notify', errorMessage)
     expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
@@ -890,7 +871,7 @@ describe('actions.js', () => {
     })
   })
 
-  it('commitresの取得レスポンスエラーのテスト', async () => {
+  it('commitResのレスポンスがfalseならエラー', async () => {
     const state = JSON.parse(JSON.stringify(defaultState))
     state.currentBranch = 'cmstest'
     const branchName = state.currentBranch
@@ -969,7 +950,6 @@ describe('actions.js', () => {
     )
 
     const commitsHash = '58c821fea857ca1e270c3b34f5bc97db64c84fc9'
-    // todo: .callsを使って直接shaを取る
 
     // ref取得
     fetchMock.mock(`${url}/github/commits/${commitsHash}`, 404, headers)
@@ -977,6 +957,9 @@ describe('actions.js', () => {
 
     const errorMessage = 'Not Found'
     expect(dispatch).toHaveBeenCalledWith('notify', errorMessage)
+    // expect(commit[0]).toEqual({
+    //   status: 'loading'
+    // })
     expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
       status: 'loading'
     })
@@ -988,7 +971,7 @@ describe('actions.js', () => {
     })
   })
 
-  it('blob作成の取得レスポンスエラーのテスト', async () => {
+  it('createBlobResのレスポンスがfalseならエラー', async () => {
     const state = JSON.parse(JSON.stringify(defaultState))
     state.currentBranch = 'cmstest'
     const branchName = state.currentBranch
@@ -1105,7 +1088,7 @@ describe('actions.js', () => {
     })
   })
 
-  it('tree作成の取得レスポンスエラーのテスト', async () => {
+  it('createTreeResのレスポンスがfalseエラー', async () => {
     const state = JSON.parse(JSON.stringify(defaultState))
     state.currentBranch = 'cmstest'
     const branchName = state.currentBranch
@@ -1234,7 +1217,7 @@ describe('actions.js', () => {
     })
   })
 
-  it('commit作成の取得レスポンスエラーのテスト', async () => {
+  it('updateRefsResのレスポンスがfalseエラー', async () => {
     const state = JSON.parse(JSON.stringify(defaultState))
     state.currentBranch = 'cmstest'
     const branchName = state.currentBranch
@@ -1314,7 +1297,6 @@ describe('actions.js', () => {
     )
 
     const commitsHash = '58c821fea857ca1e270c3b34f5bc97db64c84fc9'
-    // todo: .callsを使って直接shaを取る
 
     // commitの取得
     fetchMock.get(
@@ -1372,7 +1354,7 @@ describe('actions.js', () => {
     })
   })
 
-  it('ref更新の取得レスポンスエラーのテスト', async () => {
+  it('Resのレスポンスがfalseエラー', async () => {
     const state = JSON.parse(JSON.stringify(defaultState))
     state.currentBranch = 'cmstest'
     const branchName = state.currentBranch
@@ -1452,7 +1434,6 @@ describe('actions.js', () => {
     )
 
     const commitsHash = '58c821fea857ca1e270c3b34f5bc97db64c84fc9'
-    // todo: .callsを使って直接shaを取る
 
     // commitの取得
     fetchMock.get(
