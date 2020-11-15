@@ -700,7 +700,7 @@ describe('actions.js', () => {
     })
   })
 
-  it('fetchのエラー確認', async () => {
+  it('サーバーエラー', async () => {
     const state = JSON.parse(JSON.stringify(defaultState))
     state.currentBranch = 'cmstest'
     const branchName = state.currentBranch
@@ -710,7 +710,7 @@ describe('actions.js', () => {
       Authorization: `Bearer ${token}`
     }
     const commit = jest.fn()
-    const dispatch = jest.fn()
+    const dispatch = jest.fn(createGetValidTokenAndEmailDispatcher(state))
     state.contentMetadatas = {
       '02f495e08b05c5b5b71c90a9c7c0f906a818aa80': {
         data: {
@@ -766,32 +766,10 @@ describe('actions.js', () => {
       }
     }
 
-    // fetch.mockReject(new Error('error'))
-
-    // fetchMock.mock(`${url}/github/git/commits?ref=${branchName}`, {
-    //   status: 503,
-    //   headers,
-    //   config: {
-    //     status: 500
-    //   }
-    // })
-
-    // 501: 'Not Implemented',
-    // 502: 'Bad Gateway',
-    // 503: 'Service Unavailable',
-    // 504: 'Gateway Timeout',
-    // 505: 'HTTP Version Not Supported',
     fetchMock
       .mock(`${url}/github/git/commits?ref=${branchName}`, 200, headers)
       .catch(502)
-    // fetchMock.mock(`${url}/github/git/commits?ref=${branchName}`, 502, headers)
     await actions.postCommitCsv({ dispatch, state, commit })
-    // expect()
-    // try {
-    //   await actions.postCommitCsv({ dispatch, state, commit })
-    // } catch (e) {
-    //   expect(e.message).toBe('error')
-    // }
     const badGateway = 'Bad Gateway'
     expect(dispatch).toHaveBeenCalledWith('notify', badGateway)
     expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
@@ -803,14 +781,6 @@ describe('actions.js', () => {
     expect(commit).toHaveBeenLastCalledWith('setCommitCsvStatus', {
       status: 'failed'
     })
-    // expect.assertions(1)
-    // await actions.postCommitCsv({ dispatch, state, commit }).catch(e => {
-    //   console.log(e.message)
-    // })
-    // await actions.postCommitCsv({ dispatch, state, commit }){
-    //   try {
-    //   }
-    // }
   })
 
   it('refResのレスポンスがfalseならエラー', async () => {
@@ -822,7 +792,7 @@ describe('actions.js', () => {
       Authorization: `Bearer ${token}`
     }
     const commit = jest.fn()
-    const dispatch = jest.fn() // (テストで引数を全部設定する必要があるか)
+    const dispatch = jest.fn(createGetValidTokenAndEmailDispatcher(state)) // (テストで引数を全部設定する必要があるか)
     state.contentMetadatas = {
       '02f495e08b05c5b5b71c90a9c7c0f906a818aa80': {
         data: {
@@ -888,7 +858,7 @@ describe('actions.js', () => {
     // { method : 'get' }を加えるか
     // fethcMock.getとすると responseを見ることができない
 
-    await actions.postCommitCsv({ dispatch, state, commit })
+    await actions.postCommitCsv({ state, commit, dispatch })
 
     const errorMessage = 'Not Found'
     expect(dispatch).toHaveBeenCalledWith('notify', errorMessage)
@@ -912,7 +882,7 @@ describe('actions.js', () => {
       Authorization: `Bearer ${token}`
     }
     const commit = jest.fn()
-    const dispatch = jest.fn() // (テストで引数を全部設定する必要があるか)
+    const dispatch = jest.fn(createGetValidTokenAndEmailDispatcher(state)) // (テストで引数を全部設定する必要があるか)
     state.contentMetadatas = {
       '02f495e08b05c5b5b71c90a9c7c0f906a818aa80': {
         data: {
@@ -1009,7 +979,7 @@ describe('actions.js', () => {
       Authorization: `Bearer ${token}`
     }
     const commit = jest.fn()
-    const dispatch = jest.fn() // (テストで引数を全部設定する必要があるか)
+    const dispatch = jest.fn(createGetValidTokenAndEmailDispatcher(state)) // (テストで引数を全部設定する必要があるか)
     state.contentMetadatas = {
       '02f495e08b05c5b5b71c90a9c7c0f906a818aa80': {
         data: {
@@ -1125,7 +1095,7 @@ describe('actions.js', () => {
       Authorization: `Bearer ${token}`
     }
     const commit = jest.fn()
-    const dispatch = jest.fn() // (テストで引数を全部設定する必要があるか)
+    const dispatch = jest.fn(createGetValidTokenAndEmailDispatcher(state)) // (テストで引数を全部設定する必要があるか)
     state.contentMetadatas = {
       '02f495e08b05c5b5b71c90a9c7c0f906a818aa80': {
         data: {
@@ -1253,7 +1223,7 @@ describe('actions.js', () => {
       Authorization: `Bearer ${token}`
     }
     const commit = jest.fn()
-    const dispatch = jest.fn() // (テストで引数を全部設定する必要があるか)
+    const dispatch = jest.fn(createGetValidTokenAndEmailDispatcher(state)) // (テストで引数を全部設定する必要があるか)
     state.contentMetadatas = {
       '02f495e08b05c5b5b71c90a9c7c0f906a818aa80': {
         data: {
@@ -1390,7 +1360,7 @@ describe('actions.js', () => {
       Authorization: `Bearer ${token}`
     }
     const commit = jest.fn()
-    const dispatch = jest.fn() // (テストで引数を全部設定する必要があるか)
+    const dispatch = jest.fn(createGetValidTokenAndEmailDispatcher(state)) // (テストで引数を全部設定する必要があるか)
     state.contentMetadatas = {
       '02f495e08b05c5b5b71c90a9c7c0f906a818aa80': {
         data: {
@@ -1528,7 +1498,7 @@ describe('actions.js', () => {
     expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
       status: 'failed'
     })
-    expect(dispatch).toHaveBeenCalledTimes(2)
+    expect(dispatch).toHaveBeenCalledTimes(3)
   })
 
   it('ファイル編集の際tokenがnullならエラー', async () => {
