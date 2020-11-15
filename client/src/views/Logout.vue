@@ -18,7 +18,8 @@ import netlifyIdentity from 'netlify-identity-widget'
 
 import Vue from 'vue'
 
-export default Vue.extend({
+import { StateTypedVueConstructor } from '../extended'
+export default (Vue as StateTypedVueConstructor).extend({
   components: {
     VkSpinner: Spinner
   },
