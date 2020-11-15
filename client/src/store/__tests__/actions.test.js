@@ -957,9 +957,6 @@ describe('actions.js', () => {
 
     const errorMessage = 'Not Found'
     expect(dispatch).toHaveBeenCalledWith('notify', errorMessage)
-    // expect(commit[0]).toEqual({
-    //   status: 'loading'
-    // })
     expect(commit).toHaveBeenCalledWith('setCommitCsvStatus', {
       status: 'loading'
     })
@@ -1051,7 +1048,6 @@ describe('actions.js', () => {
     )
 
     const commitsHash = '58c821fea857ca1e270c3b34f5bc97db64c84fc9'
-    // todo: .callsを使って直接shaを取る
 
     // commitの取得
     fetchMock.get(
@@ -1168,7 +1164,6 @@ describe('actions.js', () => {
     )
 
     const commitsHash = '58c821fea857ca1e270c3b34f5bc97db64c84fc9'
-    // todo: .callsを使って直接shaを取る
 
     // commitの取得
     fetchMock.get(
