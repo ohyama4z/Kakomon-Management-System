@@ -1,5 +1,9 @@
 import { User } from 'netlify-identity-widget'
-export type PendingStatus = 'unrequested' | 'loading' | 'invalied_status'
+export type PendingStatus =
+  | 'unrequested'
+  | 'loading'
+  | 'invalied_status'
+  | 'failed'
 export type SuccessStatus = 'loaded'
 
 export type Status = PendingStatus | SuccessStatus
@@ -92,6 +96,7 @@ export interface State {
   displayedFiles: string[]
   selectedFiles: string[]
   commitStatus: Status
+  notifications: string[]
 }
 
 const state: State = {
@@ -115,6 +120,7 @@ const state: State = {
   imageShas: {},
   displayedFiles: [],
   selectedFiles: [],
-  commitStatus: 'unrequested'
+  commitStatus: 'unrequested',
+  notifications: []
 }
 export default state
