@@ -185,7 +185,7 @@ const mutations: Mutations = {
       state.changedFiles[filename] = {
         ...state.changedFiles[filename],
         ...files,
-        include_pages_num: '1'
+        included_pages_num: '1'
       }
     })
   },
