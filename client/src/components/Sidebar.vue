@@ -280,8 +280,11 @@ export default (Vue as StateTypedVueConstructor).extend({
         })
 
         const changedFilesBase = Object.entries(files).reduce(
-          (result, [filename, file]) => {
-            result = { ...result, [filename]: file.row }
+          (result, [filename, file], i) => {
+            result = {
+              ...result,
+              [filename]: { ...file.row, image_index: `${i}` }
+            }
             return result
           },
           {}
