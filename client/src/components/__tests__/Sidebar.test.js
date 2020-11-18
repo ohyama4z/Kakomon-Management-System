@@ -267,5 +267,29 @@ describe('Sidebar.vue', () => {
 
     wrapper.vm.onItemClick(e, item)
     expect(actions.getImageDatas).toHaveBeenCalled()
+
+    const payload = {
+      src1: {
+        src: 'src1',
+        subj: 'subj1',
+        year: 'year1',
+        content_type: 'content_type1',
+        tool_type: 'tool_type1',
+        period: 'period1',
+        sha: 'sha1',
+        image_index: '1'
+      },
+      src2: {
+        src: 'src2',
+        subj: 'subj1',
+        year: 'year1',
+        content_type: 'content_type1',
+        tool_type: 'tool_type1',
+        period: 'period1',
+        sha: 'sha2',
+        image_index: '2'
+      }
+    }
+    expect(mutations.setChangedFilesBase).toHaveBeenCalledWith(state, payload)
   })
 })

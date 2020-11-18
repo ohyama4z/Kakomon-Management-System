@@ -283,7 +283,7 @@ export default (Vue as StateTypedVueConstructor).extend({
           (result, [filename, file], i) => {
             result = {
               ...result,
-              [filename]: { ...file.row, image_index: `${i}` }
+              [filename]: { ...file.row, image_index: `${i + 1}` }
             }
             return result
           },
