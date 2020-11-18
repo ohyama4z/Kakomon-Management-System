@@ -343,12 +343,12 @@ describe('mutations.js', () => {
       'a.jpg': {
         subj: '2000',
         aho: 'aho',
-        include_pages_num: '1'
+        included_pages_num: '1'
       },
       'b.jpg': {
         subj: '2000',
         aho: 'aho',
-        include_pages_num: '1'
+        included_pages_num: '1'
       }
     }
 
