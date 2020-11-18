@@ -184,7 +184,8 @@ const mutations: Mutations = {
     state.selectedFiles.map(filename => {
       state.changedFiles[filename] = {
         ...state.changedFiles[filename],
-        ...files
+        ...files,
+        include_pages_num: '1'
       }
     })
   },

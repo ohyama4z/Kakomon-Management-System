@@ -342,11 +342,13 @@ describe('mutations.js', () => {
     const result = {
       'a.jpg': {
         subj: '2000',
-        aho: 'aho'
+        aho: 'aho',
+        include_pages_num: '1'
       },
       'b.jpg': {
         subj: '2000',
-        aho: 'aho'
+        aho: 'aho',
+        include_pages_num: '1'
       }
     }
 
