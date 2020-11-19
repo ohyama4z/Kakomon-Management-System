@@ -35,7 +35,7 @@ describe('mutations.js', () => {
 
     mutations.updateLastPage(state)
 
-    expect(state.lastPage).toEqual('upload')
+    expect(state.lastPage).toEqual('edit')
   })
 
   it('setBranchesStatus(payload.statusがloadingでもloadedでもない時)', () => {
