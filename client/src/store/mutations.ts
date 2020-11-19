@@ -58,7 +58,7 @@ const mutations: Mutations = {
 
   updateLastPage: state => {
     const lastPageInStrage = localStorage.getItem('lastPage')
-    const lastPage = lastPageInStrage == null ? 'upload' : lastPageInStrage
+    const lastPage = lastPageInStrage == null ? 'edit' : lastPageInStrage
     if (state.lastPage === '') {
       state.lastPage = lastPage
     }
