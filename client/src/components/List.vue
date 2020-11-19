@@ -106,7 +106,6 @@ export default (Vue as StateTypedVueConstructor).extend({
           this.$store.commit('updateChangedFileIndex', payload)
         }
       }
-      e.target.value = ''
     }
   }
 })

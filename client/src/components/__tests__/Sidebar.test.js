@@ -102,39 +102,19 @@ describe('Sidebar.vue', () => {
         icon,
         isLast: false,
         expand: false,
-        data: {
-          period: 'period1',
-          subj: '',
-          toolType: '',
-          year: '',
-          filename: ''
-        },
         child: [
           {
             title: 'subj1',
             icon,
             isLast: false,
             expand: false,
-            data: {
-              period: 'period1',
-              subj: 'subj1',
-              toolType: '',
-              year: '',
-              filename: ''
-            },
             child: [
               {
                 title: 'tool_type1',
                 icon,
                 isLast: false,
                 expand: false,
-                data: {
-                  period: 'period1',
-                  subj: 'subj1',
-                  toolType: 'tool_type1',
-                  year: '',
-                  filename: ''
-                },
+
                 child: [
                   {
                     title: 'year1',
@@ -144,9 +124,11 @@ describe('Sidebar.vue', () => {
                     data: {
                       period: 'period1',
                       subj: 'subj1',
-                      toolType: 'tool_type1',
+                      tool_type: 'tool_type1',
                       year: 'year1',
-                      filename: ''
+                      content_type: 'content_type1',
+                      sha: 'sha2',
+                      src: 'src2'
                     }
                   }
                 ]
@@ -160,39 +142,18 @@ describe('Sidebar.vue', () => {
         icon,
         isLast: false,
         expand: false,
-        data: {
-          period: 'period3',
-          subj: '',
-          toolType: '',
-          year: '',
-          filename: ''
-        },
         child: [
           {
             title: 'subj3',
             icon,
             isLast: false,
             expand: false,
-            data: {
-              period: 'period3',
-              subj: 'subj3',
-              toolType: '',
-              year: '',
-              filename: ''
-            },
             child: [
               {
                 title: 'tool_type3',
                 icon,
                 isLast: false,
                 expand: false,
-                data: {
-                  period: 'period3',
-                  subj: 'subj3',
-                  toolType: 'tool_type3',
-                  year: '',
-                  filename: ''
-                },
                 child: [
                   {
                     title: 'year3',
@@ -202,9 +163,11 @@ describe('Sidebar.vue', () => {
                     data: {
                       period: 'period3',
                       subj: 'subj3',
-                      toolType: 'tool_type3',
+                      tool_type: 'tool_type3',
                       year: 'year3',
-                      filename: ''
+                      content_type: 'content_type3',
+                      sha: 'sha3',
+                      src: 'src3'
                     }
                   }
                 ]
@@ -258,7 +221,7 @@ describe('Sidebar.vue', () => {
       data: {
         period: 'period1',
         subj: 'subj1',
-        toolType: 'tool_type1',
+        tool_type: 'tool_type1',
         year: 'year1',
         filename: ''
       }
@@ -267,5 +230,29 @@ describe('Sidebar.vue', () => {
 
     wrapper.vm.onItemClick(e, item)
     expect(actions.getImageDatas).toHaveBeenCalled()
+
+    const payload = {
+      src1: {
+        src: 'src1',
+        subj: 'subj1',
+        year: 'year1',
+        content_type: 'content_type1',
+        tool_type: 'tool_type1',
+        period: 'period1',
+        sha: 'sha1',
+        image_index: '1'
+      },
+      src2: {
+        src: 'src2',
+        subj: 'subj1',
+        year: 'year1',
+        content_type: 'content_type1',
+        tool_type: 'tool_type1',
+        period: 'period1',
+        sha: 'sha2',
+        image_index: '2'
+      }
+    }
+    expect(mutations.setChangedFilesBase).toHaveBeenCalledWith(state, payload)
   })
 })

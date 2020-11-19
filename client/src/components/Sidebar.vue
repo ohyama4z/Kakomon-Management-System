@@ -46,18 +46,10 @@ interface InterMediateFiles {
   [key: string]: CsvItem | InterMediateFiles
 }
 
-interface FilePathData {
-  period: string
-  subj: string
-  toolType: string
-  year: string
-  filename: string
-}
-
 interface LastOfDataTree {
   title: string
   icon: string
-  data: FilePathData
+  data: CsvRow
   isLast: true
   expand: boolean
 }
@@ -69,14 +61,13 @@ type GenerateMenuStructurePattern =
       icon: string
       isLast: false
       title: string
-      data: FilePathData
     }
   | {
       expand: boolean
       icon: string
       isLast: true
       title: string
-      data: FilePathData
+      data: CsvRow
     }
 
 type GenerateMenuStructure = (
@@ -183,11 +174,7 @@ export default (Vue as StateTypedVueConstructor).extend({
     },
     menuStructure() {
       const icon = 'fa fa-folder'
-      const result = generateMenuStructure(
-        this.intermediateFiles,
-        { period: '', subj: '', toolType: '', year: '', filename: '' },
-        'period'
-      )
+      const result = generateMenuStructure(this.intermediateFiles, 'period')
       return result
 
       function getNextProperty(currentProperty: string): string {
@@ -199,7 +186,6 @@ export default (Vue as StateTypedVueConstructor).extend({
 
       function generateMenuStructure(
         intermediate: InterMediateFiles,
-        data: FilePathData,
         property: string
       ): GenerateMenuStructurePattern[] {
         return Object.entries(intermediate).map(([filename, value]) => {
@@ -207,7 +193,7 @@ export default (Vue as StateTypedVueConstructor).extend({
             return {
               title: filename,
               icon: 'fas fa-circle',
-              data: { ...data, [property]: filename },
+              data: value.row,
               isLast: true,
               expand: false
             }
@@ -216,14 +202,9 @@ export default (Vue as StateTypedVueConstructor).extend({
           return {
             title: filename,
             icon,
-            child: generateMenuStructure(
-              value,
-              { ...data, [property]: filename },
-              getNextProperty(property)
-            ),
+            child: generateMenuStructure(value, getNextProperty(property)),
             isLast: false,
-            expand: false,
-            data: { ...data, [property]: filename }
+            expand: false
           }
         })
       }
@@ -259,7 +240,7 @@ export default (Vue as StateTypedVueConstructor).extend({
           throw new Error('subjTree instanceof CsvItem')
         }
 
-        const toolTypeTree = subjTree[item.data.toolType]
+        const toolTypeTree = subjTree[item.data.tool_type]
         if (toolTypeTree instanceof CsvItem) {
           throw new Error('toolTypeTree instanceof CsvItem')
         }
@@ -280,8 +261,11 @@ export default (Vue as StateTypedVueConstructor).extend({
         })
 
         const changedFilesBase = Object.entries(files).reduce(
-          (result, [filename, file]) => {
-            result = { ...result, [filename]: file.row }
+          (result, [filename, file], i) => {
+            result = {
+              ...result,
+              [filename]: { ...file.row, image_index: `${i + 1}` }
+            }
             return result
           },
           {}
