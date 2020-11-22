@@ -229,23 +229,30 @@ export default (Vue as StateTypedVueConstructor).extend({
         if (tree instanceof CsvItem) {
           throw new Error('tree instanceof CsvItem')
         }
-        const periodTree = tree[item.data.period]
+
+        const periodPropaty =
+          item.data.period === '' ? '不明' : item.data.period
+        const periodTree = tree[periodPropaty]
 
         if (periodTree instanceof CsvItem) {
           throw new Error('periodTree instanceof CsvItem')
         }
 
-        const subjTree = periodTree[item.data.subj]
+        const subjPropaty = item.data.subj === '' ? '不明' : item.data.subj
+        const subjTree = periodTree[subjPropaty]
         if (subjTree instanceof CsvItem) {
           throw new Error('subjTree instanceof CsvItem')
         }
 
-        const toolTypeTree = subjTree[item.data.tool_type]
+        const toolTypePropaty =
+          item.data.tool_type === '' ? '不明' : item.data.tool_type
+        const toolTypeTree = subjTree[toolTypePropaty]
         if (toolTypeTree instanceof CsvItem) {
           throw new Error('toolTypeTree instanceof CsvItem')
         }
 
-        const yearTree = toolTypeTree[item.data.year]
+        const yearPropaty = item.data.year === '' ? '不明' : item.data.year
+        const yearTree = toolTypeTree[yearPropaty]
         if (yearTree instanceof CsvItem) {
           throw new Error('yearTree instanceof CsvItem')
         }
