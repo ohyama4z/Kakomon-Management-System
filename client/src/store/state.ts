@@ -70,6 +70,7 @@ interface ImageDatas {
     data: {
       blobUri: string
       downloadUrl: string
+      pdfUrl: string
     }
     status: Status
   }

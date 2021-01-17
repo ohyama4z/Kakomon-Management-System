@@ -501,7 +501,7 @@ const actions: Actions = {
 
     await Promise.all(
       filenames.map(async filename => {
-        const sha = state.imageShas[commitSha][directoryPath].data[filename]
+        const sha = state.imageShas[commitSha][directoryPath].data[filename].sha
         const token = await dispatch('getToken')
         const method = 'GET'
         const headers = {
@@ -521,7 +521,13 @@ const actions: Actions = {
         const blob = toBlob(res.content, imageType)
         const blobUri = URL.createObjectURL(blob)
 
-        commit('setImageData', { sha, blobUri, downloadUrl })
+        const downloadUrl =
+          state.imageShas[commitSha][directoryPath].data[filename].url
+
+        // pdf表示の応急処置です
+        const pdfUrl = `https://github.com/ohyama4z/test-preps/raw/${commitSha}/${directoryPath}/${filename}`
+
+        commit('setImageData', { sha, blobUri, downloadUrl, pdfUrl })
       })
     )
   },

@@ -9,7 +9,9 @@
         >
           <div v-if="image.blob" class="uk-margin-top">
             <div v-if="image.fileType === 'pdf'">
-              <a :href="image.downloadUrl" target="_blank">pdfを表示</a>
+              <a :href="image.pdfUrl" target="_blank" :title="image.pdfUrl"
+                >pdfを表示</a
+              >
               <vk-icon-button
                 class="uk-margin-small-right"
                 :class="{ selectedIcon: isSelected(image.filePath) }"
@@ -87,6 +89,7 @@ export default (Vue as StateTypedVueConstructor).extend({
         return {
           blob: state.imageDatas?.[imageSha]?.data.blobUri,
           downloadUrl: state.imageDatas?.[imageSha]?.data.downloadUrl,
+          pdfUrl: state.imageDatas?.[imageSha]?.data.pdfUrl,
           filename,
           fileType,
           filePath
