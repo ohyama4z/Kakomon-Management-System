@@ -8,7 +8,19 @@
           class="uk-flex uk-flex-center"
         >
           <div v-if="image.blob" class="uk-margin-top">
-            <div class="uk-inline">
+            <div v-if="image.fileType === 'pdf'">
+              <a :href="image.pdfUrl" target="_blank" :title="image.pdfUrl"
+                >pdfを表示</a
+              >
+              <vk-icon-button
+                class="uk-margin-small-right"
+                :class="{ selectedIcon: isSelected(image.filePath) }"
+                icon="check"
+                @click="selectImage(image.filePath)"
+              ></vk-icon-button>
+            </div>
+
+            <div class="uk-inline" v-else>
               <img
                 :src="image.blob"
                 :class="{
@@ -70,10 +82,18 @@ export default (Vue as StateTypedVueConstructor).extend({
       return state.displayedFiles.map(filePath => {
         const directoryPath = filePath.substr(0, filePath.lastIndexOf('/'))
         const filename = filePath.substr(filePath.lastIndexOf('/') + 1)
+        const fileType = filename.substr(filename.lastIndexOf('.') + 1)
         const imageSha =
-          state.imageShas[commitSha]?.[directoryPath]?.data?.[filename]
+          state.imageShas[commitSha]?.[directoryPath]?.data?.[filename].sha
 
-        return { blob: state.imageDatas?.[imageSha]?.data, filename, filePath }
+        return {
+          blob: state.imageDatas?.[imageSha]?.data.blobUri,
+          downloadUrl: state.imageDatas?.[imageSha]?.data.downloadUrl,
+          pdfUrl: state.imageDatas?.[imageSha]?.data.pdfUrl,
+          filename,
+          fileType,
+          filePath
+        }
       })
     },
     selectedFiles() {

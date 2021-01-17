@@ -471,10 +471,14 @@ const actions: Actions = {
     interface Res {
       name: string
       sha: string
+      // eslint-disable-next-line camelcase
+      download_url: string
     }
     const res = (await httpRes.json()) as Res[]
 
-    const data = Object.fromEntries(res.map(file => [file.name, file.sha]))
+    const data = Object.fromEntries(
+      res.map(file => [file.name, { sha: file.sha, url: file.download_url }])
+    )
     commit('setImageShas', { commitSha, directoryPath, data })
   },
 
@@ -497,7 +501,7 @@ const actions: Actions = {
 
     await Promise.all(
       filenames.map(async filename => {
-        const sha = state.imageShas[commitSha][directoryPath].data[filename]
+        const sha = state.imageShas[commitSha][directoryPath].data[filename].sha
         const token = await dispatch('getToken')
         const method = 'GET'
         const headers = {
@@ -517,7 +521,13 @@ const actions: Actions = {
         const blob = toBlob(res.content, imageType)
         const blobUri = URL.createObjectURL(blob)
 
-        commit('setImageData', { sha, blobUri })
+        const downloadUrl =
+          state.imageShas[commitSha][directoryPath].data[filename].url
+
+        // pdf表示の応急処置です
+        const pdfUrl = `https://github.com/ohyama4z/test-preps/raw/${commitSha}/${directoryPath}/${filename}`
+
+        commit('setImageData', { sha, blobUri, downloadUrl, pdfUrl })
       })
     )
   },

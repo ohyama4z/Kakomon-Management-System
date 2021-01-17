@@ -45,20 +45,32 @@ describe('Preview.vue', () => {
     state.branches = {
       data: { master: 'commitSha' }
     }
-    state.displayedFiles = ['dir/path1', 'dir/path2']
+    state.displayedFiles = ['dir/path1.jpg', 'dir/path2.pdf']
     state.imageShas = {
       commitSha: {
         dir: {
           data: {
-            path1: 'sha1',
-            path2: 'sha2'
+            'path1.jpg': { sha: 'sha1' },
+            'path2.pdf': { sha: 'sha2' }
           }
         }
       }
     }
     state.imageDatas = {
-      sha1: { data: 'blob1' },
-      sha2: { data: 'blob2' }
+      sha1: {
+        data: {
+          blobUri: 'blob1',
+          downloadUrl: 'dlUrl1',
+          pdfUrl: 'pdfUrl1'
+        }
+      },
+      sha2: {
+        data: {
+          blobUri: 'blob2',
+          downloadUrl: 'dlUrl2',
+          pdfUrl: 'pdfUrl2'
+        }
+      }
     }
     const store = new Vuex.Store({
       state
@@ -72,13 +84,19 @@ describe('Preview.vue', () => {
     const result = [
       {
         blob: 'blob1',
-        filePath: 'dir/path1',
-        filename: 'path1'
+        downloadUrl: 'dlUrl1',
+        pdfUrl: 'pdfUrl1',
+        fileType: 'jpg',
+        filePath: 'dir/path1.jpg',
+        filename: 'path1.jpg'
       },
       {
         blob: 'blob2',
-        filePath: 'dir/path2',
-        filename: 'path2'
+        downloadUrl: 'dlUrl2',
+        pdfUrl: 'pdfUrl2',
+        fileType: 'pdf',
+        filePath: 'dir/path2.pdf',
+        filename: 'path2.pdf'
       }
     ]
 
@@ -90,22 +108,34 @@ describe('Preview.vue', () => {
     state.branches = {
       data: { master: 'commitSha' }
     }
-    state.displayedFiles = ['dir/path1', 'dir/path2']
+    state.displayedFiles = ['dir/path1.jpg', 'dir/path2.jpg']
     state.imageShas = {
       commitSha: {
         dir: {
           data: {
-            path1: 'sha1',
-            path2: 'sha2'
+            'path1.jpg': { sha: 'sha1' },
+            'path2.jpg': { sha: 'sha2' }
           }
         }
       }
     }
     state.imageDatas = {
-      sha1: { data: 'blob1' },
-      sha2: { data: 'blob2' }
+      sha1: {
+        data: {
+          blobUri: 'blob1',
+          downloadUrl: 'dlUrl1',
+          pdfUrl: 'pdfUrl1'
+        }
+      },
+      sha2: {
+        data: {
+          blobUri: 'blob2',
+          downloadUrl: 'dlUrl2',
+          pdfUrl: 'pdfUrl2'
+        }
+      }
     }
-    state.selectedFiles = ['dir/path2']
+    state.selectedFiles = ['dir/path2.jpg']
     const stubs = {
       VkIconButton: IconButton,
       VkSpinner: Spinner
@@ -125,7 +155,7 @@ describe('Preview.vue', () => {
     iconButton.trigger('click')
     await new Promise(resolve => setTimeout(resolve, 5))
     expect(mutations.setSelectedFiles).toHaveBeenCalled()
-    state.selectedFiles = ['dir/path1', 'dir/path2']
+    state.selectedFiles = ['dir/path1.jpg', 'dir/path2.jpg']
     await flushPromises()
     const selectedImages = wrapper.findAll('img[class="selectedImage"]')
     expect(selectedImages.length).toBe(2)
@@ -136,22 +166,34 @@ describe('Preview.vue', () => {
     state.branches = {
       data: { master: 'commitSha' }
     }
-    state.displayedFiles = ['dir/path1', 'dir/path2']
+    state.displayedFiles = ['dir/path1.jpg', 'dir/path2.jpg']
     state.imageShas = {
       commitSha: {
         dir: {
           data: {
-            path1: 'sha1',
-            path2: 'sha2'
+            'path1.jpg': { sha: 'sha1' },
+            'path2.jpg': { sha: 'sha2' }
           }
         }
       }
     }
     state.imageDatas = {
-      sha1: { data: 'blob1' },
-      sha2: { data: 'blob2' }
+      sha1: {
+        data: {
+          blobUri: 'blob1',
+          downloadUrl: 'dlUrl1',
+          pdfUrl: 'pdfUrl1'
+        }
+      },
+      sha2: {
+        data: {
+          blobUri: 'blob2',
+          downloadUrl: 'dlUrl2',
+          pdfUrl: 'pdfUrl2'
+        }
+      }
     }
-    state.selectedFiles = ['dir/path1', 'dir/path2']
+    state.selectedFiles = ['dir/path1.jpg', 'dir/path2.jpg']
     const stubs = {
       VkIconButton: IconButton,
       VkSpinner: Spinner
@@ -173,7 +215,7 @@ describe('Preview.vue', () => {
     iconButton.trigger('click')
     await new Promise(resolve => setTimeout(resolve, 5))
     expect(mutations.setSelectedFiles).toHaveBeenCalled()
-    state.selectedFiles = ['dir/path2']
+    state.selectedFiles = ['dir/path2.jpg']
     await flushPromises()
     const unselectedImages = wrapper.findAll('img[class="image"]')
     expect(unselectedImages.length).toBe(1)

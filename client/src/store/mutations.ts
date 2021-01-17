@@ -37,7 +37,12 @@ export interface Mutations extends MutationTree<State> {
   ) => void
   setImageData: (
     state: State,
-    payload: { sha: string; blobUri: string }
+    payload: {
+      sha: string
+      blobUri: string
+      downloadUrl: string
+      pdfUrl: string
+    }
   ) => void
   setDisplayedFiles: (state: State, filePaths: string[]) => void
   setChangedFilesBase: (state: State, files: State['changedFiles']) => void
@@ -167,7 +172,11 @@ const mutations: Mutations = {
       ...state.imageDatas,
       [payload.sha]: {
         status: 'loaded',
-        data: payload.blobUri
+        data: {
+          blobUri: payload.blobUri,
+          downloadUrl: payload.downloadUrl,
+          pdfUrl: payload.pdfUrl
+        }
       }
     }
   },

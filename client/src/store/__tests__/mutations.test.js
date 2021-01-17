@@ -284,23 +284,37 @@ describe('mutations.js', () => {
     state.imageDatas = {
       sha1: {
         status: 'loaded',
-        data: 'aaa'
+        data: {
+          blobUrl: 'blob1',
+          downloadUrl: 'dlUrl1',
+          pdfUrl: 'pdfUrl1'
+        }
       }
     }
 
     const payload = {
       sha: 'sha2',
-      blobUri: 'blob'
+      blobUri: 'blob2',
+      downloadUrl: 'dlUrl2',
+      pdfUrl: 'pdfUrl2'
     }
 
     const result = {
       sha1: {
         status: 'loaded',
-        data: 'aaa'
+        data: {
+          blobUrl: 'blob1',
+          downloadUrl: 'dlUrl1',
+          pdfUrl: 'pdfUrl1'
+        }
       },
       sha2: {
         status: 'loaded',
-        data: 'blob'
+        data: {
+          blobUri: 'blob2',
+          downloadUrl: 'dlUrl2',
+          pdfUrl: 'pdfUrl2'
+        }
       }
     }
 
