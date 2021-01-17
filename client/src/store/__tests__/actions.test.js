@@ -1520,8 +1520,8 @@ describe('actions.js', () => {
     fetchMock.get(`${url}/github/contents/dir?ref=sha`, {
       status: 200,
       body: [
-        { name: 'file1.jpg', sha: 'imageSha1' },
-        { name: 'file2.jpg', sha: 'imageSha2' }
+        { name: 'file1.jpg', sha: 'imageSha1', download_url: 'url1' },
+        { name: 'file2.jpg', sha: 'imageSha2', download_url: 'url2' }
       ],
       headers
     })
@@ -1535,8 +1535,8 @@ describe('actions.js', () => {
       directoryPath,
       commitSha,
       data: {
-        'file1.jpg': 'imageSha1',
-        'file2.jpg': 'imageSha2'
+        'file1.jpg': { sha: 'imageSha1', url: 'url1' },
+        'file2.jpg': { sha: 'imageSha2', url: 'url2' }
       }
     }
     const auth = 'Bearer 12345'
@@ -1619,8 +1619,8 @@ describe('actions.js', () => {
       commitSha: {
         dir: {
           data: {
-            file1: 'sha1',
-            file2: 'sha2'
+            file1: { sha: 'sha1' },
+            file2: { sha: 'sha2' }
           }
         }
       }
