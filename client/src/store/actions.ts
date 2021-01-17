@@ -2,25 +2,87 @@ import merge from 'deepmerge'
 import moment from 'moment'
 // @ts-ignore
 import netlifyIdentity from 'netlify-identity-widget'
-import { ActionTree } from 'vuex'
+import { ActionContext, ActionTree } from 'vuex'
+import { Mutations } from './mutations'
 import { State } from './state'
 
 const url = process.env.VUE_APP_URL
 
-interface CreateCommitPayload {
-  commitSha: string
-  branch: string
-  files: { [k: string]: string }
-  commitMessage: string
+// https://dev.to/3vilarthas/vuex-typescript-m4j
+
+interface AugmentedActionContext
+  extends ActionContext<Readonly<State>, unknown> {
+  commit<K extends keyof Mutations>(
+    key: K,
+    payload: Parameters<Mutations[K]>[1]
+  ): ReturnType<Mutations[K]>
+
+  dispatch<K extends keyof Actions>(
+    key: K,
+    payload?: Actions[K] extends (...args: any[]) => any
+      ? Parameters<Actions[K]>[1]
+      : unknown
+  ): Actions[K] extends (...args: any[]) => Promise<any>
+    ? ReturnType<Actions[K]>
+    : Promise<unknown>
 }
 
-const actions: ActionTree<Readonly<State>, unknown> = {
-  getBranches: async ({ commit, state }) => {
-    commit('setBranchesStatus', { status: 'loading' })
-    if (state.currentUser == null) {
-      throw new Error('state.currentUser == null')
+export interface Actions extends ActionTree<Readonly<State>, unknown> {
+  getBranches: (context: AugmentedActionContext) => Promise<void>
+  selectBranch: (
+    context: AugmentedActionContext,
+    payload: string
+  ) => Promise<void>
+  getToken: (context: AugmentedActionContext) => Promise<string>
+  getEmail: (context: AugmentedActionContext) => Promise<string>
+  getCommit: (
+    context: AugmentedActionContext,
+    commitSha: string
+  ) => Promise<void>
+  getContentMetadata: (
+    context: AugmentedActionContext,
+    payload: { fileSha: string; filename: string }
+  ) => Promise<void>
+  postCommitCsv: (context: AugmentedActionContext) => Promise<void>
+  updateCurrentUser: (context: AugmentedActionContext) => Promise<void>
+  getImageShas: (
+    context: AugmentedActionContext,
+    payload: {
+      commitSha: string
+      directoryPath: string
     }
-    const token = state.currentUser.token.access_token
+  ) => Promise<void>
+  getImageDatas: (
+    context: AugmentedActionContext,
+    fileSha: string
+  ) => Promise<void>
+  createBranch: (
+    context: AugmentedActionContext,
+    branch: string
+  ) => Promise<void>
+  upload: (
+    context: AugmentedActionContext,
+    payload: {
+      branch: string
+      files: { [k: string]: string }
+      commitMessage: string
+    }
+  ) => Promise<void>
+  createCommit: (
+    context: AugmentedActionContext,
+    payload: {
+      commitSha: string
+      branch: string
+      files: { [k: string]: string }
+      commitMessage: string
+    }
+  ) => Promise<void>
+}
+
+const actions: Actions = {
+  getBranches: async ({ commit, dispatch }) => {
+    commit('setBranchesStatus', { status: 'loading' })
+    const token = await dispatch('getToken')
     const getMethod = 'GET'
     const headers = {
       Authorization: `Bearer ${token}`
@@ -38,17 +100,34 @@ const actions: ActionTree<Readonly<State>, unknown> = {
     const branches = Object.fromEntries(
       res.map(branch => [branch.name, branch.commit.sha])
     )
-    commit('setBranches', { branches })
+    commit('setBranches', { branches: { master: '', ...branches } })
   },
 
-  selectBranch: async ({ dispatch, commit, state }, branchName: string) => {
+  selectBranch: async ({ dispatch, commit, state }, branchName) => {
     commit('setCurrentBranch', branchName)
     await dispatch('getBranches')
     const commitSha = state.branches.data[branchName]
     await dispatch('getCommit', commitSha)
   },
 
-  getCommit: async ({ dispatch, commit, state }, commitSha: string) => {
+  getToken: async ({ state }) => {
+    // eslint-disable-next-line camelcase
+    const token = state.currentUser?.token?.access_token
+    if (token == null) {
+      throw new Error('state.currentUser?.token?.access_token == null')
+    }
+    return token
+  },
+
+  getEmail: async ({ state }) => {
+    const email = state.currentUser?.email
+    if (email == null) {
+      throw new Error('state.currentUser?.email == null')
+    }
+    return email
+  },
+
+  getCommit: async ({ dispatch, commit, state }, commitSha) => {
     const commitDataInState = state.commits?.[commitSha]
     if (commitDataInState?.status === 'loaded') {
       Object.entries(commitDataInState.data).map(
@@ -82,10 +161,7 @@ const actions: ActionTree<Readonly<State>, unknown> = {
       return
     }
 
-    if (state.currentUser == null) {
-      throw new Error('state.currentUser == null')
-    }
-    const token = state.currentUser.token.access_token
+    const token = await dispatch(`getToken`)
     const getMethod = 'GET'
     const headers = {
       Authorization: `Bearer ${token}`
@@ -117,7 +193,7 @@ const actions: ActionTree<Readonly<State>, unknown> = {
     localStorage.setItem(`${commitSha}`, JSON.stringify(commitData))
   },
 
-  getContentMetadata: async ({ commit, state }, payload) => {
+  getContentMetadata: async ({ commit, state, dispatch }, payload) => {
     const fileDataInState = state.contentMetadatas?.[payload.fileSha]
     if (fileDataInState?.status === 'loaded') {
       return
@@ -130,7 +206,7 @@ const actions: ActionTree<Readonly<State>, unknown> = {
 
     const fileDataInLocalStorage = JSON.parse(
       localStorage.getItem(payload.fileSha) as string
-    ) as State['contentMetadatas']['']
+    ) as State['contentMetadatas']['']['data']
     if (fileDataInLocalStorage != null) {
       commit('setContentMetadata', {
         sha: payload.fileSha,
@@ -139,10 +215,7 @@ const actions: ActionTree<Readonly<State>, unknown> = {
       return
     }
 
-    if (state.currentUser == null) {
-      throw new Error('state.currentUser == null')
-    }
-    const token = state.currentUser.token.access_token
+    const token = await dispatch('getToken')
     const getMethod = 'GET'
     const headers = {
       Authorization: `Bearer ${token}`
@@ -169,19 +242,17 @@ const actions: ActionTree<Readonly<State>, unknown> = {
     localStorage.setItem(payload.fileSha, JSON.stringify(resultObj))
   },
 
-  postCommitCsv: async ({ commit, state }) => {
+  postCommitCsv: async ({ commit, state, dispatch }) => {
     commit('setCommitCsvStatus', { status: 'loading' })
-    if (state.currentUser == null) {
-      throw new Error('state.currentUser == null')
-    }
-    const token = state.currentUser.token.access_token
+    const token = await dispatch('getToken')
+
     const getMethod = 'GET'
     const postMethod = 'POST'
     const patchMethod = 'PATCH'
     const headers = {
       Authorization: `Bearer ${token}`
     }
-    const userEmail = state.currentUser.email
+    const userEmail = await dispatch('getEmail')
     const userNameLength = userEmail.search('@')
     const userName = userEmail.slice(0, userNameLength)
     const branchName = state.currentBranch
@@ -223,123 +294,171 @@ const actions: ActionTree<Readonly<State>, unknown> = {
     const content =
       '\ufeff' + convertObjToCsv(Object.values(editedCsvObj)) + '\n'
 
-    // refの取得
-    const refRes = await fetch(`${url}/github/git/refs/heads/${branchName}`, {
-      method: getMethod,
-      headers
-    })
-    interface ParseRef {
-      object: { sha: string }
-    }
-    const parseRef = (await refRes.json()) as ParseRef
-
-    // commitの取得
-    const commitRes = await fetch(
-      `${url}/github/commits/${parseRef.object.sha}`,
-      { method: getMethod, headers }
-    )
-    interface CommitRes {
-      commit: {
-        tree: { sha: string }
+    try {
+      // refの取得
+      const refRes = await fetch(`${url}/github/git/refs/heads/${branchName}`, {
+        method: getMethod,
+        headers
+      })
+      // ステータス200以外
+      if (!refRes.ok) {
+        throw new Error(refRes.statusText)
       }
-    }
-    const commitres = (await commitRes.json()) as CommitRes
 
-    const postContents = {
-      content,
-      encoding: 'utf-8'
-    }
-    const postContentsBody = JSON.stringify(postContents)
+      interface ParseRef {
+        object: { sha: string }
+      }
+      const parseRef = (await refRes.json()) as ParseRef
+      const hash = parseRef.object.sha
+      // commitの取得
+      const commitRes = await fetch(`${url}/github/commits/${hash}`, {
+        method: getMethod,
+        headers
+      })
+      // ステータス200以外
+      if (!commitRes.ok) {
+        throw new Error(commitRes.statusText)
+      }
 
-    // blobの作成
-    const createBlobRes = await fetch(
-      `${url}/github/git/blobs?ref=${branchName}`,
-      { method: postMethod, headers, body: postContentsBody }
-    )
-    interface BlobRes {
-      sha: string
-    }
-    const blobRes = (await createBlobRes.json()) as BlobRes
-    const fileInfo = {
-      base_tree: commitres.commit.tree.sha,
-      tree: [
-        {
-          path: `metadatas/${filePath}`,
-          mode: '100644',
-          type: 'blob',
-          sha: blobRes.sha
+      interface CommitRes {
+        commit: {
+          tree: { sha: string }
         }
-      ]
-    }
+      }
+      const commitres = (await commitRes.json()) as CommitRes
 
-    // treeの作成
-    const postFileInfoBody = JSON.stringify(fileInfo)
-    const createTreeRes = await fetch(`${url}/github/git/trees`, {
-      method: postMethod,
-      headers,
-      body: postFileInfoBody
-    })
-    interface TreeRes {
-      sha: string
-    }
-    const treeRes = (await createTreeRes.json()) as TreeRes
-    const date = moment().format('YYYY-MM-DDTHH:mm:ssZ')
+      const postContents = {
+        content,
+        encoding: 'utf-8'
+      }
+      const postContentsBody = JSON.stringify(postContents)
 
-    const postCommitInfo = {
-      message: date,
-      author: {
-        name: userName,
-        email: userEmail,
-        date
-      },
-      parents: [parseRef.object.sha],
-      tree: treeRes.sha
-    }
-    const postCommitInfoBody = JSON.stringify(postCommitInfo)
+      // blobの作成
+      const createBlobRes = await fetch(
+        `${url}/github/git/blobs?ref=${branchName}`,
+        {
+          method: postMethod,
+          headers,
+          body: postContentsBody
+        }
+      )
+      // ステータス200以外
+      if (!createBlobRes.ok) {
+        throw new Error(createBlobRes.statusText)
+      }
 
-    // commitの作成
-    const createCommitRes = await fetch(
-      `${url}/github/git/commits?ref=${branchName}`,
-      { method: postMethod, headers, body: postCommitInfoBody }
-    )
-    interface CreateCommitRes {
-      sha: string
-    }
-    const createdCommitRes = (await createCommitRes.json()) as CreateCommitRes
+      interface BlobRes {
+        sha: string
+      }
+      const blobRes = (await createBlobRes.json()) as BlobRes
+      const fileInfo = {
+        base_tree: commitres.commit.tree.sha,
+        tree: [
+          {
+            path: `metadatas/${filePath}`,
+            mode: '100644',
+            type: 'blob',
+            sha: blobRes.sha
+          }
+        ]
+      }
 
-    // refの更新
-    const updateRef = {
-      sha: createdCommitRes.sha,
-      force: false // 強制pushするか否
-    }
-    const updateRefs = JSON.stringify(updateRef)
-    await fetch(`${url}/github/git/refs/heads/${branchName}`, {
-      method: patchMethod,
-      headers,
-      body: updateRefs
-    })
+      // treeの作成
+      const postFileInfoBody = JSON.stringify(fileInfo)
 
-    commit('setCommitCsvStatus', { status: 'loaded' })
+      const createTreeRes = await fetch(`${url}/github/git/trees`, {
+        method: postMethod,
+        headers,
+        body: postFileInfoBody
+      })
+      // ステータス200以外
+      if (!createTreeRes.ok) {
+        throw new Error(createTreeRes.statusText)
+      }
+
+      interface TreeRes {
+        sha: string
+      }
+      const treeRes = (await createTreeRes.json()) as TreeRes
+      const date = moment().format('YYYY-MM-DDTHH:mm:ssZ')
+
+      const postCommitInfo = {
+        message: date,
+        author: {
+          name: userName,
+          email: userEmail,
+          date
+        },
+        parents: [parseRef.object.sha],
+        tree: treeRes.sha
+      }
+      const postCommitInfoBody = JSON.stringify(postCommitInfo)
+
+      // commitの作成
+      const createCommitRes = await fetch(
+        `${url}/github/git/commits?ref=${branchName}`,
+        { method: postMethod, headers, body: postCommitInfoBody }
+      )
+      // ステータス200以外
+      if (!createCommitRes.ok) {
+        throw new Error(createCommitRes.statusText)
+      }
+
+      interface CreateCommitRes {
+        sha: string
+      }
+      const createdCommitRes = (await createCommitRes.json()) as CreateCommitRes
+
+      // refの更新
+      const updateRef = {
+        sha: createdCommitRes.sha,
+        force: false // 強制pushするか否
+      }
+      const updateRefs = JSON.stringify(updateRef)
+
+      const updateRefsRes = await fetch(
+        `${url}/github/git/refs/heads/${branchName}`,
+        {
+          method: patchMethod,
+          headers,
+          body: updateRefs
+        }
+      )
+      // ステータス200以外
+      if (!updateRefsRes.ok) {
+        throw new Error(updateRefsRes.statusText)
+      }
+      await fetch(`${url}/github/git/refs/heads/${branchName}`, {
+        method: patchMethod,
+        headers,
+        body: updateRefs
+      })
+
+      commit('setCommitCsvStatus', { status: 'loaded' })
+    } catch (e) {
+      const errorMessage = e
+      dispatch('notify', errorMessage.message)
+      commit('setCommitCsvStatus', { status: 'failed' })
+    }
   },
 
   updateCurrentUser: async ({ commit }) => {
     const user = netlifyIdentity.currentUser()
     // eslint-disable-next-line camelcase
     if (user != null && user.token?.access_token == null) {
-      // @ts-ignore
-      await netlifyIdentity.refresh()
+      await (netlifyIdentity as any).refresh()
     }
     commit('updateCurrentUser', user)
   },
 
-  getImageShas: async ({ state, commit }, { commitSha, directoryPath }) => {
+  getImageShas: async (
+    { state, commit, dispatch },
+    { commitSha, directoryPath }
+  ) => {
     if (state.imageShas?.[commitSha]?.[directoryPath]?.status === 'loaded') {
       return
     }
-    if (state.currentUser == null) {
-      throw new Error('state.currentUser == null')
-    }
-    const token = state.currentUser.token.access_token
+    const token = await dispatch('getToken')
     const method = 'GET'
     const headers = {
       Authorization: `Bearer ${token}`
@@ -382,13 +501,8 @@ const actions: ActionTree<Readonly<State>, unknown> = {
 
     await Promise.all(
       filenames.map(async filename => {
-        const sha = state.imageShas[commitSha][directoryPath].data[filename].sha
-        const downloadUrl =
-          state.imageShas[commitSha][directoryPath].data[filename].url
-        if (state.currentUser == null) {
-          throw new Error('state.currentUser == null')
-        }
-        const token = state.currentUser.token.access_token
+        const sha = state.imageShas[commitSha][directoryPath].data[filename]
+        const token = await dispatch('getToken')
         const method = 'GET'
         const headers = {
           Authorization: `Bearer ${token}`
@@ -412,12 +526,9 @@ const actions: ActionTree<Readonly<State>, unknown> = {
     )
   },
 
-  createBranch: async ({ state, commit }, branch) => {
+  createBranch: async ({ commit, dispatch }, branch) => {
     commit('setBranchesStatus', { status: 'loading' })
-    if (state.currentUser == null) {
-      throw new Error('state.currentUser == null')
-    }
-    const token = state.currentUser.token.access_token
+    const token = await dispatch('getToken')
     const method = 'GET'
     const headers = {
       Authorization: `Bearer ${token}`
@@ -458,12 +569,9 @@ const actions: ActionTree<Readonly<State>, unknown> = {
     await dispatch('createCommit', createCommitPayload)
   },
 
-  createCommit: async ({ state }, payload: CreateCommitPayload) => {
+  createCommit: async ({ dispatch }, payload) => {
     // https://int128.hatenablog.com/entry/2017/09/05/161641 詳しくはここ見ろ
-    if (state.currentUser == null) {
-      throw new Error('state.currentUser == null')
-    }
-    const token = state.currentUser.token.access_token
+    const token = await dispatch('getToken')
     const headers = {
       Authorization: `Bearer ${token}`
     }
@@ -545,7 +653,7 @@ const actions: ActionTree<Readonly<State>, unknown> = {
     }
     const createTreeRes = (await createTreeHttpRes.json()) as CreateTreeRes
 
-    const email = state.currentUser.email
+    const email = await dispatch('getEmail')
     const name = email.substr(0, email.lastIndexOf('@'))
     const createCommitBody = {
       message: payload.commitMessage,
@@ -578,6 +686,14 @@ const actions: ActionTree<Readonly<State>, unknown> = {
         force: false
       })
     })
+  },
+
+  notify: ({ commit }, message: string) => {
+    commit('notify', { message })
+  },
+
+  syncNotificationsChange: ({ commit }, messages: string[]) => {
+    commit('syncNotificationsChange', { messages })
   }
 }
 
@@ -616,13 +732,11 @@ export function convertObjToCsv(
 }
 
 export function convertCsvToObj(csv: string, filename: string) {
-  interface PreObj {
-    [k: string]: string
+  type PreObj = {
+    [key: string]: string
   }
   interface ResultObj {
-    [src: string]: {
-      [k: string]: string
-    }
+    [src: string]: State['contentMetadatas']['']['data']['']
   }
   // headerNames:CSV1行目の項目 :csvRows:項目に対する値
   const [headerNames, ...csvRows] = csv
@@ -634,22 +748,32 @@ export function convertCsvToObj(csv: string, filename: string) {
 
   return csvRows
     .map(r => {
-      return headerNames
-        .map((headerName, index) => {
-          return { key: headerName.replace(/\s+/g, ''), value: r[index] }
-        })
-        .reduce((previous: PreObj, current) => {
-          previous[current.key] = current.value
-          return previous
-        }, {})
+      return (
+        headerNames
+          // .map((headerName, index) => {
+          //   return { key: headerName.replace(/\s+/g, ''), value: r[index] }
+          // })
+          .reduce((previous, headerName, i) => {
+            previous[headerName.replace(/\s+/g, '')] = r[i]
+            return previous
+          }, {} as PreObj)
+      )
     })
-    .reduce((previous: ResultObj, current) => {
-      previous[current.src] = {
-        ...current,
+    .filter(assertIsCsvRow)
+    .reduce((previous, row) => {
+      const newRow = {
+        ...row,
         csvFile: filename
       }
+      previous[row.src] = newRow
       return previous
-    }, {})
+    }, {} as ResultObj)
+}
+
+function assertIsCsvRow(
+  row: any
+): row is Omit<State['contentMetadatas']['']['data'][''], 'csvFile'> {
+  return row.src != null
 }
 
 function toBlob(base64: string, type: string) {
@@ -670,7 +794,7 @@ export function readFileAsync(blob: Blob) {
       if (typeof reader.result !== 'string') {
         throw new Error("typeof reader.result !== 'string'")
       }
-      const base64 = reader.result.replace(/data:.*\/.*;base64,/, '')
+      const base64 = reader.result.replace(/$data:.*\/.*;base64,/, '')
       resolve(base64)
     }
     reader.readAsDataURL(blob)

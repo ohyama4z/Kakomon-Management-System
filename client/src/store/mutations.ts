@@ -1,14 +1,64 @@
 import { MutationTree } from 'vuex'
-import { State } from './state'
+import { PendingStatus, State, Status } from './state'
 
-const mutations: MutationTree<State> = {
+export interface Mutations extends MutationTree<State> {
+  updateCurrentUser: (state: State, user: State['currentUser']) => void
+  updateLastPage: (state: State) => void
+  setBranches: (
+    state: State,
+    payload: { branches: State['branches']['data'] }
+  ) => void
+  setBranchesStatus: (state: State, payload: { status: Status }) => void
+  setCurrentBranch: (state: State, branchName: string) => void
+  setCommit: (
+    state: State,
+    poyload: { sha: string; data: State['commits']['']['data'] }
+  ) => void
+  setCommitStatus: (
+    state: State,
+    payload: { sha: string; status: PendingStatus }
+  ) => void
+  setContentMetadata: (
+    state: State,
+    payload: { sha: string; data: State['contentMetadatas']['']['data'] }
+  ) => void
+  setContentMetadataStatus: (
+    state: State,
+    payload: { sha: string; status: PendingStatus }
+  ) => void
+  setExpand: (state: State, expand: boolean) => void
+  setImageShas: (
+    state: State,
+    payload: {
+      commitSha: string
+      directoryPath: string
+      data: State['imageShas']['']['']['data']
+    }
+  ) => void
+  setImageData: (
+    state: State,
+    payload: { sha: string; blobUri: string }
+  ) => void
+  setDisplayedFiles: (state: State, filePaths: string[]) => void
+  setChangedFilesBase: (state: State, files: State['changedFiles']) => void
+  setChangedFiles: (state: State, files: State['changedFiles']['']) => void
+  setSelectedFiles: (state: State, selectedFiles: string[]) => void
+  updateChangedFileIndex: (
+    state: State,
+    payload: { filename: string; index: string }
+  ) => void
+  setCommitCsvStatus: (state: State, payload: { status: Status }) => void
+  clearChangedFilesAndSelectedFiles: (state: State) => void
+}
+
+const mutations: Mutations = {
   updateCurrentUser: (state, user) => {
     state.currentUser = user
   },
 
   updateLastPage: state => {
     const lastPageInStrage = localStorage.getItem('lastPage')
-    const lastPage = lastPageInStrage == null ? 'upload' : lastPageInStrage
+    const lastPage = lastPageInStrage == null ? 'edit' : lastPageInStrage
     if (state.lastPage === '') {
       state.lastPage = lastPage
     }
@@ -52,7 +102,7 @@ const mutations: MutationTree<State> = {
   },
 
   setCommitStatus: (state, payload) => {
-    if (payload.status !== 'loading' && payload.status !== 'loaded') {
+    if (payload.status !== 'loading') {
       state.branches = {
         ...state.branches,
         status: 'invalied_status'
@@ -62,6 +112,7 @@ const mutations: MutationTree<State> = {
     state.commits = {
       ...state.commits,
       [payload.sha]: {
+        data: {},
         status: payload.status
       }
     }
@@ -78,7 +129,7 @@ const mutations: MutationTree<State> = {
   },
 
   setContentMetadataStatus: (state, payload) => {
-    if (payload.status !== 'loading' && payload.status !== 'loaded') {
+    if (payload.status !== 'loading') {
       state.branches = {
         ...state.branches,
         status: 'invalied_status'
@@ -88,6 +139,7 @@ const mutations: MutationTree<State> = {
     state.contentMetadatas = {
       ...state.contentMetadatas,
       [payload.sha]: {
+        data: {},
         status: payload.status
       }
     }
@@ -135,12 +187,13 @@ const mutations: MutationTree<State> = {
     state.selectedFiles.map(filename => {
       state.changedFiles[filename] = {
         ...state.changedFiles[filename],
-        ...files
+        ...files,
+        included_pages_num: '1'
       }
     })
   },
 
-  setSelectedFiles: (state, selectedFiles: string[]) => {
+  setSelectedFiles: (state, selectedFiles) => {
     state.selectedFiles = selectedFiles
   },
 
@@ -161,6 +214,14 @@ const mutations: MutationTree<State> = {
   clearChangedFilesAndSelectedFiles: state => {
     state.changedFiles = {}
     state.selectedFiles = []
+  },
+
+  notify: (state, payload) => {
+    state.notifications = [...state.notifications, payload.message]
+  },
+
+  syncNotificationsChange: (state, payload) => {
+    state.notifications = payload.messages
   }
 }
 

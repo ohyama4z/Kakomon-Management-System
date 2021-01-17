@@ -61,11 +61,12 @@
 import type { State } from '../store/state'
 import Vue from 'vue'
 
+import { StateTypedVueConstructor } from '../extended'
+
 interface Data {
   selectedFiles: string[]
 }
-
-export default Vue.extend({
+export default (Vue as StateTypedVueConstructor).extend({
   name: 'List',
   data(): Data {
     return {
@@ -105,7 +106,6 @@ export default Vue.extend({
           this.$store.commit('updateChangedFileIndex', payload)
         }
       }
-      e.target.value = ''
     }
   }
 })

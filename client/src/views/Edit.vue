@@ -179,9 +179,11 @@ import List from '../components/List.vue'
 
 import Vue from 'vue'
 
+import { StateTypedVueConstructor } from '../extended'
+
 interface Data {
   subject: string
-  year: string | null
+  year: string
   toolType: string
   period: string
   contentType: string
@@ -191,8 +193,7 @@ interface Data {
   displayMode: 'preview' | 'list'
   isModalOpened: boolean
 }
-
-export default Vue.extend({
+export default (Vue as StateTypedVueConstructor).extend({
   name: 'Edit',
 
   components: {
@@ -210,7 +211,7 @@ export default Vue.extend({
   data(): Data {
     return {
       subject: '',
-      year: null,
+      year: '',
       toolType: '',
       period: '',
       contentType: '',

@@ -29,12 +29,13 @@ netlifyIdentity.init({
   APIUrl: `${initUrl}/.netlify/identity`
 })
 
-export const store = new Vuex.Store({
+const vuexOptions = {
   state,
   getters,
   mutations,
   actions
-})
+}
+export const store = new Vuex.Store(vuexOptions)
 
 new Vue({
   render: h => h(App),
