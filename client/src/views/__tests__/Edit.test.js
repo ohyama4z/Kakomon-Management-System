@@ -393,6 +393,40 @@ describe('Edit.vue', () => {
     expect(actions.postCommitCsv).not.toHaveBeenCalled()
   })
 
+  it('masterブランチでコミットボタンを押すとプッシュ禁止のアラートが出る', async () => {
+    state.currentBranch = 'master'
+    const stubs = {
+      VkButton: Button,
+      VkButtonLink: ButtonLink,
+      VkModal: Modal
+    }
+    const store = new Vuex.Store({
+      state,
+      getters,
+      mutations,
+      actions
+    })
+    const wrapper = shallowMount(Edit, {
+      store,
+      router,
+      localVue,
+      stubs
+    })
+    window.alert = jest.fn()
+
+    await flushPromises()
+    const commitButton = wrapper
+      .findAllComponents(ButtonLink)
+      .filter(w => w.text() === 'コミット')
+      .at(0)
+    commitButton.trigger('click')
+    await new Promise(resolve => setTimeout(resolve, 5))
+    expect(window.alert).toHaveBeenCalledWith(
+      'masterブランチにはコミット出来ません'
+    )
+    expect(wrapper.vm.isModalOpened).toBe(false)
+  })
+
   it('プレビューボタンを押すと画像表示モードに、リストボタンを押すとリスト表示モードに切り替える', async () => {
     state.changedFiles = {
       'dir/file1.jpg': {
