@@ -325,6 +325,10 @@ export default (Vue as StateTypedVueConstructor).extend({
     },
 
     openModal(): void {
+      if (this.$store.state.currentBranch === 'master') {
+        alert('masterブランチにはコミット出来ません')
+        return
+      }
       this.isModalOpened = true
     },
 

@@ -4,7 +4,7 @@
       <thead>
         <tr>
           <th class="uk-text-nowrap">選択</th>
-          <th class="uk-text-nowrap">index</th>
+          <th class="uk-text-nowrap">ページ数</th>
           <th class="uk-text-nowrap">ファイル名</th>
           <th class="uk-text-nowrap">教科名</th>
           <th class="uk-text-nowrap">年度</th>
