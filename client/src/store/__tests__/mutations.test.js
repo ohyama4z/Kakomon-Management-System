@@ -1,5 +1,5 @@
 import mutations from '../mutations'
-const state = {
+const defaultState = {
   lastPage: '',
   currentBranch: '',
   expand: true,
@@ -12,14 +12,13 @@ const state = {
   changedFiles: {},
   imageShas: {},
   imageDatas: {},
-  displayedFiles: []
+  displayedFiles: [],
+  selectedFiles: [],
+  commitStatus: 'unrequested',
+  notifications: []
 }
 
 describe('mutations.js', () => {
-  beforeEach(() => {
-    delete state.commits
-    delete state.contentMetadatas
-  })
   it('updatecurrentUser', () => {
     const state = { currentUser: jest.fn() }
     const user = 'hogetarou'
@@ -36,10 +35,11 @@ describe('mutations.js', () => {
 
     mutations.updateLastPage(state)
 
-    expect(state.lastPage).toEqual('upload')
+    expect(state.lastPage).toEqual('edit')
   })
 
   it('setBranchesStatus(payload.statusがloadingでもloadedでもない時)', () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
     state.branches = {
       status: 'loading'
     }
@@ -56,6 +56,7 @@ describe('mutations.js', () => {
   })
 
   it('setBranchesStatus(payload.statusがlaodingかloadedの時)', () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
     state.branches = {
       status: 'loading'
     }
@@ -71,12 +72,14 @@ describe('mutations.js', () => {
   })
 
   it('setCurrentBranch', () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
     const payloadBranchName = 'master'
     mutations.setCurrentBranch(state, payloadBranchName)
     expect(state.currentBranch).toBe('master')
   })
 
   it('setCommitStatus(payload.statusがloadingでもloadedでもない時)', () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
     state.branches = {
       status: 'unrequested'
     }
@@ -94,6 +97,7 @@ describe('mutations.js', () => {
   })
 
   it('setCommitStatus(payload.statusがlaodingかloadedの時)', () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
     state.branches = {
       status: 'loading'
     }
@@ -115,6 +119,7 @@ describe('mutations.js', () => {
   })
 
   it('setContentMetadataStatus(payload.statusがloadingでもloadedでもない時)', () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
     state.contentMetadatas = {
       sha: 'asdf1',
       data: 'resultObj'
@@ -141,6 +146,7 @@ describe('mutations.js', () => {
   })
 
   it('setContentMetadataStatus(payload.statusがloadingかloadedの時)', () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
     state.contentMetadatas = {
       sha: 'asdf1',
       data: 'resultObj'
@@ -167,6 +173,7 @@ describe('mutations.js', () => {
   })
 
   it('ユーザーがeditページを読み込んだ際のbranchの書き換え,commitsの書き換え,contentMetadatasの書き換えまでの一連の流れ', () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
     state.currentBranch = 'master'
     const payloadForSetBranches = {
       branches: {
@@ -230,12 +237,14 @@ describe('mutations.js', () => {
   })
 
   it('サイドバーを開閉した情報をstateに格納する', () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
     const expand = false
     mutations.setExpand(state, expand)
     expect(state.expand).toBe(false)
   })
 
   it('画像ファイルのshaの情報の書き換え', () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
     state.imageShas = {
       commitSha1: {
         dir1: {
@@ -271,26 +280,41 @@ describe('mutations.js', () => {
   })
 
   it('stateの画像ファイルの情報を更新', () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
     state.imageDatas = {
       sha1: {
         status: 'loaded',
-        data: 'aaa'
+        data: {
+          blobUrl: 'blob1',
+          downloadUrl: 'dlUrl1',
+          pdfUrl: 'pdfUrl1'
+        }
       }
     }
 
     const payload = {
       sha: 'sha2',
-      blobUri: 'blob'
+      blobUri: 'blob2',
+      downloadUrl: 'dlUrl2',
+      pdfUrl: 'pdfUrl2'
     }
 
     const result = {
       sha1: {
         status: 'loaded',
-        data: 'aaa'
+        data: {
+          blobUrl: 'blob1',
+          downloadUrl: 'dlUrl1',
+          pdfUrl: 'pdfUrl1'
+        }
       },
       sha2: {
         status: 'loaded',
-        data: 'blob'
+        data: {
+          blobUri: 'blob2',
+          downloadUrl: 'dlUrl2',
+          pdfUrl: 'pdfUrl2'
+        }
       }
     }
 
@@ -299,12 +323,14 @@ describe('mutations.js', () => {
   })
 
   it('選択したフォルダー内のファイルのパスをstateに格納', () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
     const filePaths = ['path1', 'path2', 'path3']
     mutations.setDisplayedFiles(state, filePaths)
     expect(state.displayedFiles).toBe(filePaths)
   })
 
   it('画像選択時にstateにchangedFilesのもととなるオブジェクトを作る', () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
     state.changedFiles = {}
     const payload = {
       hoge: 'hoge',
@@ -316,10 +342,12 @@ describe('mutations.js', () => {
   })
 
   it('変更内容をstateに格納', () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
     state.changedFiles = {
       'a.jpg': {},
       'b.jpg': {}
     }
+    state.selectedFiles = ['a.jpg', 'b.jpg']
     const payload = {
       subj: '2000',
       aho: 'aho'
@@ -328,15 +356,93 @@ describe('mutations.js', () => {
     const result = {
       'a.jpg': {
         subj: '2000',
-        aho: 'aho'
+        aho: 'aho',
+        included_pages_num: '1'
       },
       'b.jpg': {
         subj: '2000',
-        aho: 'aho'
+        aho: 'aho',
+        included_pages_num: '1'
       }
     }
 
     mutations.setChangedFiles(state, payload)
     expect(state.changedFiles).toEqual(result)
+  })
+
+  it('選択された編集対象をstateに格納する', () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+    const selectedFiles = ['file1', 'file2']
+
+    const result = ['file1', 'file2']
+    mutations.setSelectedFiles(state, selectedFiles)
+    expect(state.selectedFiles).toEqual(result)
+  })
+
+  it('編集時の画像のindexをstateに格納', () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+    state.changedFiles = {
+      file1: {
+        image_index: '001'
+      },
+      file2: {
+        image_index: '002'
+      }
+    }
+
+    const payload = {
+      filename: 'file2',
+      index: '999'
+    }
+
+    const result = {
+      file1: {
+        image_index: '001'
+      },
+      file2: {
+        image_index: '999'
+      }
+    }
+    mutations.updateChangedFileIndex(state, payload)
+    expect(state.changedFiles).toEqual(result)
+  })
+
+  it('編集後のステータスをstateに格納する', () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+    const payload = { status: 'loaded' }
+    const result = { status: 'loaded' }
+    mutations.setCommitCsvStatus(state, payload)
+    expect(state.commitStatus).toBe(result.status)
+  })
+
+  it('選択された編集対象と変更内容とを空にしてstateに格納する', () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+
+    const resultChangedFiles = {}
+    const resultSelectedFiles = []
+
+    mutations.clearChangedFilesAndSelectedFiles(state)
+    expect(state.changedFiles).toEqual(resultChangedFiles)
+    expect(state.selectedFiles).toEqual(resultSelectedFiles)
+  })
+
+  it('新たな通知をstateに追加する', () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+
+    state.notifications = ['aho']
+    const payload = { message: 'エラーです!!!' }
+
+    mutations.notify(state, payload)
+    expect(state.notifications).toEqual(['aho', 'エラーです!!!'])
+  })
+
+  it('Vueでの通知内容の変更をstateに同期させる', () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+    state.notifications = ['aho', 'エラー']
+
+    const payload = { messages: ['エラー'] }
+
+    mutations.syncNotificationsChange(state, payload)
+    expect(state.notifications).toEqual(['エラー'])
   })
 })

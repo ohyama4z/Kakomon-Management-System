@@ -1,11 +1,12 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import App from './App.vue'
-import Upload from './views/Upload'
-import Edit from './views/Edit'
-import mytest from './views/mytest'
-import Login from './views/Login'
-import Logout from './views/Logout'
+import Edit from './views/Edit.vue'
+import Login from './views/Login.vue'
+import Logout from './views/Logout.vue'
+import mytest from './views/mytest.vue'
+import Root from './views/Root.vue'
+import Upload from './views/Upload.vue'
 
 Vue.use(Router)
 
@@ -15,7 +16,8 @@ export default new Router({
   routes: [
     {
       path: '/',
-      redirect: { name: 'upload' }
+      name: 'Root',
+      component: Root
     },
     {
       path: '/app',

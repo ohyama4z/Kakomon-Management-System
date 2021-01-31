@@ -10,6 +10,7 @@ import { Button } from 'vuikit/lib/button'
 import { Drop } from 'vuikit/lib/drop'
 import { Iconnav, IconnavItem } from 'vuikit/lib/iconnav'
 import { Spinner } from 'vuikit/lib/spinner'
+import Navbar from '../../components/Navbar'
 import Upload from '../Upload'
 
 const localVue = createLocalVue()
@@ -254,7 +255,7 @@ describe('Upload.vue', () => {
       .findAllComponents(Button)
       .filter(w => w.text() === '作成')
       .at(0)
-    expect(wrapper.vm.isNewBranch).not.toBeFalsy()
+    expect(wrapper.vm.isNewBranch).toBeTruthy()
     createBranchButton.trigger('click')
     await flushPromises()
     expect(actions.createBranch).toHaveBeenCalled()
@@ -284,7 +285,7 @@ describe('Upload.vue', () => {
     wrapper.findAll('input').at(0).setValue('branch')
     await new Promise(resolve => setTimeout(resolve, 5))
     expect(wrapper.vm.newBranch).toBe('branch')
-    expect(wrapper.vm.isExisted).not.toBeFalsy()
+    expect(wrapper.vm.isExisted).toBeTruthy()
     expect(wrapper.vm.isNewBranch).toBeFalsy()
   })
 
@@ -312,7 +313,7 @@ describe('Upload.vue', () => {
     await flushPromises()
 
     // 初期状態ではボタンはdisabled
-    expect(wrapper.vm.isDisabled).not.toBeFalsy()
+    expect(wrapper.vm.isDisabled).toBeTruthy()
 
     // branchの選択
     wrapper.findAllComponents(Button).at(3).trigger('click')
@@ -364,5 +365,22 @@ describe('Upload.vue', () => {
     await flushPromises()
 
     expect(actions.upload).toHaveBeenCalled()
+  })
+
+  it('Navbarのログアウトが押されるとログアウトの処理を行う', async () => {
+    const stubs = {
+      VkButton: Button
+    }
+
+    const wrapper = shallowMount(Upload, {
+      store,
+      router,
+      localVue,
+      stubs
+    })
+    await flushPromises()
+    wrapper.findComponent(Navbar).vm.$emit('before-logout')
+    expect(localStorage.setItem).toHaveBeenCalledWith('lastPage', 'upload')
+    expect(mutations.updateLastPage).toHaveBeenCalled()
   })
 })

@@ -83,18 +83,27 @@
   </vk-sticky>
 </template>
 
-<script>
-import { mapState } from 'vuex'
+<script lang="ts">
+// @ts-ignore
 import { Sticky } from 'vuikit/lib/sticky'
+// @ts-ignore
 import {
   NavbarFull,
   NavbarNav,
   NavbarItem,
   NavbarLogo
+  // @ts-ignore
 } from 'vuikit/lib/navbar'
+// @ts-ignore
 import { Button } from 'vuikit/lib/button'
+import Vue from 'vue'
+import { StateTypedVueConstructor } from '../extended'
 
-export default {
+interface Data {
+  selectedBranch: string
+}
+
+export default (Vue as StateTypedVueConstructor).extend({
   name: 'Navbar',
   components: {
     VkSticky: Sticky,
@@ -105,27 +114,26 @@ export default {
     VkButton: Button
   },
 
-  data() {
+  data(): Data {
     return {
       selectedBranch: 'master'
     }
   },
 
   computed: {
-    ...mapState({
-      branches: state => {
-        return state.branches.data
-      }
-    }),
+    branches(): any {
+      const state = this.$store.state
+      return state.branches.data
+    },
 
-    uploadButtonType() {
+    uploadButtonType(): string {
       if (this.$route.path === '/upload') {
         return ''
       }
 
       return 'primary'
     },
-    editButtonType() {
+    editButtonType(): string {
       if (this.$route.path === '/edit') {
         return ''
       }
@@ -133,34 +141,30 @@ export default {
       return 'primary'
     },
 
-    isEdit() {
+    isEdit(): boolean {
       return this.$route.path === '/edit'
     }
   },
 
   methods: {
-    toUpload() {
+    toUpload(): void {
       this.$router.push('/upload')
     },
 
-    toEdit() {
+    toEdit(): void {
       this.$router.push('/edit')
     },
 
-    logout() {
-      const path = this.$route.path.substr(
-        this.$route.path.lastIndexOf('.') + 1
-      )
-      localStorage.setItem('lastPage', path)
-      this.$store.commit('updateLastPage')
+    logout(): void {
+      this.$emit('before-logout')
       this.$router.push('/logout')
     },
 
-    async selectBranch() {
+    async selectBranch(): Promise<void> {
       await this.$store.dispatch('selectBranch', this.selectedBranch)
     }
   }
-}
+})
 </script>
 
 <style scoped>

@@ -7,48 +7,117 @@
   />
 </template>
 
-<script>
+<script lang="ts">
 import merge from 'deepmerge'
-import { mapGetters } from 'vuex'
+// import { mapGetters } from 'vuex'
 import { SidebarMenu } from 'vue-sidebar-menu'
 
-export default {
+import Vue from 'vue'
+import { GetterValues } from '../store/getters'
+import { StateTypedVueConstructor } from '../extended'
+import { State } from '../store/state'
+
+interface InterMediateFilesOld {
+  [period: string]: {
+    [subj: string]: {
+      [toolType: string]: {
+        [year: string]: {
+          [filename: string]: State['contentMetadatas']['']['data'][''] & {
+            sha: string
+          }
+        }
+      }
+    }
+  }
+}
+
+class CsvItem {
+  readonly row: CsvRow
+  constructor(row: CsvRow) {
+    this.row = row
+  }
+}
+
+type CsvRow = State['contentMetadatas']['']['data'][''] & {
+  sha: string
+  // isLast: true
+}
+interface InterMediateFiles {
+  [key: string]: CsvItem | InterMediateFiles
+}
+
+interface LastOfDataTree {
+  title: string
+  icon: string
+  data: CsvRow
+  isLast: true
+  expand: boolean
+}
+
+type GenerateMenuStructurePattern =
+  | {
+      child: GenerateMenuStructurePattern[]
+      expand: boolean
+      icon: string
+      isLast: false
+      title: string
+    }
+  | {
+      expand: boolean
+      icon: string
+      isLast: true
+      title: string
+      data: CsvRow
+    }
+
+type GenerateMenuStructure = (
+  intermediate: InterMediateFiles,
+  num: number
+) => GenerateMenuStructurePattern[]
+
+type SidebarHeader = {
+  header: true
+  title: string
+  hiddenOnCollapse: boolean
+}
+
+type SidebarTree = (SidebarHeader | GenerateMenuStructurePattern)[]
+export default (Vue as StateTypedVueConstructor).extend({
   name: 'Sidebar',
   components: {
     SidebarMenu
   },
 
   computed: {
-    ...mapGetters(['currentBranchMetadatas']),
+    // ...mapGetters(['currentBranchMetadatas']),
+    currentBranchMetadatas(): GetterValues['currentBranchMetadatas'] {
+      return this.$store.getters.currentBranchMetadatas
+    },
 
-    intermediateFiles() {
-      const files = Object.values(this.currentBranchMetadatas)
-      const beforeMerge = files.map(file => {
-        const {
-          period,
-          subj,
-          // eslint-disable-next-line camelcase
-          tool_type,
-          year,
-          // eslint-disable-next-line camelcase
-          content_type
-        } = Object.fromEntries(
+    fileMetadataTree(): InterMediateFiles {
+      const files = Object.entries(this.currentBranchMetadatas.data)
+      const beforeMerge = files.map(([filename, file]) => {
+        const requiredFileValue = {
+          period: file.period,
+          subj: file.subj,
+          toolType: file.tool_type,
+          year: file.year,
+          contentType: file.content_type
+        }
+        const isUnvalue = Object.values(requiredFileValue).includes('')
+
+        const { period, subj, tool_type: toolType, year } = Object.fromEntries(
           Object.entries(file).map(([key, value]) => [
             key,
-            value === '' ? '不明' : value
+            isUnvalue ? '不明' : value
           ])
         )
-
         const fileResult = {
           [period]: {
             [subj]: {
-              // eslint-disable-next-line camelcase
-              [tool_type]: {
+              [toolType]: {
                 [year]: {
-                  // eslint-disable-next-line camelcase
-                  [content_type]: {
-                    [file.src.replace(/^.*\//, '')]: file
-                  }
+                  [filename]: new CsvItem(file)
                 }
               }
             }
@@ -56,75 +125,168 @@ export default {
         }
         return fileResult
       })
-      const result = merge.all(beforeMerge)
+
+      const result = merge.all<InterMediateFiles>(beforeMerge, {
+        isMergeableObject: obj =>
+          typeof obj === `object` && !(obj instanceof CsvItem)
+      })
       return result
     },
 
+    intermediateFiles(): InterMediateFiles {
+      const files = Object.entries(this.currentBranchMetadatas.data)
+      const beforeMerge = files.map(([, file]) => {
+        const requiredFileValue = {
+          period: file.period,
+          subj: file.subj,
+          toolType: file.tool_type,
+          year: file.year,
+          contentType: file.content_type
+        }
+        const isUnvalue =
+          Object.values(requiredFileValue).includes('') ||
+          file.csvFile === 'unassorted.csv'
+        const { period, subj, tool_type: toolType, year } = Object.fromEntries(
+          Object.entries(file).map(([key, value]) => [
+            key,
+            isUnvalue ? '不明' : value
+          ])
+        )
+
+        const fileResult = {
+          [period]: {
+            [subj]: {
+              [toolType]: {
+                [year]: new CsvItem(file)
+              }
+            }
+          }
+        }
+
+        return fileResult
+      })
+
+      const result = merge.all<InterMediateFiles>(beforeMerge, {
+        isMergeableObject: obj =>
+          typeof obj === `object` && !(obj instanceof CsvItem)
+      })
+      return result
+    },
     menuStructure() {
       const icon = 'fa fa-folder'
-      const result = generateMenuStructure(this.intermediateFiles, 6)
+      const result = generateMenuStructure(this.intermediateFiles, 'period')
       return result
 
-      function generateMenuStructure(intermediate, num) {
-        if (num === 1) {
-          const result = Object.entries(intermediate).map(([key, file]) => ({
-            title: key,
-            icon: 'fas fa-file',
-            data: file,
-            isSecondFromEnd: false,
-            expand: false
-          }))
+      function getNextProperty(currentProperty: string): string {
+        const propertyArr = ['period', 'subj', 'toolType', 'year', 'filename']
+        const index = propertyArr.findIndex(el => el === currentProperty)
 
-          return result
-        }
-        return Object.entries(intermediate).reduce((previous, [key, value]) => {
-          return [
-            ...previous,
-            {
-              title: key,
-              icon,
-              child: generateMenuStructure(value, num - 1),
-              isSecondFromEnd: num === 2, // 末端ファイルの元となるフォルダかを確かめる
+        return propertyArr[index + 1]
+      }
+
+      function generateMenuStructure(
+        intermediate: InterMediateFiles,
+        property: string
+      ): GenerateMenuStructurePattern[] {
+        return Object.entries(intermediate).map(([filename, value]) => {
+          if (value instanceof CsvItem) {
+            return {
+              title: filename,
+              icon: 'fas fa-circle',
+              data: value.row,
+              isLast: true,
               expand: false
             }
-          ]
-        }, [])
+          }
+
+          return {
+            title: filename,
+            icon,
+            child: generateMenuStructure(value, getNextProperty(property)),
+            isLast: false,
+            expand: false
+          }
+        })
       }
     },
 
-    sidebarMenu() {
-      const header = [
-        {
-          header: true,
-          title: `Branch : ${this.$store.state.currentBranch}`,
-          hiddenOnCollapse: true
-        }
-      ]
-      return [...header, ...this.menuStructure]
+    sidebarMenu(): SidebarTree {
+      const header: SidebarHeader = {
+        header: true,
+        title: `Branch : ${this.$store.state.currentBranch}`,
+        hiddenOnCollapse: true
+      }
+
+      return [header, ...this.menuStructure]
     }
   },
 
   methods: {
-    onItemClick(e, item) {
-      // データツリーの末端ファイルの元となるフォルダをクリックしたときに処理を行う
-      if (item.isSecondFromEnd && !item.expand) {
-        const fileSha = item.child[0].data.sha
-        this.$store.dispatch('getImageDatas', fileSha)
-        const changedFilesBase = Object.fromEntries(
-          item.child.map(file => {
-            return [file.data.src, file.data]
-          })
+    onItemClick(e: any, item: LastOfDataTree): void {
+      // データツリーの末端フォルダ(年度)をクリックしたときに処理を行う
+      if (item.isLast) {
+        const tree = this.fileMetadataTree
+        if (tree instanceof CsvItem) {
+          throw new Error('tree instanceof CsvItem')
+        }
+
+        const periodPropaty =
+          item.data.period === '' ? '不明' : item.data.period
+        const periodTree = tree[periodPropaty]
+
+        if (periodTree instanceof CsvItem) {
+          throw new Error('periodTree instanceof CsvItem')
+        }
+
+        const subjPropaty = item.data.subj === '' ? '不明' : item.data.subj
+        const subjTree = periodTree[subjPropaty]
+        if (subjTree instanceof CsvItem) {
+          throw new Error('subjTree instanceof CsvItem')
+        }
+
+        const toolTypePropaty =
+          item.data.tool_type === '' ? '不明' : item.data.tool_type
+        const toolTypeTree = subjTree[toolTypePropaty]
+        if (toolTypeTree instanceof CsvItem) {
+          throw new Error('toolTypeTree instanceof CsvItem')
+        }
+
+        const yearPropaty = item.data.year === '' ? '不明' : item.data.year
+        const yearTree = toolTypeTree[yearPropaty]
+        if (yearTree instanceof CsvItem) {
+          throw new Error('yearTree instanceof CsvItem')
+        }
+
+        const files = yearTree
+
+        Object.values(files).forEach(file => {
+          if (!(file instanceof CsvItem)) {
+            return
+          }
+          const fileSha = file.row.sha
+          this.$store.dispatch('getImageDatas', fileSha)
+        })
+
+        const changedFilesBase = Object.entries(files).reduce(
+          (result, [filename, file], i) => {
+            result = {
+              ...result,
+              [filename]: { ...file.row, image_index: `${i + 1}` }
+            }
+            return result
+          },
+          {}
         )
         this.$store.commit('setChangedFilesBase', changedFilesBase)
       }
 
       item.expand = !item.expand
     },
-    onToggleCollapse(collapsed) {
+    onToggleCollapse(collapsed: boolean): void {
       this.$store.commit('setExpand', !collapsed)
     }
   }
-}
+})
 </script>
 
 <style>

@@ -4,10 +4,50 @@
       <template>
         <li
           v-for="image in images"
-          v-bind:key="image"
+          v-bind:key="image.blob"
           class="uk-flex uk-flex-center"
         >
-          <img :src="image" width="700" v-if="image" />
+          <div v-if="image.blob" class="uk-margin-top">
+            <div v-if="image.fileType === 'pdf'">
+              <a :href="image.pdfUrl" target="_blank" :title="image.pdfUrl"
+                >pdfを表示</a
+              >
+              <vk-icon-button
+                class="uk-margin-small-right"
+                :class="{ selectedIcon: isSelected(image.filePath) }"
+                icon="check"
+                @click="selectImage(image.filePath)"
+              ></vk-icon-button>
+            </div>
+
+            <div class="uk-inline" v-else>
+              <img
+                :src="image.blob"
+                :class="{
+                  image: !isSelected(image.filePath),
+                  selectedImage: isSelected(image.filePath)
+                }"
+                width="700"
+              />
+              <div class="uk-position-top-right uk-overlay">
+                <vk-icon-button
+                  class="uk-margin-small-right"
+                  :class="{ selectedIcon: isSelected(image.filePath) }"
+                  icon="check"
+                  @click="selectImage(image.filePath)"
+                ></vk-icon-button>
+              </div>
+            </div>
+            <div
+              class="uk-text-center@s"
+              :class="{
+                filename: !isSelected(image.filePath),
+                selectedFilename: isSelected(image.filePath)
+              }"
+            >
+              {{ image.filename }}
+            </div>
+          </div>
           <vk-spinner raito="5" v-else />
         </li>
       </template>
@@ -15,24 +55,101 @@
   </div>
 </template>
 
-<script>
-import { mapState } from 'vuex'
+<script lang="ts">
+import type { State } from '../store/state'
+// @ts-ignore
+import { IconButton } from 'vuikit/lib/icon'
+// @ts-ignore
+import { Spinner } from 'vuikit/lib/spinner'
 
-export default {
-  name: 'Preview',
-  computed: {
-    ...mapState({
-      images: state => {
-        const commitSha = state.branches.data[state.currentBranch]
-        return state.displayedFiles.map(filePath => {
-          const directoryPath = filePath.substr(0, filePath.lastIndexOf('/'))
-          const filename = filePath.substr(filePath.lastIndexOf('/') + 1)
-          const imageSha =
-            state.imageShas[commitSha]?.[directoryPath]?.data?.[filename]
-          return state.imageDatas?.[imageSha]?.data
-        })
-      }
-    })
-  }
+import Vue from 'vue'
+import { StateTypedVueConstructor } from '../extended'
+interface Image {
+  blob: string
+  filename: string
+  selected: boolean
 }
+export default (Vue as StateTypedVueConstructor).extend({
+  name: 'Preview',
+  components: {
+    VkIconButton: IconButton,
+    VkSpinner: Spinner
+  },
+  computed: {
+    images() {
+      const state = this.$store.state as State
+      const commitSha = state.branches.data[state.currentBranch]
+      return state.displayedFiles.map(filePath => {
+        const directoryPath = filePath.substr(0, filePath.lastIndexOf('/'))
+        const filename = filePath.substr(filePath.lastIndexOf('/') + 1)
+        const fileType = filename.substr(filename.lastIndexOf('.') + 1)
+        const imageSha =
+          state.imageShas[commitSha]?.[directoryPath]?.data?.[filename].sha
+
+        return {
+          blob: state.imageDatas?.[imageSha]?.data.blobUri,
+          downloadUrl: state.imageDatas?.[imageSha]?.data.downloadUrl,
+          pdfUrl: state.imageDatas?.[imageSha]?.data.pdfUrl,
+          filename,
+          fileType,
+          filePath
+        }
+      })
+    },
+    selectedFiles() {
+      const state = this.$store.state as State
+      return state.selectedFiles
+    }
+  },
+  methods: {
+    selectImage(filename: string): void {
+      const payload = new Set<string>()
+      this.selectedFiles.map(f => {
+        payload.add(f)
+      })
+      if (payload.has(filename)) {
+        payload.delete(filename)
+      } else {
+        payload.add(filename)
+      }
+      this.$store.commit('setSelectedFiles', [...payload])
+    },
+
+    isSelected(filename: string): boolean {
+      const duplicatedFile: string | undefined = this.selectedFiles.find(
+        (f: string) => f === filename
+      )
+      return duplicatedFile != null
+    }
+  }
+})
 </script>
+
+<style scoped>
+.image {
+  border-top: solid #f5f5f5;
+  border-left: solid #f5f5f5;
+  border-right: solid #f5f5f5;
+}
+.filename {
+  border-bottom: solid #f5f5f5;
+  border-left: solid #f5f5f5;
+  border-right: solid #f5f5f5;
+  background-color: #f5f5f5;
+}
+.selectedImage {
+  border-top: solid #87cefa;
+  border-left: solid #87cefa;
+  border-right: solid #87cefa;
+}
+.selectedFilename {
+  border-bottom: solid #87cefa;
+  border-left: solid #87cefa;
+  border-right: solid #87cefa;
+  background-color: #87cefa;
+}
+.selectedIcon {
+  color: white;
+  background-color: #39f;
+}
+</style>

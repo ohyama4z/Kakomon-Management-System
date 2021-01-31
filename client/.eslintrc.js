@@ -11,8 +11,12 @@ module.exports = {
   },
   parserOptions: {
     ecmaVersion: 2020,
-    sourceType: 'module'
+    sourceType: 'module',
+    parser: '@typescript-eslint/parser'
   },
-  plugins: ['vue', 'jest'],
-  rules: {}
+  plugins: ['vue', 'jest', '@typescript-eslint'],
+  rules: {
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': 'error'
+  }
 }

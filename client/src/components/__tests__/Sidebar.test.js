@@ -6,74 +6,84 @@ const localVue = createLocalVue()
 
 localVue.use(Vuex)
 
-const state = {
-  currentUser: {
-    token: {
-      access_token: 'token'
-    }
-  },
-  lastPage: '',
-  currentBranch: '',
-
-  commits: {},
-  contentMetadatas: {},
-
-  branches: {
-    status: 'unrequested',
-    data: {}
-  }
-}
-
-const getters = {
-  currentBranchMetadatas: jest.fn(() => ({
-    src1: {
-      src: 'src1',
-      subj: 'subj1',
-      year: 'year1',
-      content_type: 'content_type1',
-      tool_type: 'tool_type1',
-      period: 'period1'
-    },
-    src2: {
-      src: 'src2',
-      subj: 'subj1',
-      year: 'year1',
-      content_type: 'content_type1',
-      tool_type: 'tool_type1',
-      period: 'period1'
-    },
-    src3: {
-      src: 'src3',
-      subj: 'subj3',
-      year: 'year3',
-      content_type: 'content_type3',
-      tool_type: 'tool_type3',
-      period: 'period3'
-    }
-  }))
-}
-
-const mutations = {
-  setExpand: jest.fn()
-}
-
-const actions = {
-  getImageDatas: jest.fn()
-}
-
-const store = new Vuex.Store({
-  state,
-  getters,
-  mutations,
-  actions
-})
-
 describe('Sidebar.vue', () => {
+  let state
+  let getters
+  let mutations
+  let actions
   beforeEach(() => {
+    state = {
+      currentUser: {
+        token: {
+          access_token: 'token'
+        }
+      },
+      lastPage: '',
+      currentBranch: '',
+
+      commits: {},
+      contentMetadatas: {},
+
+      branches: {
+        status: 'unrequested',
+        data: {}
+      }
+    }
+
+    getters = {
+      currentBranchMetadatas: jest.fn(() => ({
+        data: {
+          src1: {
+            src: 'src1',
+            subj: 'subj1',
+            year: 'year1',
+            content_type: 'content_type1',
+            tool_type: 'tool_type1',
+            period: 'period1',
+            sha: 'sha1'
+          },
+          src2: {
+            src: 'src2',
+            subj: 'subj1',
+            year: 'year1',
+            content_type: 'content_type1',
+            tool_type: 'tool_type1',
+            period: 'period1',
+            sha: 'sha2'
+          },
+          src3: {
+            src: 'src3',
+            subj: 'subj3',
+            year: 'year3',
+            content_type: 'content_type3',
+            tool_type: 'tool_type3',
+            period: 'period3',
+            sha: 'sha3'
+          }
+        },
+        status: 'loaded'
+      }))
+    }
+
+    mutations = {
+      setExpand: jest.fn(),
+      setChangedFilesBase: jest.fn()
+    }
+
+    actions = {
+      getImageDatas: jest.fn()
+    }
+
     jest.clearAllMocks()
   })
   it('gettersから取得したファイル情報からvue-sidebar-menuに合う構造のオブジェクトを作る', () => {
     state.currentBranch = 'master'
+    const store = new Vuex.Store({
+      state,
+      getters,
+      mutations,
+      actions
+    })
     const wrapper = shallowMount(Sidebar, {
       store,
       localVue
@@ -90,64 +100,36 @@ describe('Sidebar.vue', () => {
       {
         title: 'period1',
         icon,
-        isSecondFromEnd: false,
+        isLast: false,
         expand: false,
         child: [
           {
             title: 'subj1',
             icon,
-            isSecondFromEnd: false,
+            isLast: false,
             expand: false,
             child: [
               {
                 title: 'tool_type1',
                 icon,
-                isSecondFromEnd: false,
+                isLast: false,
                 expand: false,
+
                 child: [
                   {
                     title: 'year1',
-                    icon,
-                    isSecondFromEnd: false,
+                    icon: 'fas fa-circle',
+                    isLast: true,
                     expand: false,
-                    child: [
-                      {
-                        title: 'content_type1',
-                        icon,
-                        isSecondFromEnd: true,
-                        expand: false,
-                        child: [
-                          {
-                            title: 'src1',
-                            icon: 'fas fa-file',
-                            isSecondFromEnd: false,
-                            expand: false,
-                            data: {
-                              src: 'src1',
-                              subj: 'subj1',
-                              year: 'year1',
-                              content_type: 'content_type1',
-                              tool_type: 'tool_type1',
-                              period: 'period1'
-                            }
-                          },
-                          {
-                            title: 'src2',
-                            icon: 'fas fa-file',
-                            isSecondFromEnd: false,
-                            expand: false,
-                            data: {
-                              src: 'src2',
-                              subj: 'subj1',
-                              year: 'year1',
-                              content_type: 'content_type1',
-                              tool_type: 'tool_type1',
-                              period: 'period1'
-                            }
-                          }
-                        ]
-                      }
-                    ]
+                    data: {
+                      period: 'period1',
+                      subj: 'subj1',
+                      tool_type: 'tool_type1',
+                      year: 'year1',
+                      content_type: 'content_type1',
+                      sha: 'sha2',
+                      src: 'src2'
+                    }
                   }
                 ]
               }
@@ -158,50 +140,35 @@ describe('Sidebar.vue', () => {
       {
         title: 'period3',
         icon,
-        isSecondFromEnd: false,
+        isLast: false,
         expand: false,
         child: [
           {
             title: 'subj3',
             icon,
-            isSecondFromEnd: false,
+            isLast: false,
             expand: false,
             child: [
               {
                 title: 'tool_type3',
                 icon,
-                isSecondFromEnd: false,
+                isLast: false,
                 expand: false,
                 child: [
                   {
                     title: 'year3',
-                    icon,
-                    isSecondFromEnd: false,
+                    icon: 'fas fa-circle',
+                    isLast: true,
                     expand: false,
-                    child: [
-                      {
-                        title: 'content_type3',
-                        icon,
-                        isSecondFromEnd: true,
-                        expand: false,
-                        child: [
-                          {
-                            title: 'src3',
-                            icon: 'fas fa-file',
-                            isSecondFromEnd: false,
-                            expand: false,
-                            data: {
-                              src: 'src3',
-                              subj: 'subj3',
-                              year: 'year3',
-                              content_type: 'content_type3',
-                              tool_type: 'tool_type3',
-                              period: 'period3'
-                            }
-                          }
-                        ]
-                      }
-                    ]
+                    data: {
+                      period: 'period3',
+                      subj: 'subj3',
+                      tool_type: 'tool_type3',
+                      year: 'year3',
+                      content_type: 'content_type3',
+                      sha: 'sha3',
+                      src: 'src3'
+                    }
                   }
                 ]
               }
@@ -216,6 +183,12 @@ describe('Sidebar.vue', () => {
   })
 
   it('サイドバー全体を開閉した際に、state上にあるサイドバーの開閉の情報を更新する', () => {
+    const store = new Vuex.Store({
+      state,
+      getters,
+      mutations,
+      actions
+    })
     const wrapper = shallowMount(Sidebar, {
       store,
       localVue
@@ -227,29 +200,59 @@ describe('Sidebar.vue', () => {
     expect(mutations.setExpand).toHaveBeenCalled()
   })
 
-  it('ファイルツリーの末端フォルダーを開くと画像表示のactionsが呼ばれる', () => {
+  it('ファイルツリーの末端ディレクトリ(年度)をクリックすると画像表示のactionsが呼ばれる', () => {
+    state.currentBranch = 'master'
+    const store = new Vuex.Store({
+      state,
+      getters,
+      mutations,
+      actions
+    })
     const wrapper = shallowMount(Sidebar, {
       store,
       localVue
     })
 
     const item = {
-      title: '問題',
-      icon: 'fa fa-folder',
-      isSecondFromEnd: true,
+      title: 'year1',
+      icon: 'fa fa-circle',
+      isLast: true,
       expand: false,
-      child: [
-        {
-          title: 'file1',
-          data: { sha: 'sha' },
-          isSecondFromEnd: false,
-          expand: false
-        }
-      ]
+      data: {
+        period: 'period1',
+        subj: 'subj1',
+        tool_type: 'tool_type1',
+        year: 'year1',
+        filename: ''
+      }
     }
     const e = true
 
     wrapper.vm.onItemClick(e, item)
     expect(actions.getImageDatas).toHaveBeenCalled()
+
+    const payload = {
+      src1: {
+        src: 'src1',
+        subj: 'subj1',
+        year: 'year1',
+        content_type: 'content_type1',
+        tool_type: 'tool_type1',
+        period: 'period1',
+        sha: 'sha1',
+        image_index: '1'
+      },
+      src2: {
+        src: 'src2',
+        subj: 'subj1',
+        year: 'year1',
+        content_type: 'content_type1',
+        tool_type: 'tool_type1',
+        period: 'period1',
+        sha: 'sha2',
+        image_index: '2'
+      }
+    }
+    expect(mutations.setChangedFilesBase).toHaveBeenCalledWith(state, payload)
   })
 })

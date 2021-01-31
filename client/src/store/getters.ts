@@ -1,4 +1,30 @@
-export default {
+import type { GetterTree } from 'vuex'
+import type { State } from './state'
+
+type CurrentBranchMetadatas =
+  | {
+      status: 'loading'
+      data: {}
+    }
+  | {
+      status: 'loaded'
+      data: {
+        [key: string]: State['contentMetadatas']['']['data'][''] & {
+          sha: string
+        }
+      }
+    }
+
+interface Getters extends GetterTree<Readonly<State>, unknown> {
+  currentBranchMetadatas: (state: State) => CurrentBranchMetadatas
+  subjects: (state: State, getters: GetterValues) => string[]
+}
+
+export type GetterValues = {
+  [K in keyof Getters]: Getters[K] extends (...args: any) => infer U ? U : never
+}
+
+const getters: Getters = {
   currentBranchMetadatas: state => {
     const branch = state.currentBranch
     const branches = state.branches
@@ -9,7 +35,7 @@ export default {
       console.log(
         `branches is ${branches.status}, skip generating branch metadatas`
       )
-      return {}
+      return { status: 'loading', data: {} }
     }
 
     const commitSha = branches?.data?.[branch]
@@ -17,7 +43,7 @@ export default {
       console.log(
         `commits is ${commits[commitSha]?.status}, skip generating metadatas`
       )
-      return {}
+      return { status: 'loading', data: {} }
     }
 
     const loadedContentMetadataShas = Object.values(
@@ -28,7 +54,7 @@ export default {
       loadedContentMetadataShas.length !==
       Object.values(state.commits[commitSha].data).length
     ) {
-      return {}
+      return { status: 'loading', data: {} }
     }
 
     const loadedMetadatas = loadedContentMetadataShas.flatMap(sha => {
@@ -43,6 +69,17 @@ export default {
 
     const result = Object.fromEntries(contentMetadatasBySource)
 
-    return result
+    return { status: 'loaded', data: result }
+  },
+
+  subjects: (_, getters) => {
+    const set = new Set<string>()
+    Object.entries(getters.currentBranchMetadatas.data).map(([, v]) => {
+      set.add(v.subj)
+    })
+
+    return [...set]
   }
 }
+
+export default getters

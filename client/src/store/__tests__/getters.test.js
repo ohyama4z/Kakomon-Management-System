@@ -55,22 +55,25 @@ describe('getters.js', () => {
     }
 
     const result = {
-      'file1-1.jpg': {
-        src: 'file1-1.jpg',
-        sha: 'fileSha1'
+      data: {
+        'file1-1.jpg': {
+          src: 'file1-1.jpg',
+          sha: 'fileSha1'
+        },
+        'file1-2.jpg': {
+          src: 'file1-2.jpg',
+          sha: 'fileSha1'
+        },
+        'file2-1.jpg': {
+          src: 'file2-1.jpg',
+          sha: 'fileSha2'
+        },
+        'file2-2.jpg': {
+          src: 'file2-2.jpg',
+          sha: 'fileSha2'
+        }
       },
-      'file1-2.jpg': {
-        src: 'file1-2.jpg',
-        sha: 'fileSha1'
-      },
-      'file2-1.jpg': {
-        src: 'file2-1.jpg',
-        sha: 'fileSha2'
-      },
-      'file2-2.jpg': {
-        src: 'file2-2.jpg',
-        sha: 'fileSha2'
-      }
+      status: 'loaded'
     }
 
     expect(getters.currentBranchMetadatas(state)).toEqual(result)
@@ -78,7 +81,10 @@ describe('getters.js', () => {
 
   it('branchの取得が完了していない場合にはからオブジェクトを返す', () => {
     const state = JSON.parse(JSON.stringify(defaultState))
-    expect(getters.currentBranchMetadatas(state)).toEqual({})
+    expect(getters.currentBranchMetadatas(state)).toEqual({
+      data: {},
+      status: 'loading'
+    })
   })
 
   it('指定したcommitの取得が完了してない場合には空オブジェクトを返す', () => {
@@ -97,7 +103,10 @@ describe('getters.js', () => {
       }
     }
 
-    expect(getters.currentBranchMetadatas(state)).toEqual({})
+    expect(getters.currentBranchMetadatas(state)).toEqual({
+      data: {},
+      status: 'loading'
+    })
   })
 
   it('一部のファイルがまだ読込中の場合、空オブジェクトを返す', () => {
@@ -143,6 +152,26 @@ describe('getters.js', () => {
       }
     }
 
-    expect(getters.currentBranchMetadatas(state)).toEqual({})
+    expect(getters.currentBranchMetadatas(state)).toEqual({
+      data: {},
+      status: 'loading'
+    })
+  })
+
+  it('教科一覧を返す', () => {
+    const state = JSON.parse(JSON.stringify(defaultState))
+    const dammyGetters = {
+      currentBranchMetadatas: {
+        data: {
+          file1: { subj: '数学' },
+          file2: { subj: '英語' },
+          file3: { subj: '数学' },
+          file4: { subj: '論理回路' }
+        }
+      }
+    }
+    const result = ['数学', '英語', '論理回路']
+
+    expect(getters.subjects(state, dammyGetters)).toEqual(result)
   })
 })
