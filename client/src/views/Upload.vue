@@ -68,7 +68,7 @@
           <div uk-form-custom>
             <input
               type="file"
-              accept="image/jpeg, image/png, image/jpg"
+              accept="image/png, image/jpg"
               @change="dropFile"
               multiple
             />
