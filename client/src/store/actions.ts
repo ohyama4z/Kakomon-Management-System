@@ -716,9 +716,9 @@ const actions: Actions = {
     commit('syncNotificationsChange', { messages })
   },
 
-  setChangedFiles: ({ commit }, changedFiles) => {
-    localStorage.setItem('changedFiles', JSON.stringify(changedFiles))
+  setChangedFiles: ({ state, commit }, changedFiles) => {
     commit('setChangedFiles', changedFiles)
+    localStorage.setItem('changedFiles', JSON.stringify(state.changedFiles))
   }
 }
 
