@@ -300,6 +300,7 @@ export default (Vue as StateTypedVueConstructor).extend({
 
     logout(): void {
       localStorage.setItem('lastPage', 'edit')
+      localStorage.removeItem('changedFiles')
       this.$store.commit('updateLastPage')
     },
 

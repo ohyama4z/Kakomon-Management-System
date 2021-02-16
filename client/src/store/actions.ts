@@ -447,6 +447,7 @@ const actions: Actions = {
         body: updateRefs
       })
 
+      localStorage.removeItem('changedFiles')
       commit('setCommitCsvStatus', { status: 'loaded' })
     } catch (e) {
       const errorMessage = e
