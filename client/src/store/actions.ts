@@ -77,6 +77,19 @@ export interface Actions extends ActionTree<Readonly<State>, unknown> {
       commitMessage: string
     }
   ) => Promise<void>
+  setChangedFiles: (
+    context: AugmentedActionContext,
+    changedFiles: {
+      subj: string
+      year: string
+      // eslint-disable-next-line camelcase
+      tool_type: string
+      period: string
+      // eslint-disable-next-line camelcase
+      content_type: string
+      author: string
+    }
+  ) => void
 }
 
 const actions: Actions = {
@@ -700,6 +713,11 @@ const actions: Actions = {
 
   syncNotificationsChange: ({ commit }, messages: string[]) => {
     commit('syncNotificationsChange', { messages })
+  },
+
+  setChangedFiles: ({ commit }, changedFiles) => {
+    localStorage.setItem('changedFiles', JSON.stringify(changedFiles))
+    commit('setChangedFiles', changedFiles)
   }
 }
 

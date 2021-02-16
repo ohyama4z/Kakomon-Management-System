@@ -232,7 +232,6 @@ export default (Vue as StateTypedVueConstructor).extend({
     }
     await this.$store.dispatch('getBranches')
     await this.$store.dispatch('selectBranch', this.selectedBranch)
-    this.getCommit()
   },
 
   computed: {
@@ -313,7 +312,7 @@ export default (Vue as StateTypedVueConstructor).extend({
         content_type: this.contentType,
         author: this.author
       }
-      this.$store.commit('setChangedFiles', changedFiles)
+      this.$store.dispatch('setChangedFiles', changedFiles)
     },
 
     pushPreview(): void {
