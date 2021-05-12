@@ -1,0 +1,1 @@
+FROM ghcr.io/ohyama4z/git-gateway:latest

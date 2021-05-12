@@ -1,0 +1,30 @@
+name: deploy git-gateway image to GCR and gotrue image to Heroku
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: ghcrからのビルド
+        run: |
+          docker build -t git-gateway-image -f Dockerfile_git-gateway
+
+      - name: Google SDKのセットアップ
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          version: "290.0.1"
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      - name: gcrへのプッシュ
+        run: |
+          gcloud auth configure-docker --quiet
+          docker tag git-gateway-image asia.gcr.io/tomakako/git-gateway
+          docker push asia.gcr.io/tomakako/git-gateway
