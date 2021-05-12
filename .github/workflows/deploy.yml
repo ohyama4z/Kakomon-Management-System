@@ -6,15 +6,14 @@ on:
       - master
 
 jobs:
-  build:
+  deploy_git_gateway:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
 
       - name: ghcrからのビルド
         run: |
-          docker build -t git-gateway-image -f Dockerfile_git-gateway
-
+          docker build -t git-gateway-image git-gateway
       - name: Google SDKのセットアップ
         uses: google-github-actions/setup-gcloud@master
         with:
