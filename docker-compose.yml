@@ -36,7 +36,7 @@ services:
       - 8080:8081
 
   git-gateway:
-    build: asia.gcr.io/tomakako/git-gateway:20210511-1227
+    image: asia.gcr.io/tomakako/git-gateway:20210511-1227
     environment:
       - GITGATEWAY_JWT_SECRET=secret-key-shared-between-git-gateway-and-gotrue
       - GITGATEWAY_DB_DRIVER=sqlite3
