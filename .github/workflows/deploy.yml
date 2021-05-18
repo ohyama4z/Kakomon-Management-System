@@ -6,16 +6,16 @@ on:
       - master
 
 jobs:
-  deploy_git_gateway:
+  deploy:
     runs-on: ubuntu-latest
 
-    - name: タグ用の変数生成
+    steps:
+      - name: タグ用の変数生成
         run: |
           tag=$(TZ=Asia/Tokyo date +%Y%m%d-%H%M)
           echo "::set-output name=TAG::${tag}"
         id: tag-generator
 
-    steps:
       - uses: actions/checkout@v2
 
       - name: ghcrからgit-gatewayのビルド
