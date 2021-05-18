@@ -34,7 +34,7 @@ jobs:
           docker tag git-gateway-image asia.gcr.io/tomakako/git-gateway:${{ steps.tag-generator.outputs.TAG }}
           docker push asia.gcr.io/tomakako/git-gateway:${{ steps.tag-generator.outputs.TAG }}
 
-        - name: ghcrからgotrueのビルド
+      - name: ghcrからgotrueのビルド
         run: docker build -t gotrue-image gotrue
 
       - name: Heroku Container Registryへのプッシュ
