@@ -12,8 +12,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: ghcrからのビルド
-        run: |
-          docker build -t git-gateway-image git-gateway
+        run: docker build -t git-gateway-image git-gateway
       - name: Google SDKのセットアップ
         uses: google-github-actions/setup-gcloud@master
         with:
@@ -27,3 +26,11 @@ jobs:
           gcloud auth configure-docker --quiet
           docker tag git-gateway-image asia.gcr.io/tomakako/git-gateway
           docker push asia.gcr.io/tomakako/git-gateway
+
+  # deploy_gotrue:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+
+  #     - name: ghcrからのビルド
+  #       run: docker build -t gotrue 
