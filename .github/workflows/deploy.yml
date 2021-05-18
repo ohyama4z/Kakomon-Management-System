@@ -8,10 +8,17 @@ on:
 jobs:
   deploy_git_gateway:
     runs-on: ubuntu-latest
+
+    - name: タグ用の変数生成
+        run: |
+          tag=$(TZ=Asia/Tokyo date +%Y%m%d-%H%M)
+          echo "::set-output name=TAG::${tag}"
+        id: tag-generator
+
     steps:
       - uses: actions/checkout@v2
 
-      - name: ghcrからのビルド
+      - name: ghcrからgit-gatewayのビルド
         run: docker build -t git-gateway-image git-gateway
       - name: Google SDKのセットアップ
         uses: google-github-actions/setup-gcloud@master
@@ -24,13 +31,16 @@ jobs:
       - name: gcrへのプッシュ
         run: |
           gcloud auth configure-docker --quiet
-          docker tag git-gateway-image asia.gcr.io/tomakako/git-gateway
-          docker push asia.gcr.io/tomakako/git-gateway
+          docker tag git-gateway-image asia.gcr.io/tomakako/git-gateway:${{ steps.tag-generator.outputs.TAG }}
+          docker push asia.gcr.io/tomakako/git-gateway:${{ steps.tag-generator.outputs.TAG }}
 
-  # deploy_gotrue:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
+        - name: ghcrからgotrueのビルド
+        run: docker build -t gotrue-image gotrue
 
-  #     - name: ghcrからのビルド
-  #       run: docker build -t gotrue 
+      - name: Heroku Container Registryへのプッシュ
+        run: |
+          docker login --username=ohyama4z --password=${{ secrets.HEROKU_AUTH_TOKEN }} registry.heroku.com
+          docker tag gotrue-image registry.heroku.com/kakomon-management-system/gotrue:${{ steps.tag-generator.outputs.TAG }}
+          docker push registry.heroku.com/kakomon-management-system/gotrue:${{ steps.tag-generator.outputs.TAG }}
+
+      
