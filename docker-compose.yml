@@ -15,7 +15,7 @@ services:
       - 3306:3306
 
   gotrue:
-    build: ./gotrue
+    image: ghcr.io/ohyama4z/gotrue:20210511-1740
     environment:
       - GOTRUE_JWT_SECRET=secret-key-shared-between-git-gateway-and-gotrue
       - GOTRUE_JWT_EXP=3600
@@ -34,8 +34,9 @@ services:
       - GOTRUE_EXTERNAL_GITHUB_REDIRECT_URI=http://localhost:8085/.netlify/identity/callback
     ports:
       - 8080:8081
+
   git-gateway:
-    build: ./git-gateway
+    image: ghcr.io/ohyama4z/git-gateway:20210511-1227
     environment:
       - GITGATEWAY_JWT_SECRET=secret-key-shared-between-git-gateway-and-gotrue
       - GITGATEWAY_DB_DRIVER=sqlite3
