@@ -77,6 +77,19 @@ export interface Actions extends ActionTree<Readonly<State>, unknown> {
       commitMessage: string
     }
   ) => Promise<void>
+  setChangedFiles: (
+    context: AugmentedActionContext,
+    changedFiles: {
+      subj: string
+      year: string
+      // eslint-disable-next-line camelcase
+      tool_type: string
+      period: string
+      // eslint-disable-next-line camelcase
+      content_type: string
+      author: string
+    }
+  ) => void
 }
 
 const actions: Actions = {
@@ -434,6 +447,7 @@ const actions: Actions = {
         body: updateRefs
       })
 
+      localStorage.removeItem('changedFiles')
       commit('setCommitCsvStatus', { status: 'loaded' })
     } catch (e) {
       const errorMessage = e
@@ -700,6 +714,11 @@ const actions: Actions = {
 
   syncNotificationsChange: ({ commit }, messages: string[]) => {
     commit('syncNotificationsChange', { messages })
+  },
+
+  setChangedFiles: ({ state, commit }, changedFiles) => {
+    commit('setChangedFiles', changedFiles)
+    localStorage.setItem('changedFiles', JSON.stringify(state.changedFiles))
   }
 }
 
